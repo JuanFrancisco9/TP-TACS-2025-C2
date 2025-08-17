@@ -1,0 +1,13 @@
+package org.utn.ba.tptacsg2;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class Tptacsg2Application {
+
+	public static void main(String[] args) {
+		SpringApplication.run(Tptacsg2Application.class, args);
+	}
+
+}
