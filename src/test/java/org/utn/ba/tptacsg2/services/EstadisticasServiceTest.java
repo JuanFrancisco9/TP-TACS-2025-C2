@@ -42,17 +42,17 @@ class EstadisticasServiceTest {
 
         EstadisticasUso resultado = estadisticasService.obtenerEstadisticasUso();
 
-        // Assert - Promedio: 120 inscripciones / 15 eventos = 8.0
+        // Promedio: 120 inscripciones / 15 eventos = 8.0
         assertEquals(8.0, resultado.promedioInscripcionesPorEvento());
     }
 
     @Test
     @DisplayName("Todos los valores deben ser no nulos")
     void obtenerEstadisticasUso_TodosLosValoresDebenSerNoNulos() {
-        // Act
+
         EstadisticasUso resultado = estadisticasService.obtenerEstadisticasUso();
 
-        // Assert
+
         assertAll("Todos los campos deben ser no nulos",
             () -> assertNotNull(resultado.cantidadEventos()),
             () -> assertNotNull(resultado.cantidadEventosActivos()),
@@ -68,10 +68,10 @@ class EstadisticasServiceTest {
     @Test
     @DisplayName("Los valores numéricos deben ser positivos o cero")
     void obtenerEstadisticasUso_ValoresNumericosDebenSerPositivos() {
-        // Act
+
         EstadisticasUso resultado = estadisticasService.obtenerEstadisticasUso();
 
-        // Assert
+
         assertAll("Todos los valores numéricos deben ser >= 0",
             () -> assertTrue(resultado.cantidadEventos() >= 0),
             () -> assertTrue(resultado.cantidadEventosActivos() >= 0),
@@ -86,10 +86,10 @@ class EstadisticasServiceTest {
     @Test
     @DisplayName("El evento más popular no debe estar vacío")
     void obtenerEstadisticasUso_EventoMasPopularNoDebeEstarVacio() {
-        // Act
+
         EstadisticasUso resultado = estadisticasService.obtenerEstadisticasUso();
 
-        // Assert
+
         assertNotNull(resultado.eventoMasPopular());
         assertFalse(resultado.eventoMasPopular().isEmpty());
         assertTrue(resultado.eventoMasPopular().length() > 0);
