@@ -92,6 +92,5 @@ class EstadisticasServiceTest {
 
         assertNotNull(resultado.eventoMasPopular());
         assertFalse(resultado.eventoMasPopular().isEmpty());
-        assertTrue(resultado.eventoMasPopular().length() > 0);
     }
 }
