@@ -1,0 +1,16 @@
+package org.utn.ba.tptacsg2.controllers;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.utn.ba.tptacsg2.exceptions.EventoNoEncontradoException;
+
+@ControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(EventoNoEncontradoException.class)
+    public ResponseEntity<String> handleEventoNoEncontradoException(EventoNoEncontradoException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+}

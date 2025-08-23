@@ -1,4 +1,38 @@
 package org.utn.ba.tptacsg2.repositories;
 
+import jakarta.annotation.PostConstruct;
+import org.springframework.stereotype.Service;
+import org.utn.ba.tptacsg2.models.actors.Organizador;
+import org.utn.ba.tptacsg2.models.events.*;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+@Service
 public class EventoRepository {
+    private final List<Evento> eventos = new ArrayList<>();
+
+    public List<Evento> getEventos() {
+        return eventos;
+    }
+
+    public void guardarEvento(Evento evento) {
+        eventos.add(evento);
+    }
+
+    public Optional<Evento> getEvento(String id) {
+        return this.eventos.stream()
+                .filter(evento -> evento.id().equals(id))
+                .findFirst();
+    }
+
+    @PostConstruct
+    public void initializeData() {
+        this.guardarEvento(new Evento("0", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
+                            "19;00",5F, new Ubicacion("","",""), 10,
+                            new Precio("Pesos", 100F), new Organizador("","",""), new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now())));
+
+    }
 }

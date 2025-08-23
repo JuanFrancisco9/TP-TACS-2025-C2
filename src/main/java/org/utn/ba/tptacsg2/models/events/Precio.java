@@ -1,13 +1,6 @@
 package org.utn.ba.tptacsg2.models.events;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class Precio {
-    private String moneda;
-    private Float cantidad;
-}
+public record Precio (
+        String moneda,
+        Float cantidad
+) {}
