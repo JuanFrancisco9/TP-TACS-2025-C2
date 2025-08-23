@@ -41,7 +41,7 @@ class EstadisticasControllerTest {
 
         when(estadisticasService.obtenerEstadisticasUso()).thenReturn(estadisticasMock);
 
-        mockMvc.perform(get("/estadisticas/uso")
+        mockMvc.perform(get("/estadisticas")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -66,7 +66,7 @@ class EstadisticasControllerTest {
         when(estadisticasService.obtenerEstadisticasUso()).thenReturn(estadisticasMock);
 
 
-        mockMvc.perform(get("/estadisticas/uso"))
+        mockMvc.perform(get("/estadisticas"))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", "application/json"));
     }

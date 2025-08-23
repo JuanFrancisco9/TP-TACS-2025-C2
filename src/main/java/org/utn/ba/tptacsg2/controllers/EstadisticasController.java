@@ -17,7 +17,7 @@ public class EstadisticasController {
         this.estadisticasService = estadisticasService;
     }
 
-    @GetMapping("/uso")
+    @GetMapping()
     public ResponseEntity<EstadisticasUso> obtenerEstadisticasUso() {
         EstadisticasUso estadisticas = estadisticasService.obtenerEstadisticasUso();
         return ResponseEntity.ok(estadisticas);
