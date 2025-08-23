@@ -19,7 +19,7 @@ public class EventoService {
     }
 
     public Integer cuposDisponibles(Evento evento) {
-        return inscripcionRepository.getInscripcionesAEvento(evento)
+        return evento.cupoMaximo() -  inscripcionRepository.getInscripcionesAEvento(evento)
                 .stream().filter(inscripcion -> inscripcion.estado().tipoEstado().equals(TipoEstadoInscripcion.ACEPTADA))
                 .toList().size();
     }
