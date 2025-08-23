@@ -1,6 +1,7 @@
 package org.utn.ba.tptacsg2.repositories;
 
 import jakarta.annotation.PostConstruct;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.events.*;
@@ -10,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Service
+@Repository
 public class EventoRepository {
     private final List<Evento> eventos = new ArrayList<>();
 

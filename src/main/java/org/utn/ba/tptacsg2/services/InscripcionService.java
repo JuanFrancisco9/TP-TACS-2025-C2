@@ -8,7 +8,6 @@ import org.utn.ba.tptacsg2.models.inscriptions.EstadoInscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.SolicitudInscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
-import org.utn.ba.tptacsg2.models.waitlist.WaitlistService;
 import org.utn.ba.tptacsg2.repositories.EventoRepository;
 import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
 
@@ -37,7 +36,7 @@ public class InscripcionService {
         Evento evento = eventoRepository.getEvento(solicitud.evento_id())
                         .orElseThrow(() -> new EventoNoEncontradoException("No se encontró el evento " + solicitud.evento_id()));
 
-        if (eventoService.cuposDisponibles(evento) == 0) {
+        if (eventoService.cuposDisponibles(evento) <= 0) {
             return this.waitlistService.inscribirAWaitlist(solicitud);
         }
 
