@@ -1,0 +1,75 @@
+package org.utn.ba.tptacsg2;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.utn.ba.tptacsg2.models.actors.Organizador;
+import org.utn.ba.tptacsg2.models.actors.Participante;
+import org.utn.ba.tptacsg2.models.events.*;
+import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
+import org.utn.ba.tptacsg2.models.inscriptions.SolicitudInscripcion;
+import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
+import org.utn.ba.tptacsg2.models.waitlist.WaitlistService;
+import org.utn.ba.tptacsg2.repositories.EventoRepository;
+import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
+import org.utn.ba.tptacsg2.services.EventoService;
+import org.utn.ba.tptacsg2.services.GeneradorIDService;
+import org.utn.ba.tptacsg2.services.InscripcionService;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+public class InscripcionServiceTest {
+
+    @Mock private EventoRepository eventoRepository;
+    @Mock private InscripcionRepository inscripcionRepository;
+    @Mock private WaitlistService waitlistService;
+    @Mock private GeneradorIDService generadorIDService;
+    @Mock private EventoService eventoService;
+
+    @InjectMocks
+    private InscripcionService inscripcionService;
+
+    private Participante participante;
+    private Evento evento;
+    private static String ID_EVENTO_VALIDO = "1";
+
+    @BeforeEach
+    public void setUp() {
+        participante = new Participante("Pepito", "Pépez", "123456789");
+        evento = new Evento(ID_EVENTO_VALIDO, "Evento mock", "", LocalDateTime.now(), "1900", 5F, new Ubicacion("","",""), 3, new Precio("ARS", 10F), new Organizador("","",""), new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()));
+        when(eventoRepository.getEvento(ID_EVENTO_VALIDO)).thenReturn(Optional.of(evento));
+
+    }
+
+    @Test
+    public void inscripcionSaleBien() {
+
+        when(eventoService.cuposDisponibles(evento)).thenReturn(1);
+
+        SolicitudInscripcion solicitudInscripcion = new SolicitudInscripcion(participante, ID_EVENTO_VALIDO);
+        Inscripcion inscripcion = inscripcionService.inscribir(solicitudInscripcion);
+
+        assertEquals(inscripcion.estado().tipoEstado(), TipoEstadoInscripcion.ACEPTADA);
+        assertEquals(inscripcion.evento(),evento);
+        assertEquals(inscripcion.participante(),participante);
+    }
+
+    @Test
+    public void inscripcionAWaitlist_cuandoNoHayMasLugar() {
+        when(eventoService.cuposDisponibles(evento)).thenReturn(0);
+        SolicitudInscripcion solicitudInscripcion = new SolicitudInscripcion(participante, ID_EVENTO_VALIDO);
+
+        Inscripcion inscripcion = inscripcionService.inscribir(solicitudInscripcion);
+        verify(waitlistService).inscribirAWaitlist(solicitudInscripcion);
+    }
+
+}
