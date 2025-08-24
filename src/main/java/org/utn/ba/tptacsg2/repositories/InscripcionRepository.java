@@ -22,4 +22,11 @@ public class InscripcionRepository {
                 .filter(inscripcion -> inscripcion.evento().id().equals(evento.id()))
                 .toList();
     }
+
+    public List<Inscripcion> getInscripcionesDeParticipante(String idParticipante) {
+        return this.getInscripciones().stream()
+                .filter(inscripcion -> inscripcion.participante() != null &&
+                        inscripcion.participante().id().equals(idParticipante))
+                .toList();
+    }
 }
