@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.services.OrganizadorService;
 import java.util.List;
@@ -21,8 +22,11 @@ public class OrganizadorController {
     }
 
     @GetMapping("/eventos/{id_organizador}")
-    public List<Evento> getEventosDeOrganizador(@PathVariable("id_organizador") String idOrganizador) {
-        return organizadorService.getEventosDeOrganizador(idOrganizador);
+    public ResponseEntity<List<Evento>> getEventosDeOrganizador(@PathVariable("id_organizador") String idOrganizador) {
+        List<Evento> eventos = organizadorService.getEventosDeOrganizador(idOrganizador);
+        if (eventos.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(eventos);
     }
 }
-

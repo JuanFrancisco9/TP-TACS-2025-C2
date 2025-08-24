@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.services.ParticipanteService;
 import java.util.List;
+import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/participantes")
@@ -21,7 +22,11 @@ public class ParticipanteController {
     }
 
     @GetMapping("/inscripciones/{id_usuario}")
-    public List<Inscripcion> getInscripcionesDeUsuario(@PathVariable("id_usuario") String idUsuario) {
-        return participanteService.getInscripcionesDeParticipante(idUsuario);
+    public ResponseEntity<List<Inscripcion>> getInscripcionesDeUsuario(@PathVariable("id_usuario") String idUsuario) {
+        List<Inscripcion> inscripciones = participanteService.getInscripcionesDeParticipante(idUsuario);
+        if (inscripciones.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(inscripciones);
     }
 }
