@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class UsuarioDto {
+    private Long id;
     @NotBlank(message = "Debe completar todos los campos")
     private String username;
     @NotBlank(message = "Debe completar todos los campos")
