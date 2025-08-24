@@ -9,6 +9,9 @@ public record Inscripcion (
         String id,
         Participante participante,
         LocalDateTime fechaRegistro,
-        EstadoInscripcion estado,
+        EstadoInscripcionV2 estado,
         Evento evento
-){}
+){
+
+
+}
