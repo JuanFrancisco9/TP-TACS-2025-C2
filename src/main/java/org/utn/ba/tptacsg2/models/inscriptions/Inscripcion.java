@@ -5,9 +5,10 @@ import org.utn.ba.tptacsg2.models.events.Evento;
 
 import java.time.LocalDateTime;
 
-public class Inscripcion {
-    private Participante participante;
-    private LocalDateTime fechaRegistro;
-    private EstadoInscripcion estado;
-    private Evento evento;
-}
+public record Inscripcion (
+        String id,
+        Participante participante,
+        LocalDateTime fechaRegistro,
+        EstadoInscripcion estado,
+        Evento evento
+){}
