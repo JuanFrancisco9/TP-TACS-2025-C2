@@ -2,7 +2,6 @@ package org.utn.ba.tptacsg2.repositories;
 
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.events.*;
 
