@@ -12,8 +12,12 @@ import org.utn.ba.tptacsg2.models.events.*;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.SolicitudInscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
+import org.utn.ba.tptacsg2.services.WaitlistService;
 import org.utn.ba.tptacsg2.repositories.EventoRepository;
 import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
+import org.utn.ba.tptacsg2.services.EventoService;
+import org.utn.ba.tptacsg2.services.GeneradorIDService;
+import org.utn.ba.tptacsg2.services.InscripcionService;
 
 import java.time.LocalDateTime;
 import java.util.Optional;

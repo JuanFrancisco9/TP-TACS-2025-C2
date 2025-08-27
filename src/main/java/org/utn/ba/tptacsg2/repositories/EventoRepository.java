@@ -40,8 +40,8 @@ public class EventoRepository {
     @PostConstruct
     public void initializeData() {
         this.guardarEvento(new Evento("0", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
-                "19;00", 5F, new Ubicacion("", "", ""), 10,
-                new Precio("Pesos", 100F), new Organizador("1", "", "",""), new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now())));
+                            "19;00",5F, new Ubicacion("","",""), 10,
+                            new Precio("Pesos", 100F), new Organizador("","","",""), new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now())));
 
     }
 }
