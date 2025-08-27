@@ -117,3 +117,48 @@ Response 200 (ejemplo):
 }
 ```
 
+### 6. Registrar Usuario
+POST /user
+
+Request JSON:
+```json
+{
+  "username": "nuevoUser",
+  "password": "secreta",
+  "rol": "ROLE_USER"
+}
+```
+Response 201:
+```json
+"Usuario registrado correctamente"
+```
+
+### 7. Listar Usuarios (solo ADMIN)
+GET /user
+
+Response 200:
+```json
+[
+  { "username": "admin", "rol": "ROLE_ADMIN" },
+  { "username": "organizador", "rol": "ROLE_ORGNAIZER" },
+  { "username": "usuario", "rol": "ROLE_USER" }
+]
+```
+Response 403 si no tiene rol adecuado (si seguridad activa).
+
+### 8. Login
+POST /login
+
+Request JSON:
+```json
+{
+  "username": "admin",
+  "password": "admin123"
+}
+```
+Response 200: sin body.
+
+Response 401:
+```text
+Unauthorized
+```
