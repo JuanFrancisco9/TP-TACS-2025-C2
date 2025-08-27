@@ -13,6 +13,7 @@ import java.util.Optional;
 
 @Repository
 public class EventoRepository {
+
     private final List<Evento> eventos = new ArrayList<>();
 
     public List<Evento> getEventos() {
@@ -29,11 +30,18 @@ public class EventoRepository {
                 .findFirst();
     }
 
+    public List<Evento> getEventosDeOrganizador(String idOrganizador) {
+        return this.getEventos().stream()
+                .filter(evento -> evento.organizador() != null &&
+                        evento.organizador().id().equals(idOrganizador))
+                .toList();
+    }
+
     @PostConstruct
     public void initializeData() {
         this.guardarEvento(new Evento("0", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
                             "19;00",5F, new Ubicacion("","",""), 10,
-                            new Precio("Pesos", 100F), new Organizador("","","",""), new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now())));
+                            new Precio("Pesos", 100F), new Organizador("1","","",""), new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now())));
 
     }
 }
