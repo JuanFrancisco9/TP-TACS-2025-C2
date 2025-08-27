@@ -2,7 +2,6 @@ package org.utn.ba.tptacsg2.controllers;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -10,12 +9,14 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.utn.ba.tptacsg2.dtos.EstadisticasUso;
 import org.utn.ba.tptacsg2.services.EstadisticasService;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(EstadisticasController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class EstadisticasControllerTest {
 
     @Autowired
@@ -29,11 +30,11 @@ class EstadisticasControllerTest {
     void obtenerEstadisticasUso_DebeRetornar200ConEstadisticas() throws Exception {
 
         EstadisticasUso estadisticasMock = new EstadisticasUso(
-            15L,
-            8L,
-            120L,
-            95L,
-            25L,
+            15,
+            8,
+            120,
+            95,
+            25,
             60.0,
             "TP TACS G2",
             8.0
@@ -60,7 +61,7 @@ class EstadisticasControllerTest {
     void obtenerEstadisticasUso_DebeTenerContentTypeJson() throws Exception {
 
         EstadisticasUso estadisticasMock = new EstadisticasUso(
-            10L, 5L, 100L, 80L, 20L, 50.0, "Evento Test", 10.0
+            10, 5, 100, 80, 20, 50.0, "Evento Test", 10.0
         );
 
         when(estadisticasService.obtenerEstadisticasUso()).thenReturn(estadisticasMock);

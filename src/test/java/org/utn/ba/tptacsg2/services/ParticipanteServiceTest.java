@@ -32,7 +32,7 @@ class ParticipanteServiceTest {
     @DisplayName("Debe devolver lista de inscripciones cuando el participante tiene inscripciones")
     void getInscripcionesDeParticipante_devuelveListaDeInscripciones() {
 
-        String idParticipante = "participante1";
+        String idParticipante = "1";
         Inscripcion inscripcion1 = mock(Inscripcion.class);
         Inscripcion inscripcion2 = mock(Inscripcion.class);
         List<Inscripcion> inscripcionesEsperadas = Arrays.asList(inscripcion1, inscripcion2);
@@ -53,7 +53,7 @@ class ParticipanteServiceTest {
     @DisplayName("Debe devolver lista vacía cuando el participante no tiene inscripciones")
     void getInscripcionesDeParticipante_devuelveListaVaciaSiNoHayInscripciones() {
 
-        String idParticipante = "participante2";
+        String idParticipante = "2";
         when(inscripcionRepository.getInscripcionesDeParticipante(idParticipante))
             .thenReturn(Collections.emptyList());
 
