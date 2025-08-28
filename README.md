@@ -11,15 +11,18 @@ POST /evento
 Request JSON:
 ```json
 {
-  "titulo": "Seminario de Mocks",
-  "descripcion": "Introducción a Mocks",
-  "fecha": "2025-09-10T19:00:00",
-  "horaInicio": "19:00",
-  "duracion": 2.5,
-  "ubicacion": { "provincia": "Buenos Aires", "ciudad": "CABA", "direccion": "Av. Siempre Viva 123" },
-  "cupoMaximo": 30,
-  "precio": { "moneda": "ARS", "monto": 1000 },
-  "organizadorId": "1"
+  "organizadorId": "1",
+  "evento": {
+    "titulo": "Seminario de Mocks",
+    "descripcion": "Introducción a Mocks",
+    "fecha": "2025-09-10T19:00:00",
+    "horaInicio": "19:00",
+    "duracion": 2.5,
+    "ubicacion": { "provincia": "Buenos Aires", "ciudad": "CABA", "direccion": "Av. Siempre Viva 123" },
+    "cupoMaximo": 30,
+    "precio": { "moneda": "ARS", "monto": 1000 },
+    "estado": { "tipoEstado": "CONFIRMADO", "fechaCambio": "2025-08-27T12:00:00" }
+  }
 }
 ```
 Response 201:
@@ -45,18 +48,32 @@ POST /inscripcion
 Request JSON:
 ```json
 {
-  "participanteId": "1",
-  "eventoId": "0"
+  "participante": {
+    "id": "1",
+    "nombre": "Carlos",
+    "apellido": "López",
+    "dni": "11111111"
+  },
+  "evento_id": "1"
 }
 ```
 Response 200:
 ```json
 {
   "id": "<id>",
-  "participante": { "id": "1", "nombre": "Carlos", "apellido": "López", "dni": "11111111" },
+  "participante": {
+    "id": "1",
+    "nombre": "Carlos",
+    "apellido": "López",
+    "dni": "11111111"
+  },
   "fechaRegistro": "2025-08-27T12:05:00",
   "estado": { "tipoEstado": "ACEPTADA", "fechaCambio": "2025-08-27T12:05:00" },
-  "evento": { "id": "0", "titulo": "Seminario de Mocks" }
+  "evento": {
+    "id": "1",
+    "titulo": "Seminario de Mocks",
+    "descripcion": "Mocks"
+  }
 }
 ```
 
