@@ -26,7 +26,6 @@ public class UsuarioRepository {
     }
     @PostConstruct
     public void initializeData() {
-        // Passwords en texto plano (solo para entorno de prueba). Reemplazar por hash real más adelante.
         save(new Usuario(1L, "admin", "$argon2id$v=19$m=65536,t=4,p=1$Y6QXibp2pRk+u6XDSSX6Wg$vaFyKiCj6Tvl06OGHuJtPaw5+4iZDi4f2iN0jrsYYLs", Rol.ROLE_ADMIN));
         save(new Usuario(2L, "organizador", "$argon2id$v=19$m=65536,t=4,p=1$IDXLIGuWc88CLL+7VyhCOA$CXr5e1xeozTTolyjDn1PNX1cs9uHqXFbH6TrtDKOCtk", Rol.ROLE_ORGNAIZER));
         save(new Usuario(3L, "usuario", "$argon2id$v=19$m=65536,t=4,p=1$hC1J7qKqgmkSUfl8kMdQow$wva2eKpy3Mw8/oJPvJw5JdPse+cEJ73EdmcT6uhcXmU", Rol.ROLE_USER));
