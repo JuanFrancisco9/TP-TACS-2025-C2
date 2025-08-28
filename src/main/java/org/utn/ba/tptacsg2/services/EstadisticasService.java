@@ -51,7 +51,7 @@ public class EstadisticasService {
 
         // Calcular promedio de inscripciones por evento
         Double promedioInscripciones = cantidadEventos > 0 ?
-                cantidadInscripcionesTotales.doubleValue() / (double) cantidadEventos : 0.0;
+                cantidadInscripcionesTotales.doubleValue() / cantidadEventos : 0.0;
 
         return new EstadisticasUso(
             cantidadEventos,
@@ -100,7 +100,7 @@ public class EstadisticasService {
     public static double calcularTasaConversion(Integer totalInscripciones, Integer inscripcionesConfirmadas) {
         if (totalInscripciones == null || inscripcionesConfirmadas == null) return 0.0;
         if (totalInscripciones <= 0) return 0.0;
-        double percent = ((double) inscripcionesConfirmadas /  totalInscripciones) * 100.0;
+        double percent = ( inscripcionesConfirmadas.doubleValue() /  totalInscripciones) * 100.0;
 
         // truncado a 2 decimales (sin redondear)
         return Math.floor(percent * 100.0) / 100.0;
