@@ -24,9 +24,7 @@ public class EstadisticasService {
         this.inscripcionRepository = inscripcionRepository;
     }
 
-    /**
-     * Obtiene estadísticas de uso reales basadas en los repositorios
-     */
+
     public EstadisticasUso obtenerEstadisticasUso() {
         List<Evento> eventos = eventoRepository.getEventos();
         List<Inscripcion> inscripciones = inscripcionRepository.getInscripciones();
@@ -95,8 +93,6 @@ public class EstadisticasService {
 
     /**
      * Calcula la tasa de conversión desde waitlist
-     * Nota: Con el modelo actual, calculamos la tasa de aceptación general
-     * En un sistema real necesitaríamos historial de cambios de estado
      * @param totalInscripciones Total de inscripciones
      * @param inscripcionesConfirmadas Inscripciones confirmadas/aceptadas
      * @return Porcentaje de aceptación
