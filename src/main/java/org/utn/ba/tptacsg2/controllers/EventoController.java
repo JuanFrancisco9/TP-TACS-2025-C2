@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,14 +14,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.utn.ba.tptacsg2.dtos.ParticipanteDTO;
 import org.utn.ba.tptacsg2.models.actors.Participante;
 import org.utn.ba.tptacsg2.models.events.Evento;
+import org.utn.ba.tptacsg2.models.events.SolicitudEvento;
+import org.utn.ba.tptacsg2.services.EventoService;
 import org.utn.ba.tptacsg2.services.EventoService;
 
 import java.util.List;
 
 @RestController
 public class EventoController {
-
-    private final Logger logger = LoggerFactory.getLogger(EventoService.class);
     private final EventoService eventoService;
 
     public EventoController(EventoService eventoService) {
@@ -28,9 +29,10 @@ public class EventoController {
     }
 
     @PostMapping("/evento")
-    public ResponseEntity<Evento> crearEvento(@RequestBody Evento evento) {
-        eventoService.guardarEvento(evento);
-        return ResponseEntity.status(201).body(evento);
+    public ResponseEntity<Evento> crearEvento(@RequestBody SolicitudEvento solicitudEvento) {
+        Evento evento = eventoService.registrarEvento(solicitudEvento);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(evento);
     }
 
     @GetMapping("/evento/participantes")
