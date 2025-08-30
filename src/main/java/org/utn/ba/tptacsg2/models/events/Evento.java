@@ -16,5 +16,6 @@ public record Evento (
      Integer cupoMaximo,
      Precio precio,
      Organizador organizador,
-     EstadoEvento estado
+     EstadoEvento estado,
+     Categoria categoria
 ) {}

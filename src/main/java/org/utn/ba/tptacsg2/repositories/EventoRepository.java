@@ -37,11 +37,46 @@ public class EventoRepository {
                 .toList();
     }
 
+    public List<Evento> getEventosPorCategoria(Categoria categoria) {
+        return this.getEventos().stream()
+                .filter(evento -> evento.categoria() != null &&
+                        evento.categoria().equals(categoria))
+                .toList();
+    }
+
+    public List<Evento> getEventosPorPalabraClave(List<String> palabrasClave) {
+        return this.getEventos().stream()
+                .filter(evento -> {
+                    String tituloSinEspacios = evento.titulo().replaceAll("\\s+", "");
+                    return palabrasClave.stream()
+                            .allMatch(palabra -> tituloSinEspacios.contains(palabra));
+                })
+                .toList();
+    }
+
+    public List<Evento> getEventosPorFecha(LocalDateTime fecha) {
+        LocalDateTime now = LocalDateTime.now();
+        return this.getEventos().stream()
+                .filter(evento -> evento.fecha().toLocalDate().isEqual(fecha.toLocalDate())
+                        && evento.fecha().isAfter(now))
+                .toList();
+    }
+
+    public List<Evento> getEventosPorRangoDePrecio (Float precioMin, Float precioMax) {
+        return this.getEventos().stream()
+                .filter(evento -> evento.precio() != null &&
+                        evento.precio().cantidad() >= precioMin &&
+                        evento.precio().cantidad() <= precioMax)
+                .toList();
+
+    }
+
+
     @PostConstruct
     public void initializeData() {
         this.guardarEvento(new Evento("0", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
                             "19;00",5F, new Ubicacion("","",""), 10,
-                            new Precio("Pesos", 100F), new Organizador("1","","",""), new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now())));
+                            new Precio("Pesos", 100F), new Organizador("1","","",""), new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), new Categoria("Educativo")));
 
     }
 }
