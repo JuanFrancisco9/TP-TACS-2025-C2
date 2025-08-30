@@ -87,7 +87,8 @@ public class EventoService {
                 evento.cupoMaximo(),
                 evento.precio(),
                 evento.organizador(),
-                estadoEvento
+                estadoEvento,
+                evento.categoria()
         );
 
         eventoRepository.actualizarEvento(eventoActualizado);
@@ -120,7 +121,7 @@ public class EventoService {
 
         List<Evento> eventosFiltrados = eventos.stream().filter(predicadosCombinados).toList();
 
-        //TODO archivo de config para el tamanio de config
+        //TODO archivo de config para el tamanio de pag
         Integer tamanioPagina = 10;
         Integer totalElementos = eventosFiltrados.size();
         Integer totalPaginas = (int) Math.ceil((double) totalElementos / tamanioPagina);

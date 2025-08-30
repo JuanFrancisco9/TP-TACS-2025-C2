@@ -13,6 +13,7 @@ import org.utn.ba.tptacsg2.repositories.OrganizadorRepository;
 import org.utn.ba.tptacsg2.services.EventoService;
 import org.utn.ba.tptacsg2.services.GeneradorIDService;
 
+
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -54,7 +55,7 @@ public class EventoServiceTest {
                 new Precio("ARS", 5000f),
                 null,
                 new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.of(2025, 9, 1, 12, 0))
-        );
+        , null);
 
         solicitudEvento = new SolicitudEvento(idOrganizadorMock, eventoSinId);
 

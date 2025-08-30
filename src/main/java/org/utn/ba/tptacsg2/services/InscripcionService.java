@@ -70,7 +70,6 @@ public class InscripcionService {
             throw new RuntimeException("No se puede inscribir a un evento que no está confirmado. Estado actual: " + evento.estado().tipoEstado());
         }
 
-
     }
 
     public Inscripcion cancelarInscripcion(Long inscripcionId) {
@@ -80,7 +79,7 @@ public class InscripcionService {
         return null;
     }
 
-    private void moverInscripcionAConfirmadaDelEvento(Evento evento) {
+    private void moverInscripcionEnWaitlistAConfirmada(Evento evento) {
 
         Inscripcion inscripcionAConfirmar = this.inscripcionRepository.getPrimerInscripcionDeWaitlist(evento);
 
