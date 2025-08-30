@@ -21,7 +21,7 @@ public class InscripcionController {
     }
 
 
-    @PostMapping("/inscripcion")
+    @PostMapping("/inscripciones")
     public ResponseEntity<Inscripcion> inscribirse(@RequestBody SolicitudInscripcion solicitudInscripcion) {
         return ResponseEntity.ok(this.inscripcionService.inscribir(solicitudInscripcion));
     }

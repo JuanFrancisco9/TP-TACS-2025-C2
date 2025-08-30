@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@RestController("/evento")
+@RestController("/eventos")
 public class EventoController {
     private final EventoService eventoService;
 
