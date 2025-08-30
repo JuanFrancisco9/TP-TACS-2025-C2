@@ -3,6 +3,7 @@ package org.utn.ba.tptacsg2.repositories;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.events.*;
 
@@ -14,7 +15,14 @@ import java.util.Optional;
 @Repository
 public class EventoRepository {
 
-    private final List<Evento> eventos = new ArrayList<>();
+    private final List<Evento> eventos = new ArrayList<>(
+        List.of(
+            new Evento("1", "Evento Test", "Evento de testeo",LocalDateTime.of(2025,9,29,22,0), "3am",
+                3F, new Ubicacion("lat", "long", "A la vuelta de la esquina"), 100, new Precio("rublo bieloruso", 100F),
+                new Organizador("1", "o", "1", "111"), new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.of(2025,9,29,22,0))
+                )
+        )
+    );
 
     public List<Evento> getEventos() {
         return eventos;

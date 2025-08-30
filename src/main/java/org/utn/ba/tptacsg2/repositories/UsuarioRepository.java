@@ -1,6 +1,8 @@
 package org.utn.ba.tptacsg2.repositories;
 
 import org.springframework.stereotype.Repository;
+import org.utn.ba.tptacsg2.models.actors.Organizador;
+import org.utn.ba.tptacsg2.models.actors.Participante;
 import org.utn.ba.tptacsg2.models.users.Usuario;
 
 import java.util.ArrayList;
