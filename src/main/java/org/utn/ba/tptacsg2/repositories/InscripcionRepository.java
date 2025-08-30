@@ -8,6 +8,7 @@ import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class InscripcionRepository {
@@ -16,9 +17,18 @@ public class InscripcionRepository {
     public List<Inscripcion> getInscripciones() {
         return inscripciones;
     }
+
+
+    public Optional<Inscripcion> getInscripcionById(String id) {
+        return this.getInscripciones().stream()
+                .filter(inscripcion -> inscripcion.id().equals(id))
+                .findFirst();
+    }
+
     public void guardarInscripcion(Inscripcion inscripcion) {
         inscripciones.add(inscripcion);
     }
+
     public List<Inscripcion> getInscripcionesAEvento(Evento evento) {
         return this.getInscripciones().stream()
                 .filter(inscripcion -> inscripcion.evento().id().equals(evento.id()))
