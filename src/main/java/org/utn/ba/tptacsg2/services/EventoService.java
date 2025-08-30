@@ -77,7 +77,7 @@ public class EventoService {
                 estadoEvento
         );
 
-        eventoRepository.guardarEvento(eventoActualizado);
+        eventoRepository.actualizarEvento(eventoActualizado);
 
         return eventoActualizado;
     }

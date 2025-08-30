@@ -24,6 +24,11 @@ public class EventoRepository {
         eventos.add(evento);
     }
 
+    public void actualizarEvento(Evento evento){
+        eventos.removeIf(e -> e.id().equals(evento.id()));
+        this.guardarEvento(evento);
+    }
+
     public Optional<Evento> getEvento(String id) {
         return this.eventos.stream()
                 .filter(evento -> evento.id().equals(id))
