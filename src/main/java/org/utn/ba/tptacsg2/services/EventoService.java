@@ -24,8 +24,7 @@ public class EventoService {
     private final GeneradorIDService generadorIDService;
 
     @Autowired
-    public EventoService(EventoRepository eventoRepository, InscripcionRepository inscripcionRepository, ParticipanteRepository participanteRepository) {
-    public EventoService(EventoRepository eventoRepository, InscripcionRepository inscripcionRepository, OrganizadorRepository organizadorRepository, GeneradorIDService generadorIDService) {
+    public EventoService(EventoRepository eventoRepository, InscripcionRepository inscripcionRepository, OrganizadorRepository organizadorRepository, GeneradorIDService generadorIDService, ParticipanteRepository participanteRepository) {
         this.eventoRepository = eventoRepository;
         this.inscripcionRepository = inscripcionRepository;
         this.organizadorRepository = organizadorRepository;
@@ -56,8 +55,9 @@ public class EventoService {
                 organizador,
                 solicitud.evento().estado()
         );
-
         eventoRepository.guardarEvento(evento);
+        return evento;
+    }
 
     public Evento getEvento(String eventoId){
         return eventoRepository.getEvento(eventoId).orElseThrow(()-> new RuntimeException("Evento " + eventoId + " no encontrado"));
@@ -66,20 +66,9 @@ public class EventoService {
     public List<Participante> getParticipantes(String eventoId){
         List<Inscripcion> inscripciones = inscripcionRepository.getInscripcionesAEvento(this.getEvento(eventoId));
 
-        List<Participante> participantes = inscripciones.stream().map(i->i.participante()).toList();
+        List<Participante> participantes = inscripciones.stream().filter(i -> i.estado().tipoEstado() == TipoEstadoInscripcion.ACEPTADA)
+                .map(i->i.participante()).toList();
 
         return participantes;
-    }
-
-    public List<Evento> getAll(){
-        return eventoRepository.getEventos();
-    }
-
-    public void guardarEvento(Evento evento){
-        eventoRepository.guardarEvento(evento);
-    }
-}
-
-        return evento;
     }
 }
