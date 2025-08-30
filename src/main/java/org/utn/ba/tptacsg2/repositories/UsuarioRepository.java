@@ -15,7 +15,7 @@ public class UsuarioRepository {
         usuarios.add(usuario);
     }
 
-    public List<Usuario> finAll() {
+    public List<Usuario> findAll() {
         return usuarios;
     }
 
