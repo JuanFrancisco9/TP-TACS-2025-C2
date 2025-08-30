@@ -30,6 +30,12 @@ public class EventoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(evento);
     }
 
+    @PutMapping("/evento/{id_evento}")
+    public ResponseEntity<Evento> modificarEvento(@PathVariable ("id_evento") String idEvento , @RequestParam("estado") TipoEstadoEvento estado) {
+        Evento evento = eventoService.cambiarEstado(idEvento, estado);
+        return ResponseEntity.status(HttpStatus.OK).body(evento);
+    }
+
     /**
      * EP para obtener info de los participantes (nombre, apellido y dni) con inscripción ACEPTADA correspondientes a un evento
      * input: eventoId -> Strging id del evento por path param

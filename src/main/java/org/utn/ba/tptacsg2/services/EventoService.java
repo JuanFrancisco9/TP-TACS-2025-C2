@@ -7,8 +7,10 @@ import org.utn.ba.tptacsg2.dtos.output.ResultadoBusquedaEvento;
 import org.utn.ba.tptacsg2.helpers.EventPredicateBuilder;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.actors.Participante;
+import org.utn.ba.tptacsg2.models.events.EstadoEvento;
 import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.models.events.SolicitudEvento;
+import org.utn.ba.tptacsg2.models.events.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
 import org.utn.ba.tptacsg2.repositories.EventoRepository;
@@ -19,6 +21,8 @@ import org.utn.ba.tptacsg2.repositories.ParticipanteRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
+
+import java.time.LocalDateTime;
 
 @Service
 public class EventoService {
@@ -65,6 +69,30 @@ public class EventoService {
         eventoRepository.guardarEvento(evento);
 
         return evento;
+    }
+
+    public Evento cambiarEstado(String idEvento,TipoEstadoEvento estado) {
+        Evento evento = eventoRepository.getEvento(idEvento).orElseThrow(() -> new RuntimeException("Evento no encontrado"));
+
+        EstadoEvento estadoEvento = new EstadoEvento(estado, LocalDateTime.now());
+
+        Evento eventoActualizado = new Evento(
+                evento.id(),
+                evento.titulo(),
+                evento.descripcion(),
+                evento.fecha(),
+                evento.horaInicio(),
+                evento.duracion(),
+                evento.ubicacion(),
+                evento.cupoMaximo(),
+                evento.precio(),
+                evento.organizador(),
+                estadoEvento
+        );
+
+        eventoRepository.actualizarEvento(eventoActualizado);
+
+        return eventoActualizado;
     }
 
     public Evento getEvento(String eventoId){
