@@ -2,16 +2,23 @@ package org.utn.ba.tptacsg2.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.utn.ba.tptacsg2.dtos.FiltrosDTO;
+import org.utn.ba.tptacsg2.dtos.output.ResultadoBusquedaEvento;
+import org.utn.ba.tptacsg2.helpers.EventPredicateBuilder;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
+import org.utn.ba.tptacsg2.models.actors.Participante;
 import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.models.events.SolicitudEvento;
+import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
 import org.utn.ba.tptacsg2.repositories.EventoRepository;
 import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
 import org.utn.ba.tptacsg2.repositories.OrganizadorRepository;
 import org.utn.ba.tptacsg2.repositories.ParticipanteRepository;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 @Service
 public class EventoService {
@@ -19,6 +26,7 @@ public class EventoService {
     private final InscripcionRepository inscripcionRepository;
     private final OrganizadorRepository organizadorRepository;
     private final GeneradorIDService generadorIDService;
+    private final ParticipanteRepository participanteRepository;
 
     @Autowired
     public EventoService(EventoRepository eventoRepository, InscripcionRepository inscripcionRepository, OrganizadorRepository organizadorRepository, GeneradorIDService generadorIDService, ParticipanteRepository participanteRepository) {
@@ -30,8 +38,8 @@ public class EventoService {
     }
 
     public Integer cuposDisponibles(Evento evento) {
-        return evento.cupoMaximo() - inscripcionRepository.getInscripcionesAEvento(evento)
-                .stream().filter(inscripcion -> inscripcion.estado().tipoEstado().equals(TipoEstadoInscripcion.ACEPTADA))
+        return evento.cupoMaximo() -  inscripcionRepository.getInscripcionesAEvento(evento)
+                .stream().filter(inscripcion -> inscripcion.estado().getTipoEstado().equals(TipoEstadoInscripcion.ACEPTADA))
                 .toList().size();
     }
 
@@ -50,7 +58,8 @@ public class EventoService {
                 solicitud.evento().cupoMaximo(),
                 solicitud.evento().precio(),
                 organizador,
-                solicitud.evento().estado()
+                solicitud.evento().estado(),
+                solicitud.evento().categoria()
         );
 
         eventoRepository.guardarEvento(evento);
@@ -65,7 +74,7 @@ public class EventoService {
     public List<Participante> getParticipantes(String eventoId){
         List<Inscripcion> inscripciones = inscripcionRepository.getInscripcionesAEvento(this.getEvento(eventoId));
 
-        List<Participante> participantes = inscripciones.stream().filter(i -> i.estado().tipoEstado() == TipoEstadoInscripcion.ACEPTADA)
+        List<Participante> participantes = inscripciones.stream().filter(i -> i.estado().getTipoEstado() == TipoEstadoInscripcion.ACEPTADA)
                 .map(i->i.participante()).toList();
 
         return participantes;

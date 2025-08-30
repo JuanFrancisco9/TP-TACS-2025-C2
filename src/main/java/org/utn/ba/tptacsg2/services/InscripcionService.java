@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.utn.ba.tptacsg2.dtos.output.Waitlist;
 import org.utn.ba.tptacsg2.exceptions.EventoNoEncontradoException;
 import org.utn.ba.tptacsg2.models.events.Evento;
+import org.utn.ba.tptacsg2.models.events.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.inscriptions.EstadoInscripcionV2;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.dtos.SolicitudInscripcion;
@@ -41,27 +42,35 @@ public class InscripcionService {
         Evento evento = eventoRepository.getEvento(solicitud.evento_id())
                         .orElseThrow(() -> new EventoNoEncontradoException("No se encontró el evento " + solicitud.evento_id()));
 
-        if (eventoService.cuposDisponibles(evento) <= 0) {
-            Inscripcion inscripcionPendiente = this.waitlistService.inscribirAWaitlist(solicitud);
-            this.inscripcionRepository.guardarInscripcion(inscripcionPendiente);
-            return inscripcionPendiente;
+        if(evento.estado().tipoEstado() == TipoEstadoEvento.CONFIRMADO) {
+            if (eventoService.cuposDisponibles(evento) <= 0) {
+                Inscripcion inscripcionPendiente = this.waitlistService.inscribirAWaitlist(solicitud);
+                this.inscripcionRepository.guardarInscripcion(inscripcionPendiente);
+                return inscripcionPendiente;
+            }
+
+            EstadoInscripcionV2 estadoInscripcionAceptada = new EstadoInscripcionV2(this.generadorIDService.generarID(), TipoEstadoInscripcion.ACEPTADA, LocalDateTime.now());
+
+            Inscripcion inscripcionAceptada = new Inscripcion(
+                    generadorIDService.generarID(),
+                    solicitud.participante(),
+                    LocalDateTime.now(),
+                    estadoInscripcionAceptada,
+                    evento
+            );
+
+            estadoInscripcionAceptada.setInscripcion(inscripcionAceptada);
+            //TODO chequear cómo se maneja esto en Mongo
+            inscripcionRepository.guardarInscripcion(inscripcionAceptada);
+            this.estadoInscripcionRepository.guardarEstadoInscripcion(estadoInscripcionAceptada);
+            return inscripcionAceptada;
         }
 
-        EstadoInscripcionV2 estadoInscripcionAceptada = new EstadoInscripcionV2(this.generadorIDService.generarID(), TipoEstadoInscripcion.ACEPTADA, LocalDateTime.now());
+        else {
+            throw new RuntimeException("No se puede inscribir a un evento que no está confirmado. Estado actual: " + evento.estado().tipoEstado());
+        }
 
-        Inscripcion inscripcionAceptada = new Inscripcion(
-                generadorIDService.generarID(),
-                solicitud.participante(),
-                LocalDateTime.now(),
-                estadoInscripcionAceptada,
-                evento
-        );
 
-        estadoInscripcionAceptada.setInscripcion(inscripcionAceptada);
-        //TODO chequear cómo se maneja esto en Mongo
-        inscripcionRepository.guardarInscripcion(inscripcionAceptada);
-        this.estadoInscripcionRepository.guardarEstadoInscripcion(estadoInscripcionAceptada);
-        return inscripcionAceptada;
     }
 
     public Inscripcion cancelarInscripcion(Long inscripcionId) {
