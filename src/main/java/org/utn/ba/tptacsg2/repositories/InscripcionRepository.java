@@ -47,4 +47,11 @@ public class InscripcionRepository {
         this.inscripciones.add(inscripcion);
 
     }
+
+    public List<Inscripcion> getInscripcionesDeParticipante(String idParticipante) {
+        return this.getInscripciones().stream()
+                .filter(inscripcion -> inscripcion.participante() != null &&
+                        inscripcion.participante().id().equals(idParticipante))
+                .toList();
+    }
 }

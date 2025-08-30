@@ -4,6 +4,7 @@ import org.utn.ba.tptacsg2.models.actors.Organizador;
 
 import java.time.LocalDateTime;
 
+
 public record Evento (
      String id,
      String titulo,
