@@ -1,4 +1,12 @@
 services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://root:secret@mongodb:27017/TACS-2025-2C-G2?authSource=admin
   mongodb:
     image: 'mongo:latest'
     environment:
