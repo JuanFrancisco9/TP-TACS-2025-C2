@@ -1,4 +1,4 @@
-package org.utn.ba.tptacsg2;
+package org.utn.ba.tptacsg2.services;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,12 +52,23 @@ public class EventoServiceTest {
                 3.5f,
                 new Ubicacion("-34.6037", "-58.3816", "Av. Medrano 951, CABA"),
                 100,
+                0,
                 new Precio("ARS", 5000f),
                 null,
                 new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.of(2025, 9, 1, 12, 0))
         , null);
 
-        solicitudEvento = new SolicitudEvento(idOrganizadorMock, eventoSinId);
+        solicitudEvento = new SolicitudEvento(idOrganizadorMock,
+                "Fiesta UTN",
+                "Evento de prueba",
+                LocalDateTime.of(2025, 9, 10, 20, 0),
+                "20:00",
+                3.5f,
+                new Ubicacion("-34.6037", "-58.3816", "Av. Medrano 951, CABA"),
+                100,
+                0,
+                new Precio("ARS", 5000f),
+                null);
 
     }
 
@@ -77,7 +88,17 @@ public class EventoServiceTest {
         when(organizadorRepository.getOrganizador("ORG-INEXISTENTE"))
                 .thenReturn(Optional.empty());
 
-        SolicitudEvento solicitudInvalida = new SolicitudEvento("ORG-INEXISTENTE", eventoSinId);
+        SolicitudEvento solicitudInvalida = new SolicitudEvento(null,
+                "Fiesta UTN",
+                "Evento de prueba",
+                LocalDateTime.of(2025, 9, 10, 20, 0),
+                "20:00",
+                3.5f,
+                new Ubicacion("-34.6037", "-58.3816", "Av. Medrano 951, CABA"),
+                100,
+                0,
+                new Precio("ARS", 5000f),
+                null);
 
         assertThrows(RuntimeException.class, () -> {
             eventoService.registrarEvento(solicitudInvalida);

@@ -14,6 +14,7 @@ public record Evento (
      Float duracion,
      Ubicacion ubicacion,
      Integer cupoMaximo,
+     Integer cupoMinimo,
      Precio precio,
      Organizador organizador,
      EstadoEvento estado,
