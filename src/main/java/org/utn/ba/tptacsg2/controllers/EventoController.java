@@ -16,7 +16,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@RestController("/eventos")
+@RestController
+@RequestMapping("/eventos")
 public class EventoController {
     private final EventoService eventoService;
 
@@ -31,7 +32,7 @@ public class EventoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(evento);
     }
 
-    @PutMapping("/evento/{id_evento}")
+    @PutMapping("/{id_evento}")
     public ResponseEntity<Evento> modificarEvento(@PathVariable ("id_evento") String idEvento , @RequestParam("estado") TipoEstadoEvento estado) {
         Evento evento = eventoService.cambiarEstado(idEvento, estado);
         return ResponseEntity.status(HttpStatus.OK).body(evento);
