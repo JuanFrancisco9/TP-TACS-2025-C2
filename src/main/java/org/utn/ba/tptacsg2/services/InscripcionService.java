@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.utn.ba.tptacsg2.dtos.output.Waitlist;
 import org.utn.ba.tptacsg2.exceptions.EventoNoEncontradoException;
+import org.utn.ba.tptacsg2.exceptions.InscripcionNoEncontradaException;
 import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.models.events.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.inscriptions.EstadoInscripcionV2;
@@ -16,6 +17,7 @@ import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class InscripcionService {
@@ -72,11 +74,37 @@ public class InscripcionService {
 
     }
 
-    public Inscripcion cancelarInscripcion(Long inscripcionId) {
+    public Inscripcion cancelarInscripcion(String inscripcionId) {
 
-        // todo this.moverInscripcionAConfirmadaDelEvento();
+        Optional<Inscripcion> inscripcionACancelar = this.inscripcionRepository.getInscripcionById(inscripcionId);
 
-        return null;
+        if(inscripcionACancelar.isEmpty()) {
+            throw new InscripcionNoEncontradaException("No se encontró la inscripcion " + inscripcionId);
+        }
+
+        Inscripcion inscripcion = inscripcionACancelar.get();
+
+        EstadoInscripcionV2 estadoCancelado = new EstadoInscripcionV2(
+                generadorIDService.generarID(),
+                TipoEstadoInscripcion.CANCELADA,
+                inscripcion,
+                LocalDateTime.now()
+        );
+
+        Inscripcion inscripcionCancelada = new Inscripcion(
+                inscripcion.id(),
+                inscripcion.participante(),
+                inscripcion.fechaRegistro(),
+                estadoCancelado,
+                inscripcion.evento()
+        );
+
+        this.estadoInscripcionRepository.guardarEstadoInscripcion(estadoCancelado);
+        this.inscripcionRepository.guardarInscripcion(inscripcionCancelada);
+
+        this.moverInscripcionEnWaitlistAConfirmada(inscripcion.evento());
+
+        return inscripcionCancelada;
     }
 
     private void moverInscripcionEnWaitlistAConfirmada(Evento evento) {

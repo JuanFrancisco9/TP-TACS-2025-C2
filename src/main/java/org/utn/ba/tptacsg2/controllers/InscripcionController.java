@@ -1,5 +1,6 @@
 package org.utn.ba.tptacsg2.controllers;
 
+import jakarta.websocket.server.PathParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.utn.ba.tptacsg2.dtos.output.Waitlist;
@@ -24,6 +25,11 @@ public class InscripcionController {
     @PostMapping("/inscripciones")
     public ResponseEntity<Inscripcion> inscribirse(@RequestBody SolicitudInscripcion solicitudInscripcion) {
         return ResponseEntity.ok(this.inscripcionService.inscribir(solicitudInscripcion));
+    }
+
+    @PostMapping("/inscripciones/{eventoId}")
+    public ResponseEntity<Inscripcion> cancelarInscripcion(@PathVariable String eventoId) {
+        return ResponseEntity.ok(this.inscripcionService.cancelarInscripcion(eventoId));
     }
 
     @GetMapping("/waitlist/{eventoId}")
