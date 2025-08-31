@@ -157,7 +157,7 @@ Response 200:
 ```json
 [
   { "username": "admin", "rol": "ROLE_ADMIN" },
-  { "username": "organizador", "rol": "ROLE_ORGNAIZER" },
+  { "username": "organizador", "rol": "ROLE_ORGANIZER" },
   { "username": "usuario", "rol": "ROLE_USER" }
 ]
 ```
