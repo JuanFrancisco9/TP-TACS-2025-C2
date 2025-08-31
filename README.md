@@ -1,7 +1,32 @@
-# TP-TACS-2025-C2
+# TP TACS 2025-2C  Grupo 2
+
+El objetivo del TP es desarrollar una aplicación que permita a los usuarios publicar eventos y que otros usuarios se registren respetando el cupo disponible, gestionando automáticamente una lista de espera (waitlist) cuando se llena el cupo.
+
+[Enunciado](https://docs.google.com/document/d/e/2PACX-1vRKgz7eEA1fIByKMtXKxA6-Vs1rSst8cwUeTkMnZyYrDPkzkUECyK7WXqXWFSh5jwnxJMdanffdyWzB/pub)
 
 
-Base URL por defecto: `http://localhost:8080`
+## Stack Tecnológico
+- Backend: Java 21, SpringBoot 3.5.4, Maven
+- Frontend: -
+- Base de datos: -
+
+
+## Ejecutar en Local
+
+``` bash
+docker compose up
+```
+
+Levanta la aplicación en el puerto 8080
+
+Se puede comprobar que se levantó correctamente haciendo:
+
+```bash
+curl http://localhost:8080/actuator/health
+```
+
+Y viendo que el status devuelto sea UP.
+
 
 ## Endpoints
 
