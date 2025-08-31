@@ -37,11 +37,11 @@ public class EstadisticasService {
 
         Integer cantidadInscripcionesTotales = inscripciones.size();
         Integer cantidadInscripcionesConfirmadas = inscripciones.stream()
-                .filter(inscripcion -> inscripcion.estado().tipoEstado() == TipoEstadoInscripcion.ACEPTADA)
+                .filter(inscripcion -> inscripcion.estado().getTipoEstado() == TipoEstadoInscripcion.ACEPTADA)
                 .toList().size();
 
         Integer cantidadInscripcionesPendientes = inscripciones.stream()
-                .filter(inscripcion -> inscripcion.estado().tipoEstado() == TipoEstadoInscripcion.PENDIENTE)
+                .filter(inscripcion -> inscripcion.estado().getTipoEstado() == TipoEstadoInscripcion.PENDIENTE)
                 .toList().size();
 
 
