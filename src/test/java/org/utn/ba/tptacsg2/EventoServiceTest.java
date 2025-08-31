@@ -13,11 +13,11 @@ import org.utn.ba.tptacsg2.repositories.OrganizadorRepository;
 import org.utn.ba.tptacsg2.services.EventoService;
 import org.utn.ba.tptacsg2.services.GeneradorIDService;
 
+
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 
@@ -35,10 +35,12 @@ public class EventoServiceTest {
     private Evento eventoSinId;
     private SolicitudEvento solicitudEvento;
     private static String idOrganizadorMock;
+    private static String idEventoMock;
 
     @BeforeEach
     public void setUp() {
         idOrganizadorMock="ORG-123";
+        idEventoMock="EV-123";
         organizadorMock = new Organizador(idOrganizadorMock, "Juan", "Perez","78414456");
 
         eventoSinId = new Evento(
@@ -53,7 +55,7 @@ public class EventoServiceTest {
                 new Precio("ARS", 5000f),
                 null,
                 new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.of(2025, 9, 1, 12, 0))
-        );
+        , null);
 
         solicitudEvento = new SolicitudEvento(idOrganizadorMock, eventoSinId);
 
@@ -82,5 +84,17 @@ public class EventoServiceTest {
         });
 
         verify(eventoRepository, org.mockito.Mockito.never()).guardarEvento(org.mockito.Mockito.any());
+    }
+
+    @Test
+    public void cambiarEstadoEvento(){
+        when(eventoRepository.getEvento(idEventoMock)).thenReturn(Optional.of(eventoSinId));
+
+        TipoEstadoEvento tipoEstadoEvento = TipoEstadoEvento.CANCELADO;
+
+        Evento resultado = eventoService.cambiarEstado(idEventoMock, tipoEstadoEvento);
+
+        assertEquals(tipoEstadoEvento, resultado.estado().tipoEstado());
+        assertNotEquals(resultado, eventoSinId);
     }
 }

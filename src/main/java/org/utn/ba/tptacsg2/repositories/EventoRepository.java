@@ -2,6 +2,7 @@ package org.utn.ba.tptacsg2.repositories;
 
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.events.*;
 
@@ -36,14 +37,20 @@ public class EventoRepository {
                 .toList();
     }
 
+    public void actualizarEvento(Evento evento){
+        eventos.removeIf(e -> e.id().equals(evento.id()));
+        this.guardarEvento(evento);
+    }
+
     @PostConstruct
     public void initializeData() {
-        this.guardarEvento(new Evento("1", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
-                            "19:00",5F, new Ubicacion("","",""), 10,
-                            new Precio("Pesos", 100F), new Organizador("1","Juan","Pérez","12345678"), new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now())));
+        this.guardarEvento(new Evento("0", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
+                            "19;00",5F, new Ubicacion("","",""), 10,
+                            new Precio("Pesos", 100F), new Organizador("1","","",""), new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), new Categoria("Educativo")));
+
         // Segundo evento de prueba
         this.guardarEvento(new Evento("2", "Workshop de Testing", "Testing", LocalDateTime.now().plusDays(7),
                             "10:00",3F, new Ubicacion("","",""), 20,
-                            new Precio("Pesos", 150F), new Organizador("2","María","González","87654321"), new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now())));
+                            new Precio("Pesos", 150F), new Organizador("2","María","González","87654321"), new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), new Categoria("Tecnología")));
     }
 }

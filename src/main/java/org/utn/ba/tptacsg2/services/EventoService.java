@@ -2,26 +2,35 @@ package org.utn.ba.tptacsg2.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.utn.ba.tptacsg2.dtos.FiltrosDTO;
+import org.utn.ba.tptacsg2.dtos.output.ResultadoBusquedaEvento;
+import org.utn.ba.tptacsg2.helpers.EventPredicateBuilder;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.actors.Participante;
+import org.utn.ba.tptacsg2.models.events.EstadoEvento;
 import org.utn.ba.tptacsg2.models.events.Evento;
-import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.models.events.SolicitudEvento;
+import org.utn.ba.tptacsg2.models.events.TipoEstadoEvento;
+import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
 import org.utn.ba.tptacsg2.repositories.EventoRepository;
 import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
 import org.utn.ba.tptacsg2.repositories.OrganizadorRepository;
 import org.utn.ba.tptacsg2.repositories.ParticipanteRepository;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
+
+import java.time.LocalDateTime;
 
 @Service
 public class EventoService {
     private final EventoRepository eventoRepository;
     private final InscripcionRepository inscripcionRepository;
-    private final ParticipanteRepository participanteRepository;
     private final OrganizadorRepository organizadorRepository;
     private final GeneradorIDService generadorIDService;
+    private final ParticipanteRepository participanteRepository;
 
     @Autowired
     public EventoService(EventoRepository eventoRepository, InscripcionRepository inscripcionRepository, OrganizadorRepository organizadorRepository, GeneradorIDService generadorIDService, ParticipanteRepository participanteRepository) {
@@ -33,8 +42,8 @@ public class EventoService {
     }
 
     public Integer cuposDisponibles(Evento evento) {
-        return evento.cupoMaximo() - inscripcionRepository.getInscripcionesAEvento(evento)
-                .stream().filter(inscripcion -> inscripcion.estado().tipoEstado().equals(TipoEstadoInscripcion.ACEPTADA))
+        return evento.cupoMaximo() -  inscripcionRepository.getInscripcionesAEvento(evento)
+                .stream().filter(inscripcion -> inscripcion.estado().getTipoEstado().equals(TipoEstadoInscripcion.ACEPTADA))
                 .toList().size();
     }
 
@@ -53,10 +62,38 @@ public class EventoService {
                 solicitud.evento().cupoMaximo(),
                 solicitud.evento().precio(),
                 organizador,
-                solicitud.evento().estado()
+                solicitud.evento().estado(),
+                solicitud.evento().categoria()
         );
+
         eventoRepository.guardarEvento(evento);
+
         return evento;
+    }
+
+    public Evento cambiarEstado(String idEvento,TipoEstadoEvento estado) {
+        Evento evento = eventoRepository.getEvento(idEvento).orElseThrow(() -> new RuntimeException("Evento no encontrado"));
+
+        EstadoEvento estadoEvento = new EstadoEvento(estado, LocalDateTime.now());
+
+        Evento eventoActualizado = new Evento(
+                evento.id(),
+                evento.titulo(),
+                evento.descripcion(),
+                evento.fecha(),
+                evento.horaInicio(),
+                evento.duracion(),
+                evento.ubicacion(),
+                evento.cupoMaximo(),
+                evento.precio(),
+                evento.organizador(),
+                estadoEvento,
+                evento.categoria()
+        );
+
+        eventoRepository.actualizarEvento(eventoActualizado);
+
+        return eventoActualizado;
     }
 
     public Evento getEvento(String eventoId){
@@ -66,9 +103,33 @@ public class EventoService {
     public List<Participante> getParticipantes(String eventoId){
         List<Inscripcion> inscripciones = inscripcionRepository.getInscripcionesAEvento(this.getEvento(eventoId));
 
-        List<Participante> participantes = inscripciones.stream().filter(i -> i.estado().tipoEstado() == TipoEstadoInscripcion.ACEPTADA)
+        List<Participante> participantes = inscripciones.stream().filter(i -> i.estado().getTipoEstado() == TipoEstadoInscripcion.ACEPTADA)
                 .map(i->i.participante()).toList();
 
         return participantes;
+    }
+
+    public ResultadoBusquedaEvento buscarEventos(FiltrosDTO filtros) {
+        List<Evento> eventos = eventoRepository.getEventos();
+
+        Predicate<Evento> predicadosCombinados = new EventPredicateBuilder()
+                .conRangoDeFecha(filtros.fechaDesde(), filtros.fechaHasta())
+                .conCategoria(filtros.categoria())
+                .conRangoDePrecios(filtros.precioMinimo(), filtros.precioMaximo())
+                .conPalabrasClave(filtros.palabrasClave())
+                .build();
+
+        List<Evento> eventosFiltrados = eventos.stream().filter(predicadosCombinados).toList();
+
+        //TODO archivo de config para el tamanio de pag
+        Integer tamanioPagina = 10;
+        Integer totalElementos = eventosFiltrados.size();
+        Integer totalPaginas = (int) Math.ceil((double) totalElementos / tamanioPagina);
+        Integer inicioEventos = filtros.nroPagina() * tamanioPagina;
+        Integer finalEventos = Math.min(inicioEventos + tamanioPagina , eventosFiltrados.size());
+
+        List<Evento> eventosFiltradosYPaginados = inicioEventos >= eventosFiltrados.size() ? new ArrayList<>() : eventosFiltrados.subList(inicioEventos, finalEventos);
+
+        return new ResultadoBusquedaEvento(eventosFiltradosYPaginados, filtros.nroPagina() + 1, totalElementos, totalPaginas);
     }
 }

@@ -10,8 +10,9 @@ import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.actors.Participante;
 import org.utn.ba.tptacsg2.models.events.*;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
-import org.utn.ba.tptacsg2.models.inscriptions.SolicitudInscripcion;
+import org.utn.ba.tptacsg2.dtos.SolicitudInscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
+import org.utn.ba.tptacsg2.repositories.EstadoInscripcionRepository;
 import org.utn.ba.tptacsg2.services.WaitlistService;
 import org.utn.ba.tptacsg2.repositories.EventoRepository;
 import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
@@ -31,6 +32,7 @@ public class InscripcionServiceTest {
 
     @Mock private EventoRepository eventoRepository;
     @Mock private InscripcionRepository inscripcionRepository;
+    @Mock private EstadoInscripcionRepository estadoInscripcionRepository;
     @Mock private WaitlistService waitlistService;
     @Mock private GeneradorIDService generadorIDService;
     @Mock private EventoService eventoService;
@@ -45,7 +47,7 @@ public class InscripcionServiceTest {
     @BeforeEach
     public void setUp() {
         participante = new Participante("1", "Pepito", "Pépez", "123456789");
-        evento = new Evento(ID_EVENTO_VALIDO, "Evento mock", "", LocalDateTime.now(), "1900", 5F, new Ubicacion("","",""), 3, new Precio("ARS", 10F), new Organizador("1","","",""), new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()));
+        evento = new Evento(ID_EVENTO_VALIDO, "Evento mock", "", LocalDateTime.now(), "1900", 5F, new Ubicacion("","",""), 3, new Precio("ARS", 10F), new Organizador("1","","",""), new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
         when(eventoRepository.getEvento(ID_EVENTO_VALIDO)).thenReturn(Optional.of(evento));
 
     }
@@ -58,7 +60,7 @@ public class InscripcionServiceTest {
         SolicitudInscripcion solicitudInscripcion = new SolicitudInscripcion(participante, ID_EVENTO_VALIDO);
         Inscripcion inscripcion = inscripcionService.inscribir(solicitudInscripcion);
 
-        assertEquals(inscripcion.estado().tipoEstado(), TipoEstadoInscripcion.ACEPTADA);
+        assertEquals(inscripcion.estado().getTipoEstado(), TipoEstadoInscripcion.ACEPTADA);
         assertEquals(inscripcion.evento(),evento);
         assertEquals(inscripcion.participante(),participante);
     }
