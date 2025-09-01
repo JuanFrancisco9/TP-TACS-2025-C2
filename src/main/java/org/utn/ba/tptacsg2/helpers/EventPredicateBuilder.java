@@ -39,7 +39,7 @@ public class EventPredicateBuilder {
 
     public EventPredicateBuilder conCategoria(String categoria) {
         if(categoria != null && !categoria.isEmpty()) {
-            predicados.add(evento -> evento.categoria() != null && evento.categoria().toString().equalsIgnoreCase(categoria));
+            predicados.add(evento -> evento.categoria() != null && evento.categoria().getTipo().equalsIgnoreCase(categoria));
         }
 
         return this;
@@ -64,6 +64,14 @@ public class EventPredicateBuilder {
 
             predicados.add(predicadoPalabrasClave);
         }
+
+        return this;
+    }
+
+    public EventPredicateBuilder conUbicacion(String ubicacion) {
+
+        if(ubicacion != null && !ubicacion.isEmpty()) {
+            predicados.add(evento -> evento.ubicacion().localidad().equalsIgnoreCase(ubicacion));        }
 
         return this;
     }

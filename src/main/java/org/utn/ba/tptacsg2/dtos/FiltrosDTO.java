@@ -6,6 +6,7 @@ public record FiltrosDTO(
         LocalDate fechaDesde,
         LocalDate fechaHasta,
         String categoria,
+        String ubicacion,
         Double precioMaximo,
         Double precioMinimo,
         String palabrasClave,
