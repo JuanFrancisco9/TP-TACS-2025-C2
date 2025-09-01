@@ -5,9 +5,7 @@ import org.springframework.stereotype.Repository;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.actors.Participante;
 import org.utn.ba.tptacsg2.models.events.*;
-import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
-import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
-import org.utn.ba.tptacsg2.models.inscriptions.EstadoInscripcion;
+import org.utn.ba.tptacsg2.models.inscriptions.*;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
 
 import java.time.LocalDateTime;
@@ -18,7 +16,13 @@ import java.util.Optional;
 
 @Repository
 public class InscripcionRepository {
-    private final List<Inscripcion> inscripciones =  new ArrayList<>();
+    private final List<Inscripcion> inscripciones;
+    private EstadoInscripcionRepository estadoInscripcionRepository;
+
+    public InscripcionRepository(EstadoInscripcionRepository estadoInscripcionRepository) {
+        this.inscripciones = new ArrayList<>();
+        this.estadoInscripcionRepository = estadoInscripcionRepository;
+    }
 
     public List<Inscripcion> getInscripciones() {
         return inscripciones;
@@ -72,24 +76,26 @@ public class InscripcionRepository {
     }
 
 
-//    @PostConstruct
-//    public void initializeData() {
-//        // Crear participantes de prueba
-//        Participante participante1 = new Participante("1", "Carlos", "López", "11111111");
-//        Participante participante2 = new Participante("2", "Ana", "Martínez", "22222222");
-//
-//        // Crear evento de prueba (similar al del EventoRepository)
-//        Organizador organizador = new Organizador("1", "Juan", "Pérez", "12345678");
-//        Evento evento = new Evento("0", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
-//                "19:00", 5F, new Ubicacion("", "", ""), 10,
-//                new Precio("Pesos", 100F), organizador,
-//                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), new Categoria("Educativo"));
-//
-//        // Crear inscripciones de prueba
-//        EstadoInscripcion estadoAceptada = new EstadoInscripcion(TipoEstadoInscripcion.ACEPTADA, LocalDateTime.now());
-//        EstadoInscripcion estadoPendiente = new EstadoInscripcion(TipoEstadoInscripcion.PENDIENTE, LocalDateTime.now());
-//
-//        this.guardarInscripcion(new Inscripcion("1", participante1, LocalDateTime.now(), estadoAceptada, evento));
-//        this.guardarInscripcion(new Inscripcion("2", participante2, LocalDateTime.now(), estadoPendiente, evento));
-//    }
+    @PostConstruct
+    public void initializeData() {
+        // Crear participantes de prueba
+        Participante participante1 = new Participante("1", "Carlos", "López", "11111111");
+        Participante participante2 = new Participante("2", "Ana", "Martínez", "22222222");
+
+        // Crear evento de prueba (similar al del EventoRepository)
+        Organizador organizador = new Organizador("1", "Juan", "Pérez", "12345678");
+        Evento evento = new Evento("0", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
+                "19:00", 5F, new Ubicacion("", "", "", ""), 10,
+                new Precio("Pesos", 100F), organizador,
+                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), new Categoria("Educativo"));
+
+        EstadoInscripcionV2 estadoAceptada = estadoInscripcionRepository.getEstadoInscripcionById("1");
+        EstadoInscripcionV2 estadoPendiente = estadoInscripcionRepository.getEstadoInscripcionById("2");
+
+        this.guardarInscripcion(new Inscripcion("1", participante1, LocalDateTime.now(), estadoAceptada, evento));
+        this.guardarInscripcion(new Inscripcion("2", participante2, LocalDateTime.now(), estadoPendiente, evento));
+
+        estadoAceptada.setInscripcion(this.inscripciones.get(0));
+        estadoPendiente.setInscripcion(this.inscripciones.get(1));
+    }
 }

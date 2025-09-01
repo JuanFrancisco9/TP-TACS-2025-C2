@@ -6,14 +6,12 @@ import org.springframework.web.bind.annotation.*;
 import org.utn.ba.tptacsg2.dtos.FiltrosDTO;
 import org.utn.ba.tptacsg2.dtos.ParticipanteDTO;
 import org.utn.ba.tptacsg2.dtos.output.ResultadoBusquedaEvento;
-import org.utn.ba.tptacsg2.models.actors.Participante;
 import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.models.events.SolicitudEvento;
 import org.utn.ba.tptacsg2.models.events.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.services.EventoService;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -75,7 +73,7 @@ public class EventoController {
             @RequestParam() String palabrasClave,
             @RequestParam(defaultValue = "1") Integer nroPagina){
 
-        FiltrosDTO filtros = new FiltrosDTO(fechaInicio, fechaFin, categoria, precioMin, precioMax, palabrasClave, nroPagina);
+        FiltrosDTO filtros = new FiltrosDTO(fechaInicio, fechaFin, categoria, ubicacion, precioMin, precioMax, palabrasClave, nroPagina);
 
         ResultadoBusquedaEvento resultado = eventoService.buscarEventos(filtros);
 
