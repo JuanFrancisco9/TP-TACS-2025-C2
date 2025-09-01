@@ -2,6 +2,7 @@ package org.utn.ba.tptacsg2.controllers;
 
 import jakarta.websocket.server.PathParam;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.utn.ba.tptacsg2.dtos.output.Waitlist;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,17 +22,19 @@ public class InscripcionController {
         this.inscripcionService = inscripcionService;
     }
 
-
+    @PreAuthorize("hasRole('USER')")
     @PostMapping("/inscripciones")
     public ResponseEntity<Inscripcion> inscribirse(@RequestBody SolicitudInscripcion solicitudInscripcion) {
         return ResponseEntity.ok(this.inscripcionService.inscribir(solicitudInscripcion));
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PostMapping("/inscripciones/{eventoId}")
     public ResponseEntity<Inscripcion> cancelarInscripcion(@PathVariable String eventoId) {
         return ResponseEntity.ok(this.inscripcionService.cancelarInscripcion(eventoId));
     }
 
+    @PreAuthorize("hasRole('ORGANIZER')")
     @GetMapping("/waitlist/{eventoId}")
     public ResponseEntity<Waitlist> getWaitlist(@PathVariable String eventoId) {
         return ResponseEntity.ok(this.inscripcionService.getWaitlist(eventoId));
