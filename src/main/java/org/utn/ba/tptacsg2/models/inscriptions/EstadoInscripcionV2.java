@@ -22,6 +22,10 @@ public class EstadoInscripcionV2 {
         this.fechaDeCambio = fechaDeCambio;
     }
 
+    public String getId() {
+        return id;
+    }
+
     public void setInscripcion(Inscripcion inscripcion) {
         this.inscripcion = inscripcion;
     }
