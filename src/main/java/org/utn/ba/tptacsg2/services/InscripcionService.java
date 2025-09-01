@@ -16,9 +16,9 @@ import org.utn.ba.tptacsg2.repositories.EstadoInscripcionRepository;
 import org.utn.ba.tptacsg2.repositories.EventoRepository;
 import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Service
 public class InscripcionService {
@@ -29,16 +29,20 @@ public class InscripcionService {
     private final WaitlistService waitlistService;
     private final GeneradorIDService generadorIDService;
     private final EstadoInscripcionRepository estadoInscripcionRepository;
+    private final EventoLockService eventoLockService;
 
     @Autowired
     public InscripcionService (EventoRepository eventoRepository, InscripcionRepository inscripcionRepository,
-                               WaitlistService waitlistService, GeneradorIDService generadorIDService, EventoService eventoService, EstadoInscripcionRepository estadoInscripcionRepository) {
+                               WaitlistService waitlistService, GeneradorIDService generadorIDService,
+                               EventoService eventoService, EstadoInscripcionRepository estadoInscripcionRepository,
+                               EventoLockService eventoLockService) {
         this.eventoRepository = eventoRepository;
         this.inscripcionRepository = inscripcionRepository;
         this.waitlistService = waitlistService;
         this.generadorIDService = generadorIDService;
         this.eventoService = eventoService;
         this.estadoInscripcionRepository = estadoInscripcionRepository;
+        this.eventoLockService = eventoLockService;
     }
 
     public Inscripcion inscribir(SolicitudInscripcion solicitud) {
@@ -46,27 +50,35 @@ public class InscripcionService {
                         .orElseThrow(() -> new EventoNoEncontradoException("No se encontró el evento " + solicitud.evento_id()));
 
         if(evento.estado().tipoEstado() == TipoEstadoEvento.CONFIRMADO) {
-            if (eventoService.cuposDisponibles(evento) <= 0) {
-                Inscripcion inscripcionPendiente = this.waitlistService.inscribirAWaitlist(solicitud);
-                this.inscripcionRepository.guardarInscripcion(inscripcionPendiente);
-                return inscripcionPendiente;
+            ReentrantLock lock = eventoLockService.getLock(evento.id());
+            try {
+                lock.lock();
+                if (eventoService.cuposDisponibles(evento) <= 0) {
+                    Inscripcion inscripcionPendiente = this.waitlistService.inscribirAWaitlist(solicitud);
+                    this.inscripcionRepository.guardarInscripcion(inscripcionPendiente);
+                    return inscripcionPendiente;
+                }
+
+                EstadoInscripcionV2 estadoInscripcionAceptada = new EstadoInscripcionV2(this.generadorIDService.generarID(), TipoEstadoInscripcion.ACEPTADA, LocalDateTime.now());
+
+                Inscripcion inscripcionAceptada = new Inscripcion(
+                        generadorIDService.generarID(),
+                        solicitud.participante(),
+                        LocalDateTime.now(),
+                        estadoInscripcionAceptada,
+                        evento
+                );
+
+                estadoInscripcionAceptada.setInscripcion(inscripcionAceptada);
+                //TODO chequear cómo se maneja esto en Mongo
+
+                inscripcionRepository.guardarInscripcion(inscripcionAceptada);
+                this.estadoInscripcionRepository.guardarEstadoInscripcion(estadoInscripcionAceptada);
+                return inscripcionAceptada;
+
+            } finally {
+                lock.unlock();
             }
-
-            EstadoInscripcionV2 estadoInscripcionAceptada = new EstadoInscripcionV2(this.generadorIDService.generarID(), TipoEstadoInscripcion.ACEPTADA, LocalDateTime.now());
-
-            Inscripcion inscripcionAceptada = new Inscripcion(
-                    generadorIDService.generarID(),
-                    solicitud.participante(),
-                    LocalDateTime.now(),
-                    estadoInscripcionAceptada,
-                    evento
-            );
-
-            estadoInscripcionAceptada.setInscripcion(inscripcionAceptada);
-            //TODO chequear cómo se maneja esto en Mongo
-            inscripcionRepository.guardarInscripcion(inscripcionAceptada);
-            this.estadoInscripcionRepository.guardarEstadoInscripcion(estadoInscripcionAceptada);
-            return inscripcionAceptada;
         }
 
         else {

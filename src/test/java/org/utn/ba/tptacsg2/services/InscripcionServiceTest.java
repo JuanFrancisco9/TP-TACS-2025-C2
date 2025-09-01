@@ -15,6 +15,7 @@ import org.utn.ba.tptacsg2.models.actors.Participante;
 import org.utn.ba.tptacsg2.models.events.*;
 import org.utn.ba.tptacsg2.models.inscriptions.EstadoInscripcionV2;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
+import org.utn.ba.tptacsg2.dtos.SolicitudInscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
 import org.utn.ba.tptacsg2.repositories.EstadoInscripcionRepository;
 import org.utn.ba.tptacsg2.repositories.EventoRepository;
@@ -22,6 +23,7 @@ import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -35,6 +37,7 @@ public class InscripcionServiceTest {
     @Mock private WaitlistService waitlistService;
     @Mock private GeneradorIDService generadorIDService;
     @Mock private EventoService eventoService;
+    @Mock private EventoLockService eventoLockService;
 
     @InjectMocks
     private InscripcionService inscripcionService;
@@ -46,6 +49,9 @@ public class InscripcionServiceTest {
     @BeforeEach
     public void setUp() {
         participante = new Participante("1", "Pepito", "Pépez", "123456789");
+        evento = new Evento(ID_EVENTO_VALIDO, "Evento mock", "", LocalDateTime.now(), "1900", 5F, new Ubicacion("","",""), 3, new Precio("ARS", 10F), new Organizador("1","","",""), new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
+        when(eventoRepository.getEvento(ID_EVENTO_VALIDO)).thenReturn(Optional.of(evento));
+        when(eventoLockService.getLock(ID_EVENTO_VALIDO)).thenReturn(new ReentrantLock());
         evento = new Evento(ID_EVENTO_VALIDO, "Evento mock", "", LocalDateTime.now(), "1900", 5F, new Ubicacion("", "","",""), 3, new Precio("ARS", 10F), new Organizador("1","","",""), new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
         lenient().when(eventoRepository.getEvento(ID_EVENTO_VALIDO)).thenReturn(Optional.of(evento));
 
