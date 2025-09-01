@@ -173,12 +173,12 @@ class EstadisticasServiceTest {
         Organizador organizador = new Organizador("1", "Juan", "Pérez", "12345678");
 
         Evento evento1 = new Evento("1", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
-                "19:00", 5F, new Ubicacion("", "", ""), 10,
+                "19:00", 5F, new Ubicacion("", "", "", ""), 10,
                 new Precio("Pesos", 100F), organizador,
                 new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
 
         Evento evento2 = new Evento("2", "Workshop de Testing", "Testing", LocalDateTime.now(),
-                "14:00", 3F, new Ubicacion("", "", ""), 15,
+                "14:00", 3F, new Ubicacion("", "", "", ""), 15,
                 new Precio("Pesos", 150F), organizador,
                 new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
 
@@ -192,12 +192,12 @@ class EstadisticasServiceTest {
 
         Organizador organizador = new Organizador("1", "Juan", "Pérez", "12345678");
         Evento evento1 = new Evento("1", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
-                "19:00", 5F, new Ubicacion("", "", ""), 10,
+                "19:00", 5F, new Ubicacion("", "", "", ""), 10,
                 new Precio("Pesos", 100F), organizador,
                 new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
 
         Evento evento2 = new Evento("2", "Workshop de Testing", "Testing", LocalDateTime.now(),
-                "14:00", 3F, new Ubicacion("", "", ""), 15,
+                "14:00", 3F, new Ubicacion("", "", "", ""), 15,
                 new Precio("Pesos", 150F), organizador,
                 new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
 
