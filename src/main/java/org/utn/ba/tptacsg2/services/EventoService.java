@@ -63,8 +63,9 @@ public class EventoService {
                 solicitud.cupoMinimo(),
                 solicitud.precio(),
                 organizador,
-                new EstadoEvento(TipoEstadoEvento.CONFIRMADO,LocalDateTime.now()),
-                solicitud.categoria()
+                new EstadoEvento(solicitud.estado(),LocalDateTime.now()),
+                solicitud.categoria(),
+                solicitud.etiquetas()
         );
 
         eventoRepository.guardarEvento(evento);
@@ -90,7 +91,8 @@ public class EventoService {
                 evento.precio(),
                 evento.organizador(),
                 estadoEvento,
-                evento.categoria()
+                evento.categoria(),
+                evento.etiquetas()
         );
 
         eventoRepository.actualizarEvento(eventoActualizado);

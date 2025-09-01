@@ -15,6 +15,7 @@ import org.utn.ba.tptacsg2.services.GeneradorIDService;
 
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -55,8 +56,10 @@ public class EventoServiceTest {
                 0,
                 new Precio("ARS", 5000f),
                 null,
-                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.of(2025, 9, 1, 12, 0))
-        , null);
+                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.of(2025, 9, 1, 12, 0)),
+                null,
+                new ArrayList<>()
+        );
 
         solicitudEvento = new SolicitudEvento(idOrganizadorMock,
                 "Fiesta UTN",
@@ -68,7 +71,9 @@ public class EventoServiceTest {
                 100,
                 0,
                 new Precio("ARS", 5000f),
-                null);
+                TipoEstadoEvento.CONFIRMADO,
+                null,
+                new ArrayList<>());
 
     }
 
@@ -98,7 +103,9 @@ public class EventoServiceTest {
                 100,
                 0,
                 new Precio("ARS", 5000f),
-                null);
+                TipoEstadoEvento.CONFIRMADO,
+                null,
+                new ArrayList<>());
 
         assertThrows(RuntimeException.class, () -> {
             eventoService.registrarEvento(solicitudInvalida);

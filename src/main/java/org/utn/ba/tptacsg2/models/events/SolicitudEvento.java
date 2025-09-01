@@ -3,6 +3,7 @@ package org.utn.ba.tptacsg2.models.events;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record SolicitudEvento(
         String organizadorId,
@@ -15,5 +16,7 @@ public record SolicitudEvento(
         Integer cupoMaximo,
         Integer cupoMinimo,
         Precio precio,
-        Categoria categoria
+        TipoEstadoEvento estado,
+        Categoria categoria,
+        List<String> etiquetas
 ) {}

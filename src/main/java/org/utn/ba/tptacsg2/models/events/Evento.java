@@ -3,6 +3,7 @@ package org.utn.ba.tptacsg2.models.events;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 public record Evento (
@@ -18,5 +19,6 @@ public record Evento (
      Precio precio,
      Organizador organizador,
      EstadoEvento estado,
-     Categoria categoria
+     Categoria categoria,
+     List<String> etiquetas
 ) {}
