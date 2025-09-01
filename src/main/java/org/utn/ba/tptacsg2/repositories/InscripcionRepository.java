@@ -16,17 +16,7 @@ import java.util.List;
 
 @Repository
 public class InscripcionRepository {
-    private final Evento evento = new Evento("1", "Evento Test", "Evento de testeo", null, null, null, null, 100, null,
-                                       new Organizador("1", "o", "1", "111"), new EstadoEvento(TipoEstadoEvento.CONFIRMADO, null) );
-    private final Participante participante1 = new Participante("2", "p", "2", "333");
-    private final Participante participante2 = new Participante("3", "p", "3", "444");
-
-    private final List<Inscripcion> inscripciones =  new ArrayList<>(
-            Arrays.asList(
-                    new Inscripcion("1", participante1, null, new EstadoInscripcion(TipoEstadoInscripcion.ACEPTADA, null), evento),
-                    new Inscripcion("2", participante2, null, new EstadoInscripcion(TipoEstadoInscripcion.PENDIENTE, null), evento)
-            )
-    );
+    private final List<Inscripcion> inscripciones =  new ArrayList<>( );
 
     public List<Inscripcion> getInscripciones() {
         return inscripciones;

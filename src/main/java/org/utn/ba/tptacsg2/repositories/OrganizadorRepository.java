@@ -11,11 +11,7 @@ import java.util.Optional;
 
 @Repository
 public class OrganizadorRepository {
-    private final List<Organizador> organizadores = new ArrayList<>(
-            List.of(
-                    new Organizador("1", "o", "1", "111")
-            )
-    );
+    private final List<Organizador> organizadores = new ArrayList<>();
 
     public List<Organizador> getOrganizadores() {
         return organizadores;

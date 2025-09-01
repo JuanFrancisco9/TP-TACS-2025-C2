@@ -15,14 +15,7 @@ import java.util.Optional;
 @Repository
 public class EventoRepository {
 
-    private final List<Evento> eventos = new ArrayList<>(
-        List.of(
-            new Evento("1", "Evento Test", "Evento de testeo",LocalDateTime.of(2025,9,29,22,0), "3am",
-                3F, new Ubicacion("lat", "long", "A la vuelta de la esquina"), 100, new Precio("rublo bieloruso", 100F),
-                new Organizador("1", "o", "1", "111"), new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.of(2025,9,29,22,0))
-                )
-        )
-    );
+    private final List<Evento> eventos = new ArrayList<>();
 
     public List<Evento> getEventos() {
         return eventos;
