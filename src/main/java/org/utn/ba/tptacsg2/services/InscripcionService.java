@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.utn.ba.tptacsg2.dtos.output.Waitlist;
 import org.utn.ba.tptacsg2.exceptions.EventoNoEncontradoException;
+import org.utn.ba.tptacsg2.exceptions.EventoSinConfirmarException;
 import org.utn.ba.tptacsg2.exceptions.InscripcionNoEncontradaException;
 import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.models.events.TipoEstadoEvento;
@@ -81,7 +82,7 @@ public class InscripcionService {
         }
 
         else {
-            throw new RuntimeException("No se puede inscribir a un evento que no está confirmado. Estado actual: " + evento.estado().tipoEstado());
+            throw new EventoSinConfirmarException("No se puede inscribir a un evento que no está confirmado. Estado actual: " + evento.estado().tipoEstado());
         }
 
     }
@@ -137,7 +138,6 @@ public class InscripcionService {
 
         this.inscripcionRepository.actualizarInscripcion(inscripcionActualizada);
 
-        //TODO notificacion de algun tipo?? Que haces ? -> Es un flujo medio "encubierto" -> no parte de un endpoint en si
     }
 
     public Waitlist getWaitlist(String eventoId) {

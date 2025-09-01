@@ -44,7 +44,7 @@ class InscripcionServiceConcurrentTest {
                 LocalDateTime.now(),
                 "",
                 2.0f,
-                new Ubicacion("-34.6", "-58.4", "CABA"),
+                new Ubicacion("-34.6", "-58.4", "CABA", ""),
                 1,
                 new Precio("Pesos", 100F),
                 new Organizador("ORG1", "Org", "Uno", "30111222"),

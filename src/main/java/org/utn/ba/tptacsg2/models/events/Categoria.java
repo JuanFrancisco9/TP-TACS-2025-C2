@@ -11,4 +11,8 @@ public class Categoria {
     public Categoria(String tipo) {
         this.tipo = tipo;
     }
+
+    public String getTipo() {
+        return tipo;
+    }
 }

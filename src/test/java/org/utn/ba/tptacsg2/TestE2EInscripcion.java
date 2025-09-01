@@ -87,7 +87,7 @@ public class TestE2EInscripcion {
                 LocalDateTime.now().plusDays(7),
                 "10:00",
                 2.0f,
-                new Ubicacion("-34.6", "-58.4", "CABA"),
+                new Ubicacion("-34.6", "-58.4", "CABA", ""),
                 cupoMaximo,
                 null,
                 new Organizador("ORG1", "Org", "Uno", "30111222"),

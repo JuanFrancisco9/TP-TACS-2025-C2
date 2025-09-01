@@ -1,6 +1,7 @@
 package org.utn.ba.tptacsg2.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.utn.ba.tptacsg2.dtos.FiltrosDTO;
 import org.utn.ba.tptacsg2.dtos.output.ResultadoBusquedaEvento;
@@ -31,6 +32,8 @@ public class EventoService {
     private final OrganizadorRepository organizadorRepository;
     private final GeneradorIDService generadorIDService;
     private final ParticipanteRepository participanteRepository;
+    @Value("${app.pagination.default-page-size}")
+    private Integer tamanioPagina;
 
     @Autowired
     public EventoService(EventoRepository eventoRepository, InscripcionRepository inscripcionRepository, OrganizadorRepository organizadorRepository, GeneradorIDService generadorIDService, ParticipanteRepository participanteRepository) {
@@ -115,14 +118,13 @@ public class EventoService {
         Predicate<Evento> predicadosCombinados = new EventPredicateBuilder()
                 .conRangoDeFecha(filtros.fechaDesde(), filtros.fechaHasta())
                 .conCategoria(filtros.categoria())
+                .conUbicacion(filtros.ubicacion())
                 .conRangoDePrecios(filtros.precioMinimo(), filtros.precioMaximo())
                 .conPalabrasClave(filtros.palabrasClave())
                 .build();
 
         List<Evento> eventosFiltrados = eventos.stream().filter(predicadosCombinados).toList();
 
-        //TODO archivo de config para el tamanio de pag
-        Integer tamanioPagina = 10;
         Integer totalElementos = eventosFiltrados.size();
         Integer totalPaginas = (int) Math.ceil((double) totalElementos / tamanioPagina);
         Integer inicioEventos = filtros.nroPagina() * tamanioPagina;
