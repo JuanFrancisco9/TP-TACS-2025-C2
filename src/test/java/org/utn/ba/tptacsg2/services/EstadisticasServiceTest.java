@@ -20,6 +20,7 @@ import org.utn.ba.tptacsg2.repositories.EventoRepository;
 import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -177,9 +178,9 @@ class EstadisticasServiceTest {
                 new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
 
         Evento evento2 = new Evento("2", "Workshop de Testing", "Testing", LocalDateTime.now(),
-                "14:00", 3F, new Ubicacion("", "", "", ""), 15,
+                "14:00", 3F, new Ubicacion("", "", "", ""), 15,0,
                 new Precio("Pesos", 150F), organizador,
-                new EstadoEvento("2", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
+                new EstadoEvento("2", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null, new ArrayList<>());
 
         return Arrays.asList(evento1, evento2);
     }

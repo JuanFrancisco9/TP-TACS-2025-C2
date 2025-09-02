@@ -13,10 +13,13 @@ import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.events.*;
 import org.utn.ba.tptacsg2.repositories.EventoRepository;
 import org.utn.ba.tptacsg2.repositories.OrganizadorRepository;
+import org.utn.ba.tptacsg2.services.EventoService;
+import org.utn.ba.tptacsg2.services.GeneradorIDService;
 
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -54,26 +57,39 @@ public class EventoServiceTest {
                 LocalDateTime.of(2025, 9, 10, 20, 0),
                 "20:00",
                 3.5f,
-                new Ubicacion("-34.6037", "-58.3816", "Av. Medrano 951, CABA", "CABA"),
+                new Ubicacion("-34.6037", "-58.3816", "Av. Medrano 951, CABA",""),
                 100,
+                0,
                 new Precio("ARS", 5000f),
                 null,
                 new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.of(2025, 9, 1, 12, 0))
-        , null);
+        , null, new ArrayList<>());
 
-        solicitudEvento = new SolicitudEvento(idOrganizadorMock, eventoSinId);
+        solicitudEvento = new SolicitudEvento(idOrganizadorMock,
+                "Fiesta UTN",
+                "Evento de prueba",
+                LocalDateTime.of(2025, 9, 10, 20, 0),
+                "20:00",
+                3.5f,
+                new Ubicacion("-34.6037", "-58.3816", "Av. Medrano 951, CABA",""),
+                100,
+                0,
+                new Precio("ARS", 5000f),
+                TipoEstadoEvento.CONFIRMADO,
+                null,
+                new ArrayList<>());
 
-        Categoria categoria1 = new Categoria("MUSICA");
-        Categoria categoria2 = new Categoria("TECNOLOGIA");
+            Categoria categoria1 = new Categoria("MUSICA");
+            Categoria categoria2 = new Categoria("TECNOLOGIA");
 
         eventoValido1 = new Evento("E1", "Concierto de rock vivo", "Musica", LocalDateTime.of(2025, 9, 10, 20, 0), "20:00", 2f, new Ubicacion("", "", "La Plata", "CABA"), 100, new Precio("ARS", 1000f), organizadorMock, new EstadoEvento("2", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria1);
         eventoValido2= new Evento("E2", "Charla", "Tecnologia", LocalDateTime.of(2025, 10, 10, 18, 0), "18:00", 1.5f, new Ubicacion("", "", "CABA", "CABA"), 50, new Precio("ARS", 500f), organizadorMock, new EstadoEvento("2", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria2);
+            eventoValido1 = new Evento("E1", "Concierto de rock vivo", "Musica", LocalDateTime.of(2025, 9, 10, 20, 0), "20:00", 2f, new Ubicacion("", "", "La Plata", "CABA"), 100,0, new Precio("ARS", 1000f), organizadorMock, new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria1,null);
+            eventoValido2= new Evento("E2", "Charla", "Tecnologia", LocalDateTime.of(2025, 10, 10, 18, 0), "18:00", 1.5f, new Ubicacion("", "", "CABA", "CABA"), 50,0, new Precio("ARS", 500f), organizadorMock, new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria2,null);
 
-        lenient().when(eventoRepository.getEventos()).thenReturn(Arrays.asList(eventoValido1, eventoValido2));
+            lenient().when(eventoRepository.getEventos()).thenReturn(Arrays.asList(eventoValido1, eventoValido2));
 
-        ReflectionTestUtils.setField(eventoService, "tamanioPagina", 20);
-
-
+            ReflectionTestUtils.setField(eventoService, "tamanioPagina", 20);
     }
 
     @Test
@@ -92,7 +108,19 @@ public class EventoServiceTest {
         when(organizadorRepository.getOrganizador("ORG-INEXISTENTE"))
                 .thenReturn(Optional.empty());
 
-        SolicitudEvento solicitudInvalida = new SolicitudEvento("ORG-INEXISTENTE", eventoSinId);
+        SolicitudEvento solicitudInvalida = new SolicitudEvento(null,
+                "Fiesta UTN",
+                "Evento de prueba",
+                LocalDateTime.of(2025, 9, 10, 20, 0),
+                "20:00",
+                3.5f,
+                new Ubicacion("-34.6037", "-58.3816", "Av. Medrano 951, CABA",""),
+                100,
+                0,
+                new Precio("ARS", 5000f),
+                TipoEstadoEvento.CONFIRMADO,
+                null,
+                new ArrayList<>());
 
         assertThrows(RuntimeException.class, () -> {
             eventoService.registrarEvento(solicitudInvalida);

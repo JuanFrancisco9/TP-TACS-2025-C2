@@ -53,17 +53,19 @@ public class EventoService {
 
         Evento evento = new Evento(
                 generadorIDService.generarID(),
-                solicitud.evento().titulo(),
-                solicitud.evento().descripcion(),
-                solicitud.evento().fecha(),
-                solicitud.evento().horaInicio(),
-                solicitud.evento().duracion(),
-                solicitud.evento().ubicacion(),
-                solicitud.evento().cupoMaximo(),
-                solicitud.evento().precio(),
+                solicitud.titulo(),
+                solicitud.descripcion(),
+                solicitud.fecha(),
+                solicitud.horaInicio(),
+                solicitud.duracion(),
+                solicitud.ubicacion(),
+                solicitud.cupoMaximo(),
+                solicitud.cupoMinimo(),
+                solicitud.precio(),
                 organizador,
-                solicitud.evento().estado(),
-                solicitud.evento().categoria()
+                new EstadoEvento(solicitud.estado(),LocalDateTime.now()),
+                solicitud.categoria(),
+                solicitud.etiquetas()
         );
 
         eventoRepository.guardarEvento(evento);
@@ -86,10 +88,12 @@ public class EventoService {
                 evento.duracion(),
                 evento.ubicacion(),
                 evento.cupoMaximo(),
+                evento.cupoMinimo(),
                 evento.precio(),
                 evento.organizador(),
                 estadoEvento,
-                evento.categoria()
+                evento.categoria(),
+                evento.etiquetas()
         );
 
         eventoRepository.actualizarEvento(eventoActualizado);

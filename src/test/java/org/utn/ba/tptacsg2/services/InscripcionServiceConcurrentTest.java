@@ -14,6 +14,7 @@ import org.utn.ba.tptacsg2.repositories.EventoRepository;
 import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Queue;
 import java.util.concurrent.*;
 import java.util.stream.IntStream;
@@ -46,10 +47,12 @@ class InscripcionServiceConcurrentTest {
                 2.0f,
                 new Ubicacion("-34.6", "-58.4", "CABA", ""),
                 1,
+                0,
                 new Precio("Pesos", 100F),
                 new Organizador("ORG1", "Org", "Uno", "30111222"),
                 new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
-                new Categoria("Test")
+                new Categoria("Test"),
+                new ArrayList<>()
         );
     }
 
