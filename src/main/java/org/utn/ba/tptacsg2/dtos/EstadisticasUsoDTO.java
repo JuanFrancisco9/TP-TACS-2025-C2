@@ -2,21 +2,21 @@ package org.utn.ba.tptacsg2.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record EstadisticasUso(
+public record EstadisticasUsoDTO(
     @JsonProperty("cantidad_eventos")
-    Long cantidadEventos,
+    Integer cantidadEventos,
 
     @JsonProperty("cantidad_eventos_activos")
-    Long cantidadEventosActivos,
+    Integer cantidadEventosActivos,
 
     @JsonProperty("cantidad_inscripciones_totales")
-    Long cantidadInscripcionesTotales,
+    Integer cantidadInscripcionesTotales,
 
     @JsonProperty("cantidad_inscripciones_confirmadas")
-    Long cantidadInscripcionesConfirmadas,
+    Integer cantidadInscripcionesConfirmadas,
 
     @JsonProperty("cantidad_inscripciones_waitlist")
-    Long cantidadInscripcionesWaitlist,
+    Integer cantidadInscripcionesWaitlist,
 
     @JsonProperty("tasa_conversion_waitlist")
     Double tasaConversionWaitlist,

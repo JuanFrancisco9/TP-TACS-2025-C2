@@ -30,18 +30,25 @@ public class UsuarioService {
         if (usuarioRepository.findByUsername(usuario.getUsername()).isPresent()) {
             throw new RuntimeException("El usuario ya existe");
         }
+        
+        Rol rol = switch (usuario.getRol().strip().toUpperCase()) {
+            case "ADMIN" -> Rol.ROLE_ADMIN;
+            case "ORGANIZADOR" -> Rol.ROLE_ORGANIZER;
+            default -> Rol.ROLE_USER;
+        };
+
         Usuario nuevoUsuario = new Usuario(
                 usuario.getId(),
                 usuario.getUsername(),
                 passwordEncoder.encode(usuario.getPassword()),
-                Rol.valueOf(usuario.getRol().strip().toUpperCase())
+                rol
         );
 
         usuarioRepository.save(nuevoUsuario);
     }
 
     public List<UsuarioDto> getUsuarios() {
-        return usuarioRepository.finAll().stream().map(u -> new UsuarioDto(u.id(),u.username(), u.passwordHash(), u.rol().name())).toList();
+        return usuarioRepository.findAll().stream().map(u -> new UsuarioDto(u.id(),u.username(), u.passwordHash(), u.rol().name())).toList();
     }
 
     /**
@@ -53,7 +60,7 @@ public class UsuarioService {
      * @throws RuntimeException Si la contraseña es incorrecta.
      */
     public Usuario login(UsuarioDto usuario) {
-        Usuario user = usuarioRepository.finAll().stream()
+        Usuario user = usuarioRepository.findAll().stream()
                 .filter(u -> u.username().equals(usuario.getUsername())).findFirst().orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
         if (!passwordEncoder.matches(usuario.getPassword(), user.passwordHash())) {

@@ -11,4 +11,7 @@ public record Inscripcion (
         LocalDateTime fechaRegistro,
         EstadoInscripcion estado,
         Evento evento
-){}
+){
+
+
+}

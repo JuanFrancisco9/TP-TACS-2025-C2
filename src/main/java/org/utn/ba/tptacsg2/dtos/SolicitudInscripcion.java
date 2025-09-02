@@ -1,4 +1,4 @@
-package org.utn.ba.tptacsg2.models.inscriptions;
+package org.utn.ba.tptacsg2.dtos;
 
 import org.utn.ba.tptacsg2.models.actors.Participante;
 

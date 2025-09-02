@@ -1,8 +1,8 @@
 package org.utn.ba.tptacsg2.controllers;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,7 +30,7 @@ public class UsuarioController {
      * - 400: Error del servidor con el mensaje de la excepcion.
      */
     @PostMapping("/user")
-    public ResponseEntity<String> registrarUsuario(@RequestBody UsuarioDto usuarioDto) {
+    public ResponseEntity<String> registrarUsuario(@Valid @RequestBody UsuarioDto usuarioDto) {
         // Si algun campo falta da un 400 por la anottation del dto notblack
         // Entonces si rompe aca es por un error interno
         try{
