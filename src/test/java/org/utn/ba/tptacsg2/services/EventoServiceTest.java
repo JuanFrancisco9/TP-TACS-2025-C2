@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.utn.ba.tptacsg2.dtos.FiltrosDTO;
 import org.utn.ba.tptacsg2.dtos.output.ResultadoBusquedaEvento;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
@@ -19,11 +20,11 @@ import org.utn.ba.tptacsg2.services.GeneradorIDService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class EventoServiceTest {
@@ -80,7 +81,15 @@ public class EventoServiceTest {
                 null,
                 new ArrayList<>());
 
+            Categoria categoria1 = new Categoria("MUSICA");
+            Categoria categoria2 = new Categoria("TECNOLOGIA");
 
+            eventoValido1 = new Evento("E1", "Concierto de rock vivo", "Musica", LocalDateTime.of(2025, 9, 10, 20, 0), "20:00", 2f, new Ubicacion("", "", "La Plata", "CABA"), 100,0, new Precio("ARS", 1000f), organizadorMock, new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria1,null);
+            eventoValido2= new Evento("E2", "Charla", "Tecnologia", LocalDateTime.of(2025, 10, 10, 18, 0), "18:00", 1.5f, new Ubicacion("", "", "CABA", "CABA"), 50,0, new Precio("ARS", 500f), organizadorMock, new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria2,null);
+
+            lenient().when(eventoRepository.getEventos()).thenReturn(Arrays.asList(eventoValido1, eventoValido2));
+
+            ReflectionTestUtils.setField(eventoService, "tamanioPagina", 20);
     }
 
     @Test
