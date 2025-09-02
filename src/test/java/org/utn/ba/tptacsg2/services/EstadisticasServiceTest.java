@@ -170,7 +170,7 @@ class EstadisticasServiceTest {
     }
 
     private List<Evento> crearEventosDePrueba() {
-        Organizador organizador = new Organizador("1", "Juan", "Pérez", "12345678");
+        Organizador organizador = new Organizador("1", "Juan", "Pérez", "12345678",null);
 
         Evento evento1 = new Evento("1", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
                 "19:00", 5F, new Ubicacion("", "", ""), 10,
@@ -186,11 +186,11 @@ class EstadisticasServiceTest {
     }
 
     private List<Inscripcion> crearInscripcionesDePrueba() {
-        Participante participante1 = new Participante("1", "Carlos", "López", "11111111");
-        Participante participante2 = new Participante("2", "Ana", "Martínez", "22222222");
-        Participante participante3 = new Participante("3", "Luis", "García", "33333333");
+        Participante participante1 = new Participante("1", "Carlos", "López", "11111111",null);
+        Participante participante2 = new Participante("2", "Ana", "Martínez", "22222222",null);
+        Participante participante3 = new Participante("3", "Luis", "García", "33333333",null);
 
-        Organizador organizador = new Organizador("1", "Juan", "Pérez", "12345678");
+        Organizador organizador = new Organizador("1", "Juan", "Pérez", "12345678",null);
         Evento evento1 = new Evento("1", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
                 "19:00", 5F, new Ubicacion("", "", ""), 10,
                 new Precio("Pesos", 100F), organizador,

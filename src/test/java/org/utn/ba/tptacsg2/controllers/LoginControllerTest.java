@@ -5,7 +5,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -13,7 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.utn.ba.tptacsg2.config.TestSecurityConfig;
-import org.utn.ba.tptacsg2.dtos.UsuarioDto;
+import org.utn.ba.tptacsg2.dtos.InputRegistroDto;
 // IMPORTÁ la clase correcta de tu dominio:
 import org.utn.ba.tptacsg2.models.users.Usuario; // <-- ajusta el package si difiere
 import org.utn.ba.tptacsg2.services.UsuarioService;
@@ -40,9 +39,9 @@ class LoginControllerTest {
     @DisplayName("POST /login -> 200 OK cuando las credenciales son válidas")
     void login_devuelve200CuandoCredencialesValidas() throws Exception {
         // Arrange
-        UsuarioDto dto = new UsuarioDto(1L, "testuser", "password123", "USER");
+        InputRegistroDto dto = new InputRegistroDto(1L, "testuser", "password123", "USER","","","");
         // Devolvemos cualquier Usuario (podés usar un mock; el controller no lo usa):
-        when(usuarioService.login(any(UsuarioDto.class)))
+        when(usuarioService.login(any(InputRegistroDto.class)))
                 .thenReturn(Mockito.mock(Usuario.class));
 
         // Act & Assert
@@ -52,15 +51,15 @@ class LoginControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("")); // el controller no retorna body
 
-        verify(usuarioService, times(1)).login(any(UsuarioDto.class));
+        verify(usuarioService, times(1)).login(any(InputRegistroDto.class));
     }
 
     @Test
     @DisplayName("POST /login -> 401 Unauthorized cuando el usuario no existe")
     void login_devuelve401CuandoUsuarioNoExiste() throws Exception {
         // Arrange
-        UsuarioDto dto = new UsuarioDto(null, "nouser", "whatever", "USER");
-        when(usuarioService.login(any(UsuarioDto.class)))
+        InputRegistroDto dto = new InputRegistroDto(null, "nouser", "whatever", "USER", "","","");
+        when(usuarioService.login(any(InputRegistroDto.class)))
                 .thenThrow(new UsernameNotFoundException("Usuario no encontrado"));
 
         // Act & Assert
@@ -70,15 +69,15 @@ class LoginControllerTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().string("")); // el controller hace .build() sin body
 
-        verify(usuarioService, times(1)).login(any(UsuarioDto.class));
+        verify(usuarioService, times(1)).login(any(InputRegistroDto.class));
     }
 
     @Test
     @DisplayName("POST /login -> 401 Unauthorized cuando la contraseña es incorrecta")
     void login_devuelve401CuandoPasswordIncorrecta() throws Exception {
         // Arrange
-        UsuarioDto dto = new UsuarioDto(null, "testuser", "badpass", "USER");
-        when(usuarioService.login(any(UsuarioDto.class)))
+        InputRegistroDto dto = new InputRegistroDto(null, "testuser", "badpass", "USER", "","","");
+        when(usuarioService.login(any(InputRegistroDto.class)))
                 .thenThrow(new RuntimeException("Contraseña incorrecta"));
 
         // Act & Assert
@@ -88,7 +87,7 @@ class LoginControllerTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().string(""));
 
-        verify(usuarioService, times(1)).login(any(UsuarioDto.class));
+        verify(usuarioService, times(1)).login(any(InputRegistroDto.class));
     }
 
     @Test
@@ -103,7 +102,7 @@ class LoginControllerTest {
                         .content(invalidJson))
                 .andExpect(status().isBadRequest());
 
-        verify(usuarioService, never()).login(any(UsuarioDto.class));
+        verify(usuarioService, never()).login(any(InputRegistroDto.class));
     }
 }
 

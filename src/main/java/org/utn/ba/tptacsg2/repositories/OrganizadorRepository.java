@@ -28,7 +28,7 @@ public class OrganizadorRepository {
 
     @PostConstruct
     public void initializeData() {
-        this.guardarOrganizadro(new Organizador("1", "Juan", "Pérez", "12345678"));
-        this.guardarOrganizadro(new Organizador("2", "María", "González", "87654321"));
+        this.guardarOrganizadro(new Organizador("1", "Juan", "Pérez", "12345678", null));
+        this.guardarOrganizadro(new Organizador("2", "María", "González", "87654321",null));
     }
 }

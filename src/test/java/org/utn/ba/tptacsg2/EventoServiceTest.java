@@ -41,7 +41,7 @@ public class EventoServiceTest {
     public void setUp() {
         idOrganizadorMock="ORG-123";
         idEventoMock="EV-123";
-        organizadorMock = new Organizador(idOrganizadorMock, "Juan", "Perez","78414456");
+        organizadorMock = new Organizador(idOrganizadorMock, "Juan", "Perez","78414456",null);
 
         eventoSinId = new Evento(
                 null,
