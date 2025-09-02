@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import org.utn.ba.tptacsg2.exceptions.EventoNoEncontradoException;
 import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.models.inscriptions.EstadoInscripcion;
-import org.utn.ba.tptacsg2.models.inscriptions.EstadoInscripcionV2;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.dtos.SolicitudInscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
@@ -32,7 +31,7 @@ public class WaitlistService {
         Evento evento = eventoRepository.getEvento(solicitudInscripcion.evento_id())
                 .orElseThrow(() -> new EventoNoEncontradoException("No se encontró el evento " + solicitudInscripcion.evento_id()));
 
-        EstadoInscripcionV2 estadoInscripcion = new EstadoInscripcionV2(this.generadorIDService.generarID(), TipoEstadoInscripcion.PENDIENTE, LocalDateTime.now());
+        EstadoInscripcion estadoInscripcion = new EstadoInscripcion(this.generadorIDService.generarID(), TipoEstadoInscripcion.PENDIENTE, LocalDateTime.now());
 
         Inscripcion inscripcionPendiente =  new Inscripcion(
                 generadorIDService.generarID(),

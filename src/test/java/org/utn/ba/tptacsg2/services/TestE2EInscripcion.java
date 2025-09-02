@@ -1,4 +1,4 @@
-package org.utn.ba.tptacsg2;
+package org.utn.ba.tptacsg2.services;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,10 +15,8 @@ import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
 import org.utn.ba.tptacsg2.repositories.EventoRepository;
 import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
-import org.utn.ba.tptacsg2.services.InscripcionService;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -93,7 +91,7 @@ public class TestE2EInscripcion {
                 null,
                 null,
                 new Organizador("ORG1", "Org", "Uno", "30111222"),
-                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
+                new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
                 null,
                 null
         );

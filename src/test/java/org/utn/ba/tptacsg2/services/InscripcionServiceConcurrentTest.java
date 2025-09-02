@@ -50,7 +50,7 @@ class InscripcionServiceConcurrentTest {
                 0,
                 new Precio("Pesos", 100F),
                 new Organizador("ORG1", "Org", "Uno", "30111222"),
-                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
+                new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
                 new Categoria("Test"),
                 new ArrayList<>()
         );

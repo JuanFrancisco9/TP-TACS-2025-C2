@@ -14,10 +14,7 @@ import org.utn.ba.tptacsg2.models.events.SolicitudEvento;
 import org.utn.ba.tptacsg2.models.events.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
-import org.utn.ba.tptacsg2.repositories.EventoRepository;
-import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
-import org.utn.ba.tptacsg2.repositories.OrganizadorRepository;
-import org.utn.ba.tptacsg2.repositories.ParticipanteRepository;
+import org.utn.ba.tptacsg2.repositories.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,17 +28,17 @@ public class EventoService {
     private final InscripcionRepository inscripcionRepository;
     private final OrganizadorRepository organizadorRepository;
     private final GeneradorIDService generadorIDService;
-    private final ParticipanteRepository participanteRepository;
+    private final EstadoEventoRepository estadoEventoRepository;
     @Value("${app.pagination.default-page-size}")
     private Integer tamanioPagina;
 
     @Autowired
-    public EventoService(EventoRepository eventoRepository, InscripcionRepository inscripcionRepository, OrganizadorRepository organizadorRepository, GeneradorIDService generadorIDService, ParticipanteRepository participanteRepository) {
+    public EventoService(EventoRepository eventoRepository, InscripcionRepository inscripcionRepository, OrganizadorRepository organizadorRepository, GeneradorIDService generadorIDService,EstadoEventoRepository estadoEventoRepository) {
         this.eventoRepository = eventoRepository;
         this.inscripcionRepository = inscripcionRepository;
         this.organizadorRepository = organizadorRepository;
         this.generadorIDService = generadorIDService;
-        this.participanteRepository = participanteRepository;
+        this.estadoEventoRepository = estadoEventoRepository;
     }
 
     public Integer cuposDisponibles(Evento evento) {
@@ -53,6 +50,8 @@ public class EventoService {
     public Evento registrarEvento(SolicitudEvento solicitud) {
         Organizador organizador = organizadorRepository.getOrganizador(solicitud.organizadorId())
                 .orElseThrow(() -> new RuntimeException("Organizador no encontrado"));
+
+        EstadoEvento estadoInicial = new EstadoEvento(this.generadorIDService.generarID(), solicitud.estado(), LocalDateTime.now());
 
         Evento evento = new Evento(
                 generadorIDService.generarID(),
@@ -66,11 +65,13 @@ public class EventoService {
                 solicitud.cupoMinimo(),
                 solicitud.precio(),
                 organizador,
-                new EstadoEvento(solicitud.estado(),LocalDateTime.now()),
+                estadoInicial,
                 solicitud.categoria(),
                 solicitud.etiquetas()
         );
 
+        estadoInicial.setEvento(evento);
+        this.estadoEventoRepository.guardarEstadoEvento(estadoInicial);
         eventoRepository.guardarEvento(evento);
 
         return evento;
@@ -79,7 +80,8 @@ public class EventoService {
     public Evento cambiarEstado(String idEvento,TipoEstadoEvento estado) {
         Evento evento = eventoRepository.getEvento(idEvento).orElseThrow(() -> new RuntimeException("Evento no encontrado"));
 
-        EstadoEvento estadoEvento = new EstadoEvento(estado, LocalDateTime.now());
+        EstadoEvento estadoEvento = new EstadoEvento(this.generadorIDService.generarID(), estado, LocalDateTime.now());
+        this.estadoEventoRepository.guardarEstadoEvento(estadoEvento);
 
         Evento eventoActualizado = new Evento(
                 evento.id(),
