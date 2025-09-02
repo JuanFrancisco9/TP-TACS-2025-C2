@@ -173,9 +173,9 @@ class EstadisticasServiceTest {
         Organizador organizador = new Organizador("1", "Juan", "Pérez", "12345678");
 
         Evento evento1 = new Evento("1", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
-                "19:00", 5F, new Ubicacion("", "", "", ""), 10,
+                "19:00", 5F, new Ubicacion("", "", "", ""), 10, 0,
                 new Precio("Pesos", 100F), organizador,
-                new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
+                new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null, new ArrayList<>());
 
         Evento evento2 = new Evento("2", "Workshop de Testing", "Testing", LocalDateTime.now(),
                 "14:00", 3F, new Ubicacion("", "", "", ""), 15,0,
@@ -192,14 +192,14 @@ class EstadisticasServiceTest {
 
         Organizador organizador = new Organizador("1", "Juan", "Pérez", "12345678");
         Evento evento1 = new Evento("1", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
-                "19:00", 5F, new Ubicacion("", "", "", ""), 10,
+                "19:00", 5F, new Ubicacion("", "", "", ""), 10, 0,
                 new Precio("Pesos", 100F), organizador,
-                new EstadoEvento("3", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
+                new EstadoEvento("3", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null, new ArrayList<>());
 
         Evento evento2 = new Evento("2", "Workshop de Testing", "Testing", LocalDateTime.now(),
-                "14:00", 3F, new Ubicacion("", "", "", ""), 15,
+                "14:00", 3F, new Ubicacion("", "", "", ""), 15,0,
                 new Precio("Pesos", 150F), organizador,
-                new EstadoEvento("4", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
+                new EstadoEvento("4", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null, new ArrayList<>());
 
         EstadoInscripcion estadoAceptada = new EstadoInscripcion("1",TipoEstadoInscripcion.ACEPTADA, null, LocalDateTime.now());
         EstadoInscripcion estadoPendiente = new EstadoInscripcion("1",TipoEstadoInscripcion.PENDIENTE, null, LocalDateTime.now());

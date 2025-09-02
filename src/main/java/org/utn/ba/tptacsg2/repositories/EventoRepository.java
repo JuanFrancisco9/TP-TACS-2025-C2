@@ -57,19 +57,17 @@ public class EventoRepository {
         EstadoEvento estadoEvento2 = this.estadoEventoRepository.getEstadoInscripcionById("2");
 
         this.guardarEvento(new Evento("0", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
-                            "19;00",5F, new Ubicacion("","","", ""), 10,
-                            new Precio("Pesos", 100F), new Organizador("1","","",""), new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), new Categoria("Educativo")));
-                            "19;00",5F, new Ubicacion("","","",""), 10, 0,
-                            new Precio("Pesos", 100F), new Organizador("1","","",""), new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), new Categoria("Educativo"),new ArrayList<>()));
+                            "19;00",5F, new Ubicacion("","","", ""), 10, 0,
+                            new Precio("Pesos", 100F), new Organizador("1","","",""),
+                estadoEvento1,new Categoria("Educativo"),new ArrayList<>()));
 
         // Segundo evento de prueba
         this.guardarEvento(new Evento("2", "Workshop de Testing", "Testing", LocalDateTime.now().plusDays(7),
-                            "10:00",3F, new Ubicacion("","","", ""), 20,
-                            new Precio("Pesos", 150F), new Organizador("2","María","González","87654321"), new EstadoEvento("2", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), new Categoria("Tecnología")));
+                "10:00", 3F, new Ubicacion("","","", ""), 20, 0,
+                new Precio("Pesos", 150F), new Organizador("2","María","González","87654321"),
+                estadoEvento2, new Categoria("Tecnología"), new ArrayList<>()));
 
         estadoEvento1.setEvento(this.eventos.get(0));
         estadoEvento2.setEvento(this.eventos.get(1));
-                            "10:00",3F, new Ubicacion("","","",""), 20, 0,
-                            new Precio("Pesos", 150F), new Organizador("2","María","González","87654321"), new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), new Categoria("Tecnología"),new ArrayList<>()));
     }
 }

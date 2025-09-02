@@ -11,6 +11,7 @@ import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.events.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -34,11 +35,12 @@ public class EventoControllerE2ETest {
 
 
         mockMvc.perform(post("/eventos")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(solicitud)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(solicitud)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists());
     }
+
 
     @Test
     void modificarEvento_deberiaRetornar200YEventoActualizado() throws Exception {

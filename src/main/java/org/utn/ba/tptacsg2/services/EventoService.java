@@ -51,6 +51,8 @@ public class EventoService {
         Organizador organizador = organizadorRepository.getOrganizador(solicitud.organizadorId())
                 .orElseThrow(() -> new RuntimeException("Organizador no encontrado"));
 
+        EstadoEvento estadoInicial = new EstadoEvento(this.generadorIDService.generarID(), solicitud.estado(), LocalDateTime.now());
+
         Evento evento = new Evento(
                 generadorIDService.generarID(),
                 solicitud.titulo(),
@@ -63,11 +65,13 @@ public class EventoService {
                 solicitud.cupoMinimo(),
                 solicitud.precio(),
                 organizador,
-                new EstadoEvento(solicitud.estado(),LocalDateTime.now()),
+                estadoInicial,
                 solicitud.categoria(),
                 solicitud.etiquetas()
         );
 
+        estadoInicial.setEvento(evento);
+        this.estadoEventoRepository.guardarEstadoEvento(estadoInicial);
         eventoRepository.guardarEvento(evento);
 
         return evento;

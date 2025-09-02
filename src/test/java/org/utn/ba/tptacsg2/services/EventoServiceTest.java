@@ -11,6 +11,7 @@ import org.utn.ba.tptacsg2.dtos.FiltrosDTO;
 import org.utn.ba.tptacsg2.dtos.output.ResultadoBusquedaEvento;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.events.*;
+import org.utn.ba.tptacsg2.repositories.EstadoEventoRepository;
 import org.utn.ba.tptacsg2.repositories.EventoRepository;
 import org.utn.ba.tptacsg2.repositories.OrganizadorRepository;
 import org.utn.ba.tptacsg2.services.EventoService;
@@ -31,6 +32,7 @@ public class EventoServiceTest {
 
     @Mock private EventoRepository eventoRepository;
     @Mock private OrganizadorRepository organizadorRepository;
+    @Mock private EstadoEventoRepository estadoEventoRepository;
     @Mock private GeneradorIDService generadorIDService;
 
     @InjectMocks
@@ -82,10 +84,8 @@ public class EventoServiceTest {
             Categoria categoria1 = new Categoria("MUSICA");
             Categoria categoria2 = new Categoria("TECNOLOGIA");
 
-        eventoValido1 = new Evento("E1", "Concierto de rock vivo", "Musica", LocalDateTime.of(2025, 9, 10, 20, 0), "20:00", 2f, new Ubicacion("", "", "La Plata", "CABA"), 100, new Precio("ARS", 1000f), organizadorMock, new EstadoEvento("2", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria1);
-        eventoValido2= new Evento("E2", "Charla", "Tecnologia", LocalDateTime.of(2025, 10, 10, 18, 0), "18:00", 1.5f, new Ubicacion("", "", "CABA", "CABA"), 50, new Precio("ARS", 500f), organizadorMock, new EstadoEvento("2", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria2);
-            eventoValido1 = new Evento("E1", "Concierto de rock vivo", "Musica", LocalDateTime.of(2025, 9, 10, 20, 0), "20:00", 2f, new Ubicacion("", "", "La Plata", "CABA"), 100,0, new Precio("ARS", 1000f), organizadorMock, new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria1,null);
-            eventoValido2= new Evento("E2", "Charla", "Tecnologia", LocalDateTime.of(2025, 10, 10, 18, 0), "18:00", 1.5f, new Ubicacion("", "", "CABA", "CABA"), 50,0, new Precio("ARS", 500f), organizadorMock, new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria2,null);
+        eventoValido1 = new Evento("E1", "Concierto de rock vivo", "Musica", LocalDateTime.of(2025, 9, 10, 20, 0), "20:00", 2f, new Ubicacion("", "", "La Plata", "CABA"), 100, 0, new Precio("ARS", 1000f), organizadorMock, new EstadoEvento("2", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria1, new ArrayList<>());
+        eventoValido2= new Evento("E2", "Charla", "Tecnologia", LocalDateTime.of(2025, 10, 10, 18, 0), "18:00", 1.5f, new Ubicacion("", "", "CABA", "CABA"), 50, 0,  new Precio("ARS", 500f), organizadorMock, new EstadoEvento("3", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria2, new ArrayList<>());
 
             lenient().when(eventoRepository.getEventos()).thenReturn(Arrays.asList(eventoValido1, eventoValido2));
 
