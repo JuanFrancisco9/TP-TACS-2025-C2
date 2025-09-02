@@ -79,7 +79,7 @@ public class EventPredicateBuilder {
     public Predicate<Evento> build() {
         return predicados.stream()
                 .reduce(Predicate::and)
-                .orElse(_ -> true);
+                .orElse(e-> true);
     }
 
 }

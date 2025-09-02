@@ -11,6 +11,7 @@ import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.events.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -29,9 +30,8 @@ public class EventoControllerE2ETest {
     void crearEvento_deberiaRetornar201YEvento() throws Exception {
 
         Categoria categoria1 = new Categoria("Musica");
-        Evento evento = new Evento("E1", "Concierto de rock vivo", "Musica", LocalDateTime.of(2025, 9, 10, 20, 0), "20:00", 2f, new Ubicacion("", "", "La Plata", "CABA"), 100, new Precio("ARS", 1000f), new Organizador("1", "Juan", "Perez", "14"), new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria1);
 
-        SolicitudEvento solicitud = new SolicitudEvento("1",  evento);
+        SolicitudEvento solicitud = new SolicitudEvento("1",  "Concierto de rock vivo", "Musica", LocalDateTime.of(2025, 9, 10, 20, 0), "20:00", 2f, new Ubicacion("", "", "La Plata", "CABA"), 100,0, new Precio("ARS", 1000f), TipoEstadoEvento.CONFIRMADO, categoria1, new ArrayList<>());
 
 
         mockMvc.perform(post("/eventos")
@@ -45,8 +45,8 @@ public class EventoControllerE2ETest {
     void modificarEvento_deberiaRetornar200YEventoActualizado() throws Exception {
         // Primero, crear un evento
         Categoria categoria1 = new Categoria("Musica");
-        Evento evento = new Evento("E2", "Festival Jazz", "Musica", LocalDateTime.of(2025, 10, 5, 18, 0), "18:00", 2f, new Ubicacion("", "", "Rosario", "Santa Fe"), 200, new Precio("ARS", 2000f), new Organizador("2", "Ana", "Gomez", "15"), new EstadoEvento(TipoEstadoEvento.PENDIENTE, LocalDateTime.now()), categoria1);
-        SolicitudEvento solicitud = new SolicitudEvento("2", evento);
+
+        SolicitudEvento solicitud = new SolicitudEvento("2", "Festival Jazz", "Musica", LocalDateTime.of(2025, 10, 5, 18, 0), "18:00", 2f, new Ubicacion("", "", "Rosario", "Santa Fe"), 200,0, new Precio("ARS", 2000f), TipoEstadoEvento.PENDIENTE, categoria1,new ArrayList<>());
         String response = mockMvc.perform(post("/eventos")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(solicitud)))
