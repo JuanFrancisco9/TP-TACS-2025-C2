@@ -10,12 +10,14 @@ import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public class InscripcionRepository {
+
     private final List<Inscripcion> inscripciones;
     private EstadoInscripcionRepository estadoInscripcionRepository;
 
