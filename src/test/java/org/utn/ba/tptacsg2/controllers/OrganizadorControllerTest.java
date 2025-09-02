@@ -16,6 +16,7 @@ import org.utn.ba.tptacsg2.models.events.Precio;
 import org.utn.ba.tptacsg2.services.OrganizadorService;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -38,8 +39,8 @@ class OrganizadorControllerTest {
     @DisplayName("GET /organizadores/eventos/{id} devuelve 200 y lista cuando hay eventos")
     void getEventosDeOrganizador_devuelve200ConLista() throws Exception {
         String idOrganizador = "1";
-        Evento evento1 = new Evento("0","Seminario de Mocks","Mocks", LocalDateTime.now(),"19:00",5F,new Ubicacion("","",""),10,new Precio("Pesos",100F),null,new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
-        Evento evento2 = new Evento("1","Workshop Testing","Testing", LocalDateTime.now(),"10:00",3F,new Ubicacion("","",""),20,new Precio("Pesos",150F),null,new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
+        Evento evento1 = new Evento("0","Seminario de Mocks","Mocks", LocalDateTime.now(),"19:00",5F,new Ubicacion("","","",""),10,0,new Precio("Pesos",100F),null,new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null,new ArrayList<>());
+        Evento evento2 = new Evento("1","Workshop Testing","Testing", LocalDateTime.now(),"10:00",3F,new Ubicacion("","","",""),20,0,new Precio("Pesos",150F),null,new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null,new ArrayList<>());
         List<Evento> eventos = Arrays.asList(evento1, evento2);
 
         when(organizadorService.getEventosDeOrganizador(idOrganizador)).thenReturn(eventos);

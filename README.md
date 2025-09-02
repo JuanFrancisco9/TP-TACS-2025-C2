@@ -37,17 +37,27 @@ Request JSON:
 ```json
 {
   "organizadorId": "1",
-  "evento": {
-    "titulo": "Seminario de Mocks",
-    "descripcion": "Introducción a Mocks",
-    "fecha": "2025-09-10T19:00:00",
-    "horaInicio": "19:00",
-    "duracion": 2.5,
-    "ubicacion": { "provincia": "Buenos Aires", "ciudad": "CABA", "direccion": "Av. Siempre Viva 123" },
-    "cupoMaximo": 30,
-    "precio": { "moneda": "ARS", "monto": 1000 },
-    "estado": { "tipoEstado": "CONFIRMADO", "fechaCambio": "2025-08-27T12:00:00" }
-  }
+  "titulo": "Seminario de Mocks",
+  "descripcion": "Introducción a Mocks",
+  "fecha": "2025-09-10T19:00:00",
+  "horaInicio": "19:00",
+  "duracion": 2.5,
+  "ubicacion": {
+    "provincia": "Buenos Aires",
+    "ciudad": "CABA",
+    "direccion": "Av. Siempre Viva 123"
+  },
+  "cupoMaximo": 30,
+  "cupoMinimo": 10,
+  "precio": {
+    "moneda": "ARS",
+    "monto": 1000
+  },
+  "estado": "CONFIRMADO",
+  "categoria": {
+    "tipo": "TECNOLOGIA"
+  },
+  "etiquetas": ["mocks", "testing", "java"]
 }
 ```
 Response 201:
@@ -63,7 +73,9 @@ Response 201:
   "cupoMaximo": 30,
   "precio": { "moneda": "ARS", "monto": 1000 },
   "organizador": { "id": "1", "nombre": "Juan", "apellido": "Pérez", "dni": "12345678" },
-  "estado": { "tipoEstado": "CONFIRMADO", "fechaCambio": "2025-08-27T12:00:00" }
+  "estado": { "tipoEstado": "CONFIRMADO", "fechaCambio": "2025-08-27T12:00:00" },
+  "categoria":{"tipo": "TECNOLOGIA"},
+  "etiquetas": ["mocks", "testing", "java"]
 }
 ```
 

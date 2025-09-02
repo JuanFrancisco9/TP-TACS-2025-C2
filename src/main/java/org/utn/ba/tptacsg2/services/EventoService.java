@@ -1,6 +1,7 @@
 package org.utn.ba.tptacsg2.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.utn.ba.tptacsg2.dtos.FiltrosDTO;
 import org.utn.ba.tptacsg2.dtos.output.ResultadoBusquedaEvento;
@@ -31,6 +32,8 @@ public class EventoService {
     private final OrganizadorRepository organizadorRepository;
     private final GeneradorIDService generadorIDService;
     private final ParticipanteRepository participanteRepository;
+    @Value("${app.pagination.default-page-size}")
+    private Integer tamanioPagina;
 
     @Autowired
     public EventoService(EventoRepository eventoRepository, InscripcionRepository inscripcionRepository, OrganizadorRepository organizadorRepository, GeneradorIDService generadorIDService, ParticipanteRepository participanteRepository) {
@@ -53,17 +56,19 @@ public class EventoService {
 
         Evento evento = new Evento(
                 generadorIDService.generarID(),
-                solicitud.evento().titulo(),
-                solicitud.evento().descripcion(),
-                solicitud.evento().fecha(),
-                solicitud.evento().horaInicio(),
-                solicitud.evento().duracion(),
-                solicitud.evento().ubicacion(),
-                solicitud.evento().cupoMaximo(),
-                solicitud.evento().precio(),
+                solicitud.titulo(),
+                solicitud.descripcion(),
+                solicitud.fecha(),
+                solicitud.horaInicio(),
+                solicitud.duracion(),
+                solicitud.ubicacion(),
+                solicitud.cupoMaximo(),
+                solicitud.cupoMinimo(),
+                solicitud.precio(),
                 organizador,
-                solicitud.evento().estado(),
-                solicitud.evento().categoria()
+                new EstadoEvento(solicitud.estado(),LocalDateTime.now()),
+                solicitud.categoria(),
+                solicitud.etiquetas()
         );
 
         eventoRepository.guardarEvento(evento);
@@ -85,10 +90,12 @@ public class EventoService {
                 evento.duracion(),
                 evento.ubicacion(),
                 evento.cupoMaximo(),
+                evento.cupoMinimo(),
                 evento.precio(),
                 evento.organizador(),
                 estadoEvento,
-                evento.categoria()
+                evento.categoria(),
+                evento.etiquetas()
         );
 
         eventoRepository.actualizarEvento(eventoActualizado);
@@ -115,14 +122,13 @@ public class EventoService {
         Predicate<Evento> predicadosCombinados = new EventPredicateBuilder()
                 .conRangoDeFecha(filtros.fechaDesde(), filtros.fechaHasta())
                 .conCategoria(filtros.categoria())
+                .conUbicacion(filtros.ubicacion())
                 .conRangoDePrecios(filtros.precioMinimo(), filtros.precioMaximo())
                 .conPalabrasClave(filtros.palabrasClave())
                 .build();
 
         List<Evento> eventosFiltrados = eventos.stream().filter(predicadosCombinados).toList();
 
-        //TODO archivo de config para el tamanio de pag
-        Integer tamanioPagina = 10;
         Integer totalElementos = eventosFiltrados.size();
         Integer totalPaginas = (int) Math.ceil((double) totalElementos / tamanioPagina);
         Integer inicioEventos = filtros.nroPagina() * tamanioPagina;

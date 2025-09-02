@@ -21,6 +21,7 @@ import org.utn.ba.tptacsg2.repositories.EventoRepository;
 import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -173,14 +174,14 @@ class EstadisticasServiceTest {
         Organizador organizador = new Organizador("1", "Juan", "Pérez", "12345678",null);
 
         Evento evento1 = new Evento("1", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
-                "19:00", 5F, new Ubicacion("", "", ""), 10,
+                "19:00", 5F, new Ubicacion("", "", "", ""), 10,0,
                 new Precio("Pesos", 100F), organizador,
-                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
+                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null,new ArrayList<>());
 
         Evento evento2 = new Evento("2", "Workshop de Testing", "Testing", LocalDateTime.now(),
-                "14:00", 3F, new Ubicacion("", "", ""), 15,
+                "14:00", 3F, new Ubicacion("", "", "", ""), 15,0,
                 new Precio("Pesos", 150F), organizador,
-                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
+                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null,new ArrayList<>());
 
         return Arrays.asList(evento1, evento2);
     }
@@ -192,14 +193,14 @@ class EstadisticasServiceTest {
 
         Organizador organizador = new Organizador("1", "Juan", "Pérez", "12345678",null);
         Evento evento1 = new Evento("1", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
-                "19:00", 5F, new Ubicacion("", "", ""), 10,
+                "19:00", 5F, new Ubicacion("", "", "", ""), 10, 0,
                 new Precio("Pesos", 100F), organizador,
-                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
+                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null, new ArrayList<>());
 
         Evento evento2 = new Evento("2", "Workshop de Testing", "Testing", LocalDateTime.now(),
-                "14:00", 3F, new Ubicacion("", "", ""), 15,
+                "14:00", 3F, new Ubicacion("", "", "", ""), 15,0,
                 new Precio("Pesos", 150F), organizador,
-                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
+                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null,new ArrayList<>());
 
         EstadoInscripcionV2 estadoAceptada = new EstadoInscripcionV2("1",TipoEstadoInscripcion.ACEPTADA, null, LocalDateTime.now());
         EstadoInscripcionV2 estadoPendiente = new EstadoInscripcionV2("1",TipoEstadoInscripcion.PENDIENTE, null, LocalDateTime.now());
