@@ -8,7 +8,7 @@ import org.utn.ba.tptacsg2.exceptions.EventoSinConfirmarException;
 import org.utn.ba.tptacsg2.exceptions.InscripcionNoEncontradaException;
 import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.models.events.TipoEstadoEvento;
-import org.utn.ba.tptacsg2.models.inscriptions.EstadoInscripcionV2;
+import org.utn.ba.tptacsg2.models.inscriptions.EstadoInscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.dtos.SolicitudInscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
@@ -49,7 +49,7 @@ public class InscripcionService {
         Evento evento = eventoRepository.getEvento(solicitud.evento_id())
                         .orElseThrow(() -> new EventoNoEncontradoException("No se encontró el evento " + solicitud.evento_id()));
 
-        if(evento.estado().tipoEstado() == TipoEstadoEvento.CONFIRMADO) {
+        if(evento.estado().getTipoEstado() == TipoEstadoEvento.CONFIRMADO) {
             ReentrantLock lock = eventoLockService.getLock(evento.id());
             try {
                 lock.lock();
@@ -59,7 +59,7 @@ public class InscripcionService {
                     return inscripcionPendiente;
                 }
 
-                EstadoInscripcionV2 estadoInscripcionAceptada = new EstadoInscripcionV2(this.generadorIDService.generarID(), TipoEstadoInscripcion.ACEPTADA, LocalDateTime.now());
+                EstadoInscripcion estadoInscripcionAceptada = new EstadoInscripcion(this.generadorIDService.generarID(), TipoEstadoInscripcion.ACEPTADA, LocalDateTime.now());
 
                 Inscripcion inscripcionAceptada = new Inscripcion(
                         generadorIDService.generarID(),
@@ -82,7 +82,7 @@ public class InscripcionService {
         }
 
         else {
-            throw new EventoSinConfirmarException("No se puede inscribir a un evento que no está confirmado. Estado actual: " + evento.estado().tipoEstado());
+            throw new EventoSinConfirmarException("No se puede inscribir a un evento que no está confirmado. Estado actual: " + evento.estado().getTipoEstado());
         }
 
     }
@@ -97,7 +97,7 @@ public class InscripcionService {
 
         Inscripcion inscripcion = inscripcionACancelar.get();
 
-        EstadoInscripcionV2 estadoCancelado = new EstadoInscripcionV2(
+        EstadoInscripcion estadoCancelado = new EstadoInscripcion(
                 generadorIDService.generarID(),
                 TipoEstadoInscripcion.CANCELADA,
                 inscripcion,
@@ -124,7 +124,7 @@ public class InscripcionService {
 
         Inscripcion inscripcionAConfirmar = this.inscripcionRepository.getPrimerInscripcionDeWaitlist(evento);
 
-        EstadoInscripcionV2 nuevoEstado = new EstadoInscripcionV2(this.generadorIDService.generarID(), TipoEstadoInscripcion.ACEPTADA, inscripcionAConfirmar, LocalDateTime.now());
+        EstadoInscripcion nuevoEstado = new EstadoInscripcion(this.generadorIDService.generarID(), TipoEstadoInscripcion.ACEPTADA, inscripcionAConfirmar, LocalDateTime.now());
 
         Inscripcion inscripcionActualizada = new Inscripcion(
                 inscripcionAConfirmar.id(),

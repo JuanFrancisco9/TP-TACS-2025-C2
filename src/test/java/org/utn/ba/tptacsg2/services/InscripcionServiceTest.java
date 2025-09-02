@@ -13,9 +13,8 @@ import org.utn.ba.tptacsg2.exceptions.InscripcionNoEncontradaException;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.actors.Participante;
 import org.utn.ba.tptacsg2.models.events.*;
-import org.utn.ba.tptacsg2.models.inscriptions.EstadoInscripcionV2;
+import org.utn.ba.tptacsg2.models.inscriptions.EstadoInscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
-import org.utn.ba.tptacsg2.dtos.SolicitudInscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
 import org.utn.ba.tptacsg2.repositories.EstadoInscripcionRepository;
 import org.utn.ba.tptacsg2.repositories.EventoRepository;
@@ -49,7 +48,7 @@ public class InscripcionServiceTest {
     @BeforeEach
     public void setUp() {
         participante = new Participante("1", "Pepito", "Pépez", "123456789");
-        evento = new Evento(ID_EVENTO_VALIDO, "Evento mock", "", LocalDateTime.now(), "1900", 5F, new Ubicacion("","","", ""), 3, new Precio("ARS", 10F), new Organizador("1","","",""), new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
+        evento = new Evento(ID_EVENTO_VALIDO, "Evento mock", "", LocalDateTime.now(), "1900", 5F, new Ubicacion("","","", ""), 3, new Precio("ARS", 10F), new Organizador("1","","",""), new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
         lenient().when(eventoRepository.getEvento(ID_EVENTO_VALIDO)).thenReturn(Optional.of(evento));
         lenient().when(eventoLockService.getLock(ID_EVENTO_VALIDO)).thenReturn(new ReentrantLock());
         lenient().when(eventoRepository.getEvento(ID_EVENTO_VALIDO)).thenReturn(Optional.of(evento));
@@ -85,7 +84,7 @@ public class InscripcionServiceTest {
         String eventoId = "evt-1";
         Evento evento = mock(Evento.class);
 
-        EstadoInscripcionV2 estadoActual = new EstadoInscripcionV2("estado-1", TipoEstadoInscripcion.ACEPTADA, LocalDateTime.now());
+        EstadoInscripcion estadoActual = new EstadoInscripcion("estado-1", TipoEstadoInscripcion.ACEPTADA, LocalDateTime.now());
         Inscripcion inscripcion = new Inscripcion(inscripcionId, participante, LocalDateTime.now(), estadoActual, evento);
 
         when(inscripcionRepository.getInscripcionById(inscripcionId)).thenReturn(Optional.of(inscripcion));
@@ -93,7 +92,7 @@ public class InscripcionServiceTest {
 
         // Simular que hay alguien en la waitlist
         Inscripcion inscripcionWaitlist = new Inscripcion("waitlist-1", participante, LocalDateTime.now(),
-                new EstadoInscripcionV2("estado-wait", TipoEstadoInscripcion.PENDIENTE, LocalDateTime.now()), evento);
+                new EstadoInscripcion("estado-wait", TipoEstadoInscripcion.PENDIENTE, LocalDateTime.now()), evento);
         when(inscripcionRepository.getPrimerInscripcionDeWaitlist(evento)).thenReturn(inscripcionWaitlist);
 
         // Act
@@ -110,7 +109,7 @@ public class InscripcionServiceTest {
         assertEquals("waitlist-1", actualizada.id());
         assertEquals(TipoEstadoInscripcion.ACEPTADA, actualizada.estado().getTipoEstado());
 
-        verify(estadoInscripcionRepository, times(2)).guardarEstadoInscripcion(any(EstadoInscripcionV2.class));
+        verify(estadoInscripcionRepository, times(2)).guardarEstadoInscripcion(any(EstadoInscripcion.class));
     }
 
     @Test
@@ -126,9 +125,9 @@ public class InscripcionServiceTest {
         String eventoId = ID_EVENTO_VALIDO;
 
         Inscripcion insc1 = new Inscripcion("w1", participante, LocalDateTime.now(),
-                new EstadoInscripcionV2("e1", TipoEstadoInscripcion.PENDIENTE, LocalDateTime.now()), eventoValido);
+                new EstadoInscripcion("e1", TipoEstadoInscripcion.PENDIENTE, LocalDateTime.now()), eventoValido);
         Inscripcion insc2 = new Inscripcion("w2", participante, LocalDateTime.now(),
-                new EstadoInscripcionV2("e2", TipoEstadoInscripcion.PENDIENTE, LocalDateTime.now()), eventoValido);
+                new EstadoInscripcion("e2", TipoEstadoInscripcion.PENDIENTE, LocalDateTime.now()), eventoValido);
 
         when(inscripcionRepository.getWailist(eventoValido)).thenReturn(java.util.List.of(insc1, insc2));
 

@@ -91,7 +91,7 @@ public class TestE2EInscripcion {
                 cupoMaximo,
                 null,
                 new Organizador("ORG1", "Org", "Uno", "30111222"),
-                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
+                new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
                 null
         );
     }

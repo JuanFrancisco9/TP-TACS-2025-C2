@@ -14,7 +14,6 @@ import org.utn.ba.tptacsg2.models.events.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.events.Ubicacion;
 import org.utn.ba.tptacsg2.models.events.Precio;
 import org.utn.ba.tptacsg2.models.inscriptions.EstadoInscripcion;
-import org.utn.ba.tptacsg2.models.inscriptions.EstadoInscripcionV2;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
 import org.utn.ba.tptacsg2.repositories.EventoRepository;
@@ -175,12 +174,12 @@ class EstadisticasServiceTest {
         Evento evento1 = new Evento("1", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
                 "19:00", 5F, new Ubicacion("", "", "", ""), 10,
                 new Precio("Pesos", 100F), organizador,
-                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
+                new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
 
         Evento evento2 = new Evento("2", "Workshop de Testing", "Testing", LocalDateTime.now(),
                 "14:00", 3F, new Ubicacion("", "", "", ""), 15,
                 new Precio("Pesos", 150F), organizador,
-                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
+                new EstadoEvento("2", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
 
         return Arrays.asList(evento1, evento2);
     }
@@ -194,15 +193,15 @@ class EstadisticasServiceTest {
         Evento evento1 = new Evento("1", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
                 "19:00", 5F, new Ubicacion("", "", "", ""), 10,
                 new Precio("Pesos", 100F), organizador,
-                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
+                new EstadoEvento("3", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
 
         Evento evento2 = new Evento("2", "Workshop de Testing", "Testing", LocalDateTime.now(),
                 "14:00", 3F, new Ubicacion("", "", "", ""), 15,
                 new Precio("Pesos", 150F), organizador,
-                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
+                new EstadoEvento("4", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
 
-        EstadoInscripcionV2 estadoAceptada = new EstadoInscripcionV2("1",TipoEstadoInscripcion.ACEPTADA, null, LocalDateTime.now());
-        EstadoInscripcionV2 estadoPendiente = new EstadoInscripcionV2("1",TipoEstadoInscripcion.PENDIENTE, null, LocalDateTime.now());
+        EstadoInscripcion estadoAceptada = new EstadoInscripcion("1",TipoEstadoInscripcion.ACEPTADA, null, LocalDateTime.now());
+        EstadoInscripcion estadoPendiente = new EstadoInscripcion("1",TipoEstadoInscripcion.PENDIENTE, null, LocalDateTime.now());
 
         Inscripcion inscripcion1 = new Inscripcion("1", participante1, LocalDateTime.now(), estadoAceptada, evento1);
         Inscripcion inscripcion2 = new Inscripcion("2", participante2, LocalDateTime.now(), estadoAceptada, evento1);

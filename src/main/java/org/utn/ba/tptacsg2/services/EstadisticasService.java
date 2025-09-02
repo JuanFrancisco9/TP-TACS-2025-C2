@@ -32,7 +32,7 @@ public class EstadisticasService {
 
         Integer cantidadEventos = eventos.size();
         Integer cantidadEventosActivos = eventos.stream()
-                .filter(evento -> evento.estado().tipoEstado() == TipoEstadoEvento.CONFIRMADO)
+                .filter(evento -> evento.estado().getTipoEstado() == TipoEstadoEvento.CONFIRMADO)
                 .toList().size();
 
         Integer cantidadInscripcionesTotales = inscripciones.size();
