@@ -10,12 +10,14 @@ import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public class InscripcionRepository {
+
     private final List<Inscripcion> inscripciones;
     private EstadoInscripcionRepository estadoInscripcionRepository;
 
@@ -87,10 +89,10 @@ public class InscripcionRepository {
         Evento evento = new Evento("0", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
                 "19:00", 5F, new Ubicacion("", "", "", ""), 10,0,
                 new Precio("Pesos", 100F), organizador,
-                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), new Categoria("Educativo"), new ArrayList<>());
+                new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), new Categoria("Educativo"), new ArrayList<>());
 
-        EstadoInscripcionV2 estadoAceptada = estadoInscripcionRepository.getEstadoInscripcionById("1");
-        EstadoInscripcionV2 estadoPendiente = estadoInscripcionRepository.getEstadoInscripcionById("2");
+        EstadoInscripcion estadoAceptada = estadoInscripcionRepository.getEstadoInscripcionById("1");
+        EstadoInscripcion estadoPendiente = estadoInscripcionRepository.getEstadoInscripcionById("2");
 
         this.guardarInscripcion(new Inscripcion("1", participante1, LocalDateTime.now(), estadoAceptada, evento));
         this.guardarInscripcion(new Inscripcion("2", participante2, LocalDateTime.now(), estadoPendiente, evento));

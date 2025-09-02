@@ -37,8 +37,8 @@ public class EventoControllerE2ETest {
 
 
         mockMvc.perform(post("/eventos")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(solicitud)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(solicitud)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists());
     }

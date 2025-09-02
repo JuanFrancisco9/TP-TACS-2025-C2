@@ -10,7 +10,7 @@ RUN mvn dependency:go-offline
 COPY src ./src
 
 # Compila y empaqueta la aplicación en un JAR ejecutable.
-RUN mvn clean package -DskipTests
+RUN mvn clean package
 
 # ----- Run Stage -----
 FROM eclipse-temurin:21-jre-alpine

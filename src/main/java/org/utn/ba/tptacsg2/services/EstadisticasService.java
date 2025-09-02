@@ -1,7 +1,8 @@
 package org.utn.ba.tptacsg2.services;
 
 import org.springframework.stereotype.Service;
-import org.utn.ba.tptacsg2.dtos.EstadisticasUso;
+import org.utn.ba.tptacsg2.dtos.EstadisticasUsoDTO;
+import org.utn.ba.tptacsg2.enums.TipoEstadistica;
 import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.models.events.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
@@ -9,8 +10,11 @@ import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
 import org.utn.ba.tptacsg2.repositories.EventoRepository;
 import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,44 +29,117 @@ public class EstadisticasService {
     }
 
 
-    public EstadisticasUso obtenerEstadisticasUso() {
-        List<Evento> eventos = eventoRepository.getEventos();
-        List<Inscripcion> inscripciones = inscripcionRepository.getInscripciones();
+    public EstadisticasUsoDTO obtenerEstadisticasUso() {
+        return obtenerEstadisticasUso(null, null, null);
+    }
 
+    public EstadisticasUsoDTO obtenerEstadisticasUso(LocalDate fechaDesde, LocalDate fechaHasta, Set<TipoEstadistica> estadisticasSolicitadas) {
+        Integer cantidadEventos = null;
+        Integer cantidadEventosActivos = null;
+        Integer cantidadInscripcionesTotales = null;
+        Integer cantidadInscripcionesConfirmadas = null;
+        Integer cantidadInscripcionesWaitlist = null;
+        Double tasaConversionWaitlist = null;
+        String eventoMasPopular = null;
+        Double promedioInscripcionesPorEvento = null;
 
-        Integer cantidadEventos = eventos.size();
-        Integer cantidadEventosActivos = eventos.stream()
-                .filter(evento -> evento.estado().tipoEstado() == TipoEstadoEvento.CONFIRMADO)
-                .toList().size();
+        if (debeCalcular(estadisticasSolicitadas, TipoEstadistica.CANTIDAD_EVENTOS)) {
+            cantidadEventos = obtenerCantidadEventos(fechaDesde, fechaHasta);
+        }
+        if (debeCalcular(estadisticasSolicitadas, TipoEstadistica.CANTIDAD_EVENTOS_ACTIVOS)) {
+            cantidadEventosActivos = obtenerCantidadEventosActivos(fechaDesde, fechaHasta);
+        }
+        if (debeCalcular(estadisticasSolicitadas, TipoEstadistica.CANTIDAD_INSCRIPCIONES_TOTALES)) {
+            cantidadInscripcionesTotales = obtenerCantidadInscripcionesTotales(fechaDesde, fechaHasta);
+        }
+        if (debeCalcular(estadisticasSolicitadas, TipoEstadistica.CANTIDAD_INSCRIPCIONES_CONFIRMADAS)) {
+            cantidadInscripcionesConfirmadas = obtenerCantidadInscripcionesConfirmadas(fechaDesde, fechaHasta);
+        }
+        if (debeCalcular(estadisticasSolicitadas, TipoEstadistica.CANTIDAD_INSCRIPCIONES_WAITLIST)) {
+            cantidadInscripcionesWaitlist = obtenerCantidadInscripcionesWaitlist(fechaDesde, fechaHasta);
+        }
+        if (debeCalcular(estadisticasSolicitadas, TipoEstadistica.TASA_CONVERSION_WAITLIST)) {
+            tasaConversionWaitlist = obtenerTasaConversionWaitlist(fechaDesde, fechaHasta);
+        }
+        if (debeCalcular(estadisticasSolicitadas, TipoEstadistica.EVENTO_MAS_POPULAR)) {
+            eventoMasPopular = obtenerEventoMasPopular(fechaDesde, fechaHasta);
+        }
+        if (debeCalcular(estadisticasSolicitadas, TipoEstadistica.PROMEDIO_INSCRIPCIONES_POR_EVENTO)) {
+            promedioInscripcionesPorEvento = obtenerPromedioInscripcionesPorEvento(fechaDesde, fechaHasta);
+        }
 
-        Integer cantidadInscripcionesTotales = inscripciones.size();
-        Integer cantidadInscripcionesConfirmadas = inscripciones.stream()
-                .filter(inscripcion -> inscripcion.estado().getTipoEstado() == TipoEstadoInscripcion.ACEPTADA)
-                .toList().size();
-
-        Integer cantidadInscripcionesPendientes = inscripciones.stream()
-                .filter(inscripcion -> inscripcion.estado().getTipoEstado() == TipoEstadoInscripcion.PENDIENTE)
-                .toList().size();
-
-
-        Double tasaConversionWaitlist = calcularTasaConversion(cantidadInscripcionesTotales, cantidadInscripcionesConfirmadas);
-
-        String eventoMasPopular = encontrarEventoMasPopular(eventos, inscripciones);
-
-        // Calcular promedio de inscripciones por evento
-        Double promedioInscripciones = cantidadEventos > 0 ?
-                cantidadInscripcionesTotales.doubleValue() / cantidadEventos : 0.0;
-
-        return new EstadisticasUso(
+        return new EstadisticasUsoDTO(
             cantidadEventos,
             cantidadEventosActivos,
             cantidadInscripcionesTotales,
             cantidadInscripcionesConfirmadas,
-            cantidadInscripcionesPendientes, // Usando pendientes como waitlist
+            cantidadInscripcionesWaitlist,
             tasaConversionWaitlist,
             eventoMasPopular,
-            Math.round(promedioInscripciones * 100.0) / 100.0
+            promedioInscripcionesPorEvento
         );
+    }
+
+    private boolean debeCalcular(Set<TipoEstadistica> solicitadas, TipoEstadistica tipo) {
+        return solicitadas == null || solicitadas.contains(tipo);
+    }
+
+    public Integer obtenerCantidadEventos(LocalDate fechaDesde, LocalDate fechaHasta) {
+        List<Evento> eventos = eventoRepository.getEventos();
+        return filtrarEventosPorFecha(eventos, fechaDesde, fechaHasta).size();
+    }
+
+
+    public Integer obtenerCantidadEventosActivos(LocalDate fechaDesde, LocalDate fechaHasta) {
+        List<Evento> eventos = eventoRepository.getEventos();
+        return filtrarEventosPorFecha(eventos, fechaDesde, fechaHasta).stream()
+                .filter(evento -> evento.estado().tipoEstado() == TipoEstadoEvento.CONFIRMADO)
+                .toList().size();
+    }
+
+    public Integer obtenerCantidadInscripcionesTotales(LocalDate fechaDesde, LocalDate fechaHasta) {
+        List<Inscripcion> inscripciones = inscripcionRepository.getInscripciones();
+        return filtrarInscripcionesPorFecha(inscripciones, fechaDesde, fechaHasta).size();
+    }
+
+    public Integer obtenerCantidadInscripcionesConfirmadas(LocalDate fechaDesde, LocalDate fechaHasta) {
+        List<Inscripcion> inscripciones = inscripcionRepository.getInscripciones();
+        return filtrarInscripcionesPorFecha(inscripciones, fechaDesde, fechaHasta).stream()
+                .filter(inscripcion -> inscripcion.estado().getTipoEstado() == TipoEstadoInscripcion.ACEPTADA)
+                .toList().size();
+    }
+
+    public Integer obtenerCantidadInscripcionesWaitlist(LocalDate fechaDesde, LocalDate fechaHasta) {
+        List<Inscripcion> inscripciones = inscripcionRepository.getInscripciones();
+        return filtrarInscripcionesPorFecha(inscripciones, fechaDesde, fechaHasta).stream()
+                .filter(inscripcion -> inscripcion.estado().getTipoEstado() == TipoEstadoInscripcion.PENDIENTE)
+                .toList().size();
+    }
+
+    public Double obtenerTasaConversionWaitlist(LocalDate fechaDesde, LocalDate fechaHasta) {
+        Integer totalInscripciones = obtenerCantidadInscripcionesTotales(fechaDesde, fechaHasta);
+        Integer inscripcionesConfirmadas = obtenerCantidadInscripcionesConfirmadas(fechaDesde, fechaHasta);
+        return calcularTasaConversion(totalInscripciones, inscripcionesConfirmadas);
+    }
+
+    public String obtenerEventoMasPopular(LocalDate fechaDesde, LocalDate fechaHasta) {
+        List<Evento> eventos = eventoRepository.getEventos();
+        List<Inscripcion> inscripciones = inscripcionRepository.getInscripciones();
+        
+        List<Evento> eventosFiltrados = filtrarEventosPorFecha(eventos, fechaDesde, fechaHasta);
+        List<Inscripcion> inscripcionesFiltradas = filtrarInscripcionesPorFecha(inscripciones, fechaDesde, fechaHasta);
+        
+        return encontrarEventoMasPopular(eventosFiltrados, inscripcionesFiltradas);
+    }
+
+    public Double obtenerPromedioInscripcionesPorEvento(LocalDate fechaDesde, LocalDate fechaHasta) {
+        Integer cantidadEventos = obtenerCantidadEventos(fechaDesde, fechaHasta);
+        Integer cantidadInscripcionesTotales = obtenerCantidadInscripcionesTotales(fechaDesde, fechaHasta);
+        
+        Double promedio = cantidadEventos > 0 ?
+                cantidadInscripcionesTotales.doubleValue() / cantidadEventos : 0.0;
+        
+        return Math.round(promedio * 100.0) / 100.0;
     }
 
     /**
@@ -104,5 +181,35 @@ public class EstadisticasService {
 
         // truncado a 2 decimales (sin redondear)
         return Math.floor(percent * 100.0) / 100.0;
+    }
+
+    private List<Evento> filtrarEventosPorFecha(List<Evento> eventos, LocalDate fechaDesde, LocalDate fechaHasta) {
+        if (fechaDesde == null && fechaHasta == null) {
+            return eventos;
+        }
+        
+        return eventos.stream()
+                .filter(evento -> {
+                    LocalDate fechaEvento = evento.fecha().toLocalDate();
+                    boolean despuesDeFechaDesde = fechaDesde == null || !fechaEvento.isBefore(fechaDesde);
+                    boolean antesDeFechaHasta = fechaHasta == null || !fechaEvento.isAfter(fechaHasta);
+                    return despuesDeFechaDesde && antesDeFechaHasta;
+                })
+                .toList();
+    }
+
+    private List<Inscripcion> filtrarInscripcionesPorFecha(List<Inscripcion> inscripciones, LocalDate fechaDesde, LocalDate fechaHasta) {
+        if (fechaDesde == null && fechaHasta == null) {
+            return inscripciones;
+        }
+        
+        return inscripciones.stream()
+                .filter(inscripcion -> {
+                    LocalDate fechaInscripcion = inscripcion.fechaRegistro().toLocalDate();
+                    boolean despuesDeFechaDesde = fechaDesde == null || !fechaInscripcion.isBefore(fechaDesde);
+                    boolean antesDeFechaHasta = fechaHasta == null || !fechaInscripcion.isAfter(fechaHasta);
+                    return despuesDeFechaDesde && antesDeFechaHasta;
+                })
+                .toList();
     }
 }
