@@ -13,6 +13,7 @@ import org.utn.ba.tptacsg2.models.events.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.events.Ubicacion;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
+import org.utn.ba.tptacsg2.models.users.Usuario;
 import org.utn.ba.tptacsg2.repositories.EventoRepository;
 import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
 import org.utn.ba.tptacsg2.services.InscripcionService;
@@ -76,7 +77,8 @@ public class TestE2EInscripcion {
                 id,
                 "Nombre " + id,
                 "Apellido " + id,
-                "DNI-" + id
+                "DNI-" + id,
+                new Usuario(null,null,null, null)
         );
     }
 
@@ -92,7 +94,7 @@ public class TestE2EInscripcion {
                 cupoMaximo,
                 null,
                 null,
-                new Organizador("ORG1", "Org", "Uno", "30111222"),
+                new Organizador("ORG1", "Org", "Uno", "30111222", null),
                 new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
                 null,
                 null
