@@ -37,17 +37,27 @@ Request JSON:
 ```json
 {
   "organizadorId": "1",
-  "evento": {
-    "titulo": "Seminario de Mocks",
-    "descripcion": "Introducción a Mocks",
-    "fecha": "2025-09-10T19:00:00",
-    "horaInicio": "19:00",
-    "duracion": 2.5,
-    "ubicacion": { "provincia": "Buenos Aires", "ciudad": "CABA", "direccion": "Av. Siempre Viva 123" },
-    "cupoMaximo": 30,
-    "precio": { "moneda": "ARS", "monto": 1000 },
-    "estado": { "tipoEstado": "CONFIRMADO", "fechaCambio": "2025-08-27T12:00:00" }
-  }
+  "titulo": "Seminario de Mocks",
+  "descripcion": "Introducción a Mocks",
+  "fecha": "2025-09-10T19:00:00",
+  "horaInicio": "19:00",
+  "duracion": 2.5,
+  "ubicacion": {
+    "provincia": "Buenos Aires",
+    "ciudad": "CABA",
+    "direccion": "Av. Siempre Viva 123"
+  },
+  "cupoMaximo": 30,
+  "cupoMinimo": 10,
+  "precio": {
+    "moneda": "ARS",
+    "monto": 1000
+  },
+  "estado": "CONFIRMADO",
+  "categoria": {
+    "tipo": "TECNOLOGIA"
+  },
+  "etiquetas": ["mocks", "testing", "java"]
 }
 ```
 Response 201:
@@ -63,7 +73,9 @@ Response 201:
   "cupoMaximo": 30,
   "precio": { "moneda": "ARS", "monto": 1000 },
   "organizador": { "id": "1", "nombre": "Juan", "apellido": "Pérez", "dni": "12345678" },
-  "estado": { "tipoEstado": "CONFIRMADO", "fechaCambio": "2025-08-27T12:00:00" }
+  "estado": { "tipoEstado": "CONFIRMADO", "fechaCambio": "2025-08-27T12:00:00" },
+  "categoria":{"tipo": "TECNOLOGIA"},
+  "etiquetas": ["mocks", "testing", "java"]
 }
 ```
 
@@ -143,21 +155,84 @@ Response 200:
 Response 204: lista vacía.
 
 ### 5. Estadísticas de Uso
+
+#### 5.1. Estadísticas Generales (Personalizables)
 GET /estadisticas
+
+Parámetros de consulta opcionales:
+- `fechaDesde` (LocalDate): Fecha desde para filtrar (formato: YYYY-MM-DD)
+- `fechaHasta` (LocalDate): Fecha hasta para filtrar (formato: YYYY-MM-DD)  
+- `estadisticas` (Set<TipoEstadistica>): Estadísticas específicas a calcular
+
+Ejemplo con filtros:
+```
+GET /estadisticas?fechaDesde=2025-01-01&fechaHasta=2025-12-31&estadisticas=CANTIDAD_EVENTOS,CANTIDAD_EVENTOS_ACTIVOS
+```
 
 Response 200 (ejemplo):
 ```json
 {
   "cantidad_eventos": 1,
   "cantidad_eventos_activos": 1,
-  "cantidad_inscripciones_totales": 2,
-  "cantidad_inscripciones_confirmadas": 1,
-  "cantidad_inscripciones_waitlist": 1,
-  "tasa_conversion_waitlist": 50.0,
-  "evento_mas_popular": "Seminario de Mocks",
-  "promedio_inscripciones_por_evento": 2.0
+  "cantidad_inscripciones_totales": null,
+  "cantidad_inscripciones_confirmadas": null,
+  "cantidad_inscripciones_waitlist": null,
+  "tasa_conversion_waitlist": null,
+  "evento_mas_popular": null,
+  "promedio_inscripciones_por_evento": null
 }
 ```
+
+#### 5.2. Estadísticas Completas
+GET /estadisticas/completas
+
+Parámetros de consulta opcionales:
+- `fechaDesde` (LocalDate): Fecha desde para filtrar
+- `fechaHasta` (LocalDate): Fecha hasta para filtrar
+
+Response 200: Mismo formato que estadísticas generales con todas las estadísticas calculadas.
+
+#### 5.3. Estadísticas Individuales
+
+##### Cantidad de Eventos
+GET /estadisticas/eventos/cantidad
+Parámetros: `fechaDesde`, `fechaHasta` (opcionales)
+Response 200: `15` (Integer)
+
+##### Cantidad de Eventos Activos  
+GET /estadisticas/eventos/activos
+Parámetros: `fechaDesde`, `fechaHasta` (opcionales)
+Response 200: `8` (Integer)
+
+##### Total de Inscripciones
+GET /estadisticas/inscripciones/totales
+Parámetros: `fechaDesde`, `fechaHasta` (opcionales)
+Response 200: `120` (Integer)
+
+##### Inscripciones Confirmadas
+GET /estadisticas/inscripciones/confirmadas
+Parámetros: `fechaDesde`, `fechaHasta` (opcionales)
+Response 200: `95` (Integer)
+
+##### Inscripciones en Waitlist
+GET /estadisticas/inscripciones/waitlist
+Parámetros: `fechaDesde`, `fechaHasta` (opcionales)
+Response 200: `25` (Integer)
+
+##### Tasa de Conversión Waitlist
+GET /estadisticas/conversion/waitlist
+Parámetros: `fechaDesde`, `fechaHasta` (opcionales)
+Response 200: `60.0` (Double - porcentaje)
+
+##### Evento Más Popular
+GET /estadisticas/eventos/mas-popular
+Parámetros: `fechaDesde`, `fechaHasta` (opcionales)
+Response 200: `"Seminario de Mocks"` (String)
+
+##### Promedio de Inscripciones por Evento
+GET /estadisticas/inscripciones/promedio-por-evento
+Parámetros: `fechaDesde`, `fechaHasta` (opcionales)
+Response 200: `8.0` (Double)
 
 ### 6. Registrar Usuario
 POST /user

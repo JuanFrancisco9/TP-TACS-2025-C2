@@ -2,7 +2,7 @@ package org.utn.ba.tptacsg2.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record EstadisticasUso(
+public record EstadisticasUsoDTO(
     @JsonProperty("cantidad_eventos")
     Integer cantidadEventos,
 
