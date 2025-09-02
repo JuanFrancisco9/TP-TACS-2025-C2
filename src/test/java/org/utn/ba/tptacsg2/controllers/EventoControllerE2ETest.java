@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.events.*;
@@ -26,6 +27,7 @@ public class EventoControllerE2ETest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @WithMockUser(roles = "ORGANIZER")
     @Test
     void crearEvento_deberiaRetornar201YEvento() throws Exception {
 
@@ -41,7 +43,7 @@ public class EventoControllerE2ETest {
                 .andExpect(jsonPath("$.id").exists());
     }
 
-
+    @WithMockUser(roles = "ORGANIZER")
     @Test
     void modificarEvento_deberiaRetornar200YEventoActualizado() throws Exception {
         // Primero, crear un evento
@@ -61,6 +63,7 @@ public class EventoControllerE2ETest {
                 .andExpect(jsonPath("$.estado.tipoEstado").value("CONFIRMADO"));
     }
 
+    @WithMockUser(roles = "USER")
     @Test
     void buscarEventos_deberiaRetornar200YLista() throws Exception {
         mockMvc.perform(get("/eventos")

@@ -52,8 +52,8 @@ class EventoControllerTest {
     void getParticipantesFromEvento_listaConElementos() {
         // given
         String eventoId = "2";
-        Participante participante1 = new Participante("1", "Juan", "Pérez", "12345678");
-        Participante participante2 = new Participante("2", "María", "Gómez", "87654321");
+        Participante participante1 = new Participante("1", "Juan", "Pérez", "12345678", null);
+        Participante participante2 = new Participante("2", "María", "Gómez", "87654321",null);
 
         when(eventoService.getParticipantes(eventoId))
                 .thenReturn(List.of(participante1, participante2));

@@ -29,7 +29,7 @@ public class ParticipanteRepository {
 
     @PostConstruct
     public void initializeData() {
-        this.guardarParticipante(new Participante("1", "Carlos", "López", "11111111"));
-        this.guardarParticipante(new Participante("2", "Ana", "Martínez", "22222222"));
+        this.guardarParticipante(new Participante("1", "Carlos", "López", "11111111",null));
+        this.guardarParticipante(new Participante("2", "Ana", "Martínez", "22222222", null));
     }
 }

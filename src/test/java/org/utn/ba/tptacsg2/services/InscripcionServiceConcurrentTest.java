@@ -49,7 +49,7 @@ class InscripcionServiceConcurrentTest {
                 1,
                 0,
                 new Precio("Pesos", 100F),
-                new Organizador("ORG1", "Org", "Uno", "30111222"),
+                new Organizador("ORG1", "Org", "Uno", "30111222", null),
                 new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
                 new Categoria("Test"),
                 new ArrayList<>()
@@ -72,7 +72,7 @@ class InscripcionServiceConcurrentTest {
             try {
                 startLine.await(10, TimeUnit.SECONDS);
                 inscripcionService.inscribir(new SolicitudInscripcion(
-                        new Participante("U" + i, "Nombre" + i, "Apellido" + i, "DNI" + i),
+                        new Participante("U" + i, "Nombre" + i, "Apellido" + i, "DNI" + i, null),
                         eventoCon1Cupo.id()
                 ));
             } catch (Throwable t) {

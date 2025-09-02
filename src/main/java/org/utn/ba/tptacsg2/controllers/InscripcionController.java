@@ -1,5 +1,6 @@
 package org.utn.ba.tptacsg2.controllers;
 
+import jakarta.websocket.server.PathParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.utn.ba.tptacsg2.dtos.output.Waitlist;
