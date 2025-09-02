@@ -85,9 +85,9 @@ public class InscripcionRepository {
         // Crear evento de prueba (similar al del EventoRepository)
         Organizador organizador = new Organizador("1", "Juan", "Pérez", "12345678");
         Evento evento = new Evento("0", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
-                "19:00", 5F, new Ubicacion("", "", "", ""), 10,
+                "19:00", 5F, new Ubicacion("", "", "", ""), 10,0,
                 new Precio("Pesos", 100F), organizador,
-                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), new Categoria("Educativo"));
+                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), new Categoria("Educativo"), new ArrayList<>());
 
         EstadoInscripcionV2 estadoAceptada = estadoInscripcionRepository.getEstadoInscripcionById("1");
         EstadoInscripcionV2 estadoPendiente = estadoInscripcionRepository.getEstadoInscripcionById("2");

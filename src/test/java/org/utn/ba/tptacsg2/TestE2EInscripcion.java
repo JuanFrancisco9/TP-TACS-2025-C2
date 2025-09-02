@@ -18,6 +18,7 @@ import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
 import org.utn.ba.tptacsg2.services.InscripcionService;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -90,8 +91,10 @@ public class TestE2EInscripcion {
                 new Ubicacion("-34.6", "-58.4", "CABA", ""),
                 cupoMaximo,
                 null,
+                null,
                 new Organizador("ORG1", "Org", "Uno", "30111222"),
                 new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
+                null,
                 null
         );
     }
