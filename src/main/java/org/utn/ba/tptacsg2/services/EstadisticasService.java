@@ -93,7 +93,7 @@ public class EstadisticasService {
     public Integer obtenerCantidadEventosActivos(LocalDate fechaDesde, LocalDate fechaHasta) {
         List<Evento> eventos = eventoRepository.getEventos();
         return filtrarEventosPorFecha(eventos, fechaDesde, fechaHasta).stream()
-                .filter(evento -> evento.estado().tipoEstado() == TipoEstadoEvento.CONFIRMADO)
+                .filter(evento -> evento.estado().getTipoEstado() == TipoEstadoEvento.CONFIRMADO)
                 .toList().size();
     }
 
