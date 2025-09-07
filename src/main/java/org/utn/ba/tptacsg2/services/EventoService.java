@@ -1,6 +1,7 @@
 package org.utn.ba.tptacsg2.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.utn.ba.tptacsg2.dtos.FiltrosDTO;
 import org.utn.ba.tptacsg2.dtos.output.ResultadoBusquedaEvento;
@@ -13,10 +14,7 @@ import org.utn.ba.tptacsg2.models.events.SolicitudEvento;
 import org.utn.ba.tptacsg2.models.events.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
-import org.utn.ba.tptacsg2.repositories.EventoRepository;
-import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
-import org.utn.ba.tptacsg2.repositories.OrganizadorRepository;
-import org.utn.ba.tptacsg2.repositories.ParticipanteRepository;
+import org.utn.ba.tptacsg2.repositories.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,15 +28,17 @@ public class EventoService {
     private final InscripcionRepository inscripcionRepository;
     private final OrganizadorRepository organizadorRepository;
     private final GeneradorIDService generadorIDService;
-    private final ParticipanteRepository participanteRepository;
+    private final EstadoEventoRepository estadoEventoRepository;
+    @Value("${app.pagination.default-page-size}")
+    private Integer tamanioPagina;
 
     @Autowired
-    public EventoService(EventoRepository eventoRepository, InscripcionRepository inscripcionRepository, OrganizadorRepository organizadorRepository, GeneradorIDService generadorIDService, ParticipanteRepository participanteRepository) {
+    public EventoService(EventoRepository eventoRepository, InscripcionRepository inscripcionRepository, OrganizadorRepository organizadorRepository, GeneradorIDService generadorIDService,EstadoEventoRepository estadoEventoRepository) {
         this.eventoRepository = eventoRepository;
         this.inscripcionRepository = inscripcionRepository;
         this.organizadorRepository = organizadorRepository;
         this.generadorIDService = generadorIDService;
-        this.participanteRepository = participanteRepository;
+        this.estadoEventoRepository = estadoEventoRepository;
     }
 
     public Integer cuposDisponibles(Evento evento) {
@@ -51,21 +51,27 @@ public class EventoService {
         Organizador organizador = organizadorRepository.getOrganizador(solicitud.organizadorId())
                 .orElseThrow(() -> new RuntimeException("Organizador no encontrado"));
 
+        EstadoEvento estadoInicial = new EstadoEvento(this.generadorIDService.generarID(), solicitud.estado(), LocalDateTime.now());
+
         Evento evento = new Evento(
                 generadorIDService.generarID(),
-                solicitud.evento().titulo(),
-                solicitud.evento().descripcion(),
-                solicitud.evento().fecha(),
-                solicitud.evento().horaInicio(),
-                solicitud.evento().duracion(),
-                solicitud.evento().ubicacion(),
-                solicitud.evento().cupoMaximo(),
-                solicitud.evento().precio(),
+                solicitud.titulo(),
+                solicitud.descripcion(),
+                solicitud.fecha(),
+                solicitud.horaInicio(),
+                solicitud.duracion(),
+                solicitud.ubicacion(),
+                solicitud.cupoMaximo(),
+                solicitud.cupoMinimo(),
+                solicitud.precio(),
                 organizador,
-                solicitud.evento().estado(),
-                solicitud.evento().categoria()
+                estadoInicial,
+                solicitud.categoria(),
+                solicitud.etiquetas()
         );
 
+        estadoInicial.setEvento(evento);
+        this.estadoEventoRepository.guardarEstadoEvento(estadoInicial);
         eventoRepository.guardarEvento(evento);
 
         return evento;
@@ -74,7 +80,8 @@ public class EventoService {
     public Evento cambiarEstado(String idEvento,TipoEstadoEvento estado) {
         Evento evento = eventoRepository.getEvento(idEvento).orElseThrow(() -> new RuntimeException("Evento no encontrado"));
 
-        EstadoEvento estadoEvento = new EstadoEvento(estado, LocalDateTime.now());
+        EstadoEvento estadoEvento = new EstadoEvento(this.generadorIDService.generarID(), estado, LocalDateTime.now());
+        this.estadoEventoRepository.guardarEstadoEvento(estadoEvento);
 
         Evento eventoActualizado = new Evento(
                 evento.id(),
@@ -85,10 +92,12 @@ public class EventoService {
                 evento.duracion(),
                 evento.ubicacion(),
                 evento.cupoMaximo(),
+                evento.cupoMinimo(),
                 evento.precio(),
                 evento.organizador(),
                 estadoEvento,
-                evento.categoria()
+                evento.categoria(),
+                evento.etiquetas()
         );
 
         eventoRepository.actualizarEvento(eventoActualizado);
@@ -115,14 +124,13 @@ public class EventoService {
         Predicate<Evento> predicadosCombinados = new EventPredicateBuilder()
                 .conRangoDeFecha(filtros.fechaDesde(), filtros.fechaHasta())
                 .conCategoria(filtros.categoria())
+                .conUbicacion(filtros.ubicacion())
                 .conRangoDePrecios(filtros.precioMinimo(), filtros.precioMaximo())
                 .conPalabrasClave(filtros.palabrasClave())
                 .build();
 
         List<Evento> eventosFiltrados = eventos.stream().filter(predicadosCombinados).toList();
 
-        //TODO archivo de config para el tamanio de pag
-        Integer tamanioPagina = 10;
         Integer totalElementos = eventosFiltrados.size();
         Integer totalPaginas = (int) Math.ceil((double) totalElementos / tamanioPagina);
         Integer inicioEventos = filtros.nroPagina() * tamanioPagina;

@@ -11,7 +11,9 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.utn.ba.tptacsg2.config.TestSecurityConfig;
-import org.utn.ba.tptacsg2.dtos.UsuarioDto;
+import org.utn.ba.tptacsg2.dtos.InputRegistroDto;
+import org.utn.ba.tptacsg2.models.users.Rol;
+import org.utn.ba.tptacsg2.models.users.Usuario;
 import org.utn.ba.tptacsg2.services.UsuarioService;
 
 import java.util.Arrays;
@@ -40,34 +42,34 @@ class UsuarioControllerTest {
     @DisplayName("Debe devolver 201 cuando se registra un usuario correctamente")
     void registrarUsuario_devuelve201CuandoSeRegistraCorrectamente() throws Exception {
         // Arrange
-        UsuarioDto usuarioDto = new UsuarioDto(1L, "testuser", "password123", "PARTICIPANTE");
-        doNothing().when(usuarioService).registrar(any(UsuarioDto.class));
+        InputRegistroDto inputRegistroDto = new InputRegistroDto(1L, "testuser", "password123", "PARTICIPANTE", "juan", "Perez", "123");
+        doNothing().when(usuarioService).registrar(any(InputRegistroDto.class));
 
         // Act & Assert
         mockMvc.perform(post("/user")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(usuarioDto)))
+                .content(objectMapper.writeValueAsString(inputRegistroDto)))
                 .andExpect(status().isCreated())
                 .andExpect(content().string("Usuario registrado correctamente"));
 
-        verify(usuarioService, times(1)).registrar(any(UsuarioDto.class));
+        verify(usuarioService, times(1)).registrar(any(InputRegistroDto.class));
     }
 
     @Test
     @DisplayName("Debe devolver 400 cuando ocurre una excepción durante el registro")
     void registrarUsuario_devuelve400CuandoOcurreExcepcion() throws Exception {
         // Arrange
-        UsuarioDto usuarioDto = new UsuarioDto(1L, "testuser", "password123", "PARTICIPANTE");
-        doThrow(new RuntimeException("El usuario ya existe")).when(usuarioService).registrar(any(UsuarioDto.class));
+        InputRegistroDto inputRegistroDto = new InputRegistroDto(1L, "testuser", "password123", "PARTICIPANTE", "juan", "Perez", "123");
+        doThrow(new RuntimeException("El usuario ya existe")).when(usuarioService).registrar(any(InputRegistroDto.class));
 
         // Act & Assert
         mockMvc.perform(post("/user")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(usuarioDto)))
+                .content(objectMapper.writeValueAsString(inputRegistroDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Error del servidor: El usuario ya existe"));
 
-        verify(usuarioService, times(1)).registrar(any(UsuarioDto.class));
+        verify(usuarioService, times(1)).registrar(any(InputRegistroDto.class));
     }
 
     @Test
@@ -75,8 +77,8 @@ class UsuarioControllerTest {
     @WithMockUser(roles = "ADMIN")
     void getUsuarios_devuelve200YListaDeUsuarios() throws Exception {
         // Arrange
-        UsuarioDto usuario1 = new UsuarioDto(1L, "user1", "pass1", "PARTICIPANTE");
-        UsuarioDto usuario2 = new UsuarioDto(2L, "user2", "pass2", "ORGANIZADOR");
+        Usuario usuario1 = new Usuario(1L, "user1", "pass1", Rol.ROLE_USER);
+        Usuario usuario2 = new Usuario(2L, "user2", "pass2", Rol.ROLE_ORGANIZER);
         
         when(usuarioService.getUsuarios())
             .thenReturn(Arrays.asList(usuario1, usuario2));

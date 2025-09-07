@@ -1,5 +1,6 @@
 package org.utn.ba.tptacsg2.controllers;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +22,7 @@ public class ParticipanteController {
         this.participanteService = participanteService;
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/inscripciones/{id_usuario}")
     public ResponseEntity<List<Inscripcion>> getInscripcionesDeUsuario(@PathVariable("id_usuario") String idUsuario) {
         List<Inscripcion> inscripciones = participanteService.getInscripcionesDeParticipante(idUsuario);

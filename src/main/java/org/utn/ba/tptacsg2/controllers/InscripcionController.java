@@ -27,9 +27,9 @@ public class InscripcionController {
         return ResponseEntity.ok(this.inscripcionService.inscribir(solicitudInscripcion));
     }
 
-    @PostMapping("/inscripciones/{eventoId}")
-    public ResponseEntity<Inscripcion> cancelarInscripcion(@PathVariable String eventoId) {
-        return ResponseEntity.ok(this.inscripcionService.cancelarInscripcion(eventoId));
+    @PostMapping("/inscripciones/{inscripcionId}")
+    public ResponseEntity<Inscripcion> cancelarInscripcion(@PathVariable String inscripcionId) {
+        return ResponseEntity.ok(this.inscripcionService.cancelarInscripcion(inscripcionId));
     }
 
     @GetMapping("/waitlist/{eventoId}")

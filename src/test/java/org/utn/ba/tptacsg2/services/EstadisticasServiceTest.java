@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.utn.ba.tptacsg2.dtos.EstadisticasUso;
+import org.utn.ba.tptacsg2.dtos.EstadisticasUsoDTO;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.actors.Participante;
 import org.utn.ba.tptacsg2.models.events.Evento;
@@ -14,13 +14,14 @@ import org.utn.ba.tptacsg2.models.events.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.events.Ubicacion;
 import org.utn.ba.tptacsg2.models.events.Precio;
 import org.utn.ba.tptacsg2.models.inscriptions.EstadoInscripcion;
-import org.utn.ba.tptacsg2.models.inscriptions.EstadoInscripcionV2;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
 import org.utn.ba.tptacsg2.repositories.EventoRepository;
 import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -53,7 +54,7 @@ class EstadisticasServiceTest {
         when(eventoRepository.getEventos()).thenReturn(eventos);
         when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
 
-        EstadisticasUso resultado = estadisticasService.obtenerEstadisticasUso();
+        EstadisticasUsoDTO resultado = estadisticasService.obtenerEstadisticasUso();
 
         assertNotNull(resultado);
         assertEquals(2, resultado.cantidadEventos());
@@ -73,7 +74,7 @@ class EstadisticasServiceTest {
         when(eventoRepository.getEventos()).thenReturn(eventos);
         when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
 
-        EstadisticasUso resultado = estadisticasService.obtenerEstadisticasUso();
+        EstadisticasUsoDTO resultado = estadisticasService.obtenerEstadisticasUso();
 
         // Tasa de conversión: 2 confirmadas vs 1 pendiente = 66.66%
         assertEquals(66.66, resultado.tasaConversionWaitlist());
@@ -88,7 +89,7 @@ class EstadisticasServiceTest {
         when(eventoRepository.getEventos()).thenReturn(eventos);
         when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
 
-        EstadisticasUso resultado = estadisticasService.obtenerEstadisticasUso();
+        EstadisticasUsoDTO resultado = estadisticasService.obtenerEstadisticasUso();
 
         // Promedio: 3 inscripciones / 2 eventos = 1.5
         assertEquals(1.5, resultado.promedioInscripcionesPorEvento());
@@ -103,7 +104,7 @@ class EstadisticasServiceTest {
         when(eventoRepository.getEventos()).thenReturn(eventos);
         when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
 
-        EstadisticasUso resultado = estadisticasService.obtenerEstadisticasUso();
+        EstadisticasUsoDTO resultado = estadisticasService.obtenerEstadisticasUso();
 
         assertAll("Todos los campos deben ser no nulos",
             () -> assertNotNull(resultado.cantidadEventos()),
@@ -126,7 +127,7 @@ class EstadisticasServiceTest {
         when(eventoRepository.getEventos()).thenReturn(eventos);
         when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
 
-        EstadisticasUso resultado = estadisticasService.obtenerEstadisticasUso();
+        EstadisticasUsoDTO resultado = estadisticasService.obtenerEstadisticasUso();
 
         assertAll("Todos los valores numéricos deben ser >= 0",
             () -> assertTrue(resultado.cantidadEventos() >= 0),
@@ -148,7 +149,7 @@ class EstadisticasServiceTest {
         when(eventoRepository.getEventos()).thenReturn(eventos);
         when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
 
-        EstadisticasUso resultado = estadisticasService.obtenerEstadisticasUso();
+        EstadisticasUsoDTO resultado = estadisticasService.obtenerEstadisticasUso();
 
         assertNotNull(resultado.eventoMasPopular());
         assertFalse(resultado.eventoMasPopular().isEmpty());
@@ -160,7 +161,7 @@ class EstadisticasServiceTest {
         when(eventoRepository.getEventos()).thenReturn(List.of());
         when(inscripcionRepository.getInscripciones()).thenReturn(List.of());
 
-        EstadisticasUso resultado = estadisticasService.obtenerEstadisticasUso();
+        EstadisticasUsoDTO resultado = estadisticasService.obtenerEstadisticasUso();
 
         assertEquals(0, resultado.cantidadEventos());
         assertEquals(0, resultado.cantidadEventosActivos());
@@ -170,39 +171,131 @@ class EstadisticasServiceTest {
     }
 
     private List<Evento> crearEventosDePrueba() {
-        Organizador organizador = new Organizador("1", "Juan", "Pérez", "12345678");
+        Organizador organizador = new Organizador("1", "Juan", "Pérez", "12345678",null);
 
         Evento evento1 = new Evento("1", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
-                "19:00", 5F, new Ubicacion("", "", ""), 10,
+                "19:00", 5F, new Ubicacion("", "", "", ""), 10, 0,
                 new Precio("Pesos", 100F), organizador,
-                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
+                new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null, new ArrayList<>());
 
         Evento evento2 = new Evento("2", "Workshop de Testing", "Testing", LocalDateTime.now(),
-                "14:00", 3F, new Ubicacion("", "", ""), 15,
+                "14:00", 3F, new Ubicacion("", "", "", ""), 15,0,
                 new Precio("Pesos", 150F), organizador,
-                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
+                new EstadoEvento("2", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null, new ArrayList<>());
 
         return Arrays.asList(evento1, evento2);
     }
 
-    private List<Inscripcion> crearInscripcionesDePrueba() {
-        Participante participante1 = new Participante("1", "Carlos", "López", "11111111");
-        Participante participante2 = new Participante("2", "Ana", "Martínez", "22222222");
-        Participante participante3 = new Participante("3", "Luis", "García", "33333333");
+    @Test
+    @DisplayName("Debe obtener correctamente la cantidad de eventos")
+    void obtenerCantidadEventos_DebeRetornarCantidadCorrecta() {
+        List<Evento> eventos = crearEventosDePrueba();
+        when(eventoRepository.getEventos()).thenReturn(eventos);
 
-        Organizador organizador = new Organizador("1", "Juan", "Pérez", "12345678");
+        Integer resultado = estadisticasService.obtenerCantidadEventos(null, null);
+
+        assertEquals(2, resultado);
+    }
+
+    @Test
+    @DisplayName("Debe obtener correctamente la cantidad de eventos activos")
+    void obtenerCantidadEventosActivos_DebeRetornarCantidadCorrecta() {
+        List<Evento> eventos = crearEventosDePrueba();
+        when(eventoRepository.getEventos()).thenReturn(eventos);
+
+        Integer resultado = estadisticasService.obtenerCantidadEventosActivos(null, null);
+
+        assertEquals(2, resultado);
+    }
+
+    @Test
+    @DisplayName("Debe obtener correctamente la cantidad total de inscripciones")
+    void obtenerCantidadInscripcionesTotales_DebeRetornarCantidadCorrecta() {
+        List<Inscripcion> inscripciones = crearInscripcionesDePrueba();
+        when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
+
+        Integer resultado = estadisticasService.obtenerCantidadInscripcionesTotales(null, null);
+
+        assertEquals(3, resultado);
+    }
+
+    @Test
+    @DisplayName("Debe obtener correctamente la cantidad de inscripciones confirmadas")
+    void obtenerCantidadInscripcionesConfirmadas_DebeRetornarCantidadCorrecta() {
+        List<Inscripcion> inscripciones = crearInscripcionesDePrueba();
+        when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
+
+        Integer resultado = estadisticasService.obtenerCantidadInscripcionesConfirmadas(null, null);
+
+        assertEquals(2, resultado);
+    }
+
+    @Test
+    @DisplayName("Debe obtener correctamente la cantidad de inscripciones en waitlist")
+    void obtenerCantidadInscripcionesWaitlist_DebeRetornarCantidadCorrecta() {
+        List<Inscripcion> inscripciones = crearInscripcionesDePrueba();
+        when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
+
+        Integer resultado = estadisticasService.obtenerCantidadInscripcionesWaitlist(null, null);
+
+        assertEquals(1, resultado);
+    }
+
+    @Test
+    @DisplayName("Debe obtener correctamente la tasa de conversión waitlist")
+    void obtenerTasaConversionWaitlist_DebeRetornarTasaCorrecta() {
+        List<Inscripcion> inscripciones = crearInscripcionesDePrueba();
+        when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
+
+        Double resultado = estadisticasService.obtenerTasaConversionWaitlist(null, null);
+
+        assertEquals(66.66, resultado);
+    }
+
+    @Test
+    @DisplayName("Debe obtener correctamente el evento más popular")
+    void obtenerEventoMasPopular_DebeRetornarEventoCorrecto() {
+        List<Evento> eventos = crearEventosDePrueba();
+        List<Inscripcion> inscripciones = crearInscripcionesDePrueba();
+        when(eventoRepository.getEventos()).thenReturn(eventos);
+        when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
+
+        String resultado = estadisticasService.obtenerEventoMasPopular(null, null);
+
+        assertEquals("Seminario de Mocks", resultado);
+    }
+
+    @Test
+    @DisplayName("Debe obtener correctamente el promedio de inscripciones por evento")
+    void obtenerPromedioInscripcionesPorEvento_DebeRetornarPromedioCorecto() {
+        List<Evento> eventos = crearEventosDePrueba();
+        List<Inscripcion> inscripciones = crearInscripcionesDePrueba();
+        when(eventoRepository.getEventos()).thenReturn(eventos);
+        when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
+
+        Double resultado = estadisticasService.obtenerPromedioInscripcionesPorEvento(null, null);
+
+        assertEquals(1.5, resultado);
+    }
+
+    private List<Inscripcion> crearInscripcionesDePrueba() {
+        Participante participante1 = new Participante("1", "Carlos", "López", "11111111",null);
+        Participante participante2 = new Participante("2", "Ana", "Martínez", "22222222",null);
+        Participante participante3 = new Participante("3", "Luis", "García", "33333333",null);
+
+        Organizador organizador = new Organizador("1", "Juan", "Pérez", "12345678",null);
         Evento evento1 = new Evento("1", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
-                "19:00", 5F, new Ubicacion("", "", ""), 10,
+                "19:00", 5F, new Ubicacion("", "", "", ""), 10, 0,
                 new Precio("Pesos", 100F), organizador,
-                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
+                new EstadoEvento("3", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null, new ArrayList<>());
 
         Evento evento2 = new Evento("2", "Workshop de Testing", "Testing", LocalDateTime.now(),
-                "14:00", 3F, new Ubicacion("", "", ""), 15,
+                "14:00", 3F, new Ubicacion("", "", "", ""), 15,0,
                 new Precio("Pesos", 150F), organizador,
-                new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null);
+                new EstadoEvento("4", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null, new ArrayList<>());
 
-        EstadoInscripcionV2 estadoAceptada = new EstadoInscripcionV2("1",TipoEstadoInscripcion.ACEPTADA, null, LocalDateTime.now());
-        EstadoInscripcionV2 estadoPendiente = new EstadoInscripcionV2("1",TipoEstadoInscripcion.PENDIENTE, null, LocalDateTime.now());
+        EstadoInscripcion estadoAceptada = new EstadoInscripcion("1",TipoEstadoInscripcion.ACEPTADA, null, LocalDateTime.now());
+        EstadoInscripcion estadoPendiente = new EstadoInscripcion("1",TipoEstadoInscripcion.PENDIENTE, null, LocalDateTime.now());
 
         Inscripcion inscripcion1 = new Inscripcion("1", participante1, LocalDateTime.now(), estadoAceptada, evento1);
         Inscripcion inscripcion2 = new Inscripcion("2", participante2, LocalDateTime.now(), estadoAceptada, evento1);
@@ -213,5 +306,52 @@ class EstadisticasServiceTest {
         estadoPendiente.setInscripcion(inscripcion3);
 
         return Arrays.asList(inscripcion1, inscripcion2, inscripcion3);
+    }
+
+    @Test
+    @DisplayName("Debe filtrar eventos por fecha correctamente")
+    void obtenerCantidadEventos_ConFiltroFechas_DebeRetornarCantidadFiltrada() {
+        List<Evento> eventos = crearEventosDePrueba();
+        when(eventoRepository.getEventos()).thenReturn(eventos);
+
+        LocalDate fechaDesde = LocalDate.now().minusDays(1);
+        LocalDate fechaHasta = LocalDate.now().plusDays(1);
+
+        Integer resultado = estadisticasService.obtenerCantidadEventos(fechaDesde, fechaHasta);
+
+        assertEquals(2, resultado);
+    }
+
+    @Test
+    @DisplayName("Debe filtrar inscripciones por fecha correctamente")
+    void obtenerCantidadInscripcionesTotales_ConFiltroFechas_DebeRetornarCantidadFiltrada() {
+        List<Inscripcion> inscripciones = crearInscripcionesDePrueba();
+        when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
+
+        LocalDate fechaDesde = LocalDate.now().minusDays(1);
+        LocalDate fechaHasta = LocalDate.now().plusDays(1);
+
+        Integer resultado = estadisticasService.obtenerCantidadInscripcionesTotales(fechaDesde, fechaHasta);
+
+        assertEquals(3, resultado);
+    }
+
+    @Test
+    @DisplayName("Debe obtener estadísticas con filtros de fecha específicos")
+    void obtenerEstadisticasUso_ConFiltroFechas_DebeRetornarEstadisticasFiltradas() {
+        List<Evento> eventos = crearEventosDePrueba();
+        List<Inscripcion> inscripciones = crearInscripcionesDePrueba();
+
+        when(eventoRepository.getEventos()).thenReturn(eventos);
+        when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
+
+        LocalDate fechaDesde = LocalDate.now().minusDays(1);
+        LocalDate fechaHasta = LocalDate.now().plusDays(1);
+
+        EstadisticasUsoDTO resultado = estadisticasService.obtenerEstadisticasUso(fechaDesde, fechaHasta, null);
+
+        assertNotNull(resultado);
+        assertEquals(2, resultado.cantidadEventos());
+        assertEquals(3, resultado.cantidadInscripcionesTotales());
     }
 }

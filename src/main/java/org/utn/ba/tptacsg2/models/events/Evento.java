@@ -1,8 +1,11 @@
 package org.utn.ba.tptacsg2.models.events;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 public record Evento (
@@ -14,8 +17,11 @@ public record Evento (
      Float duracion,
      Ubicacion ubicacion,
      Integer cupoMaximo,
+     Integer cupoMinimo,
      Precio precio,
      Organizador organizador,
+     @JsonManagedReference
      EstadoEvento estado,
-     Categoria categoria
+     Categoria categoria,
+     List<String> etiquetas
 ) {}

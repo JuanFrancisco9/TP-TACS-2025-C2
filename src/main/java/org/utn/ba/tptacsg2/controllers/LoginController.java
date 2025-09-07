@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.utn.ba.tptacsg2.dtos.UsuarioDto;
+import org.utn.ba.tptacsg2.dtos.InputRegistroDto;
 import org.utn.ba.tptacsg2.models.users.Usuario;
 import org.utn.ba.tptacsg2.services.UsuarioService;
 
@@ -23,7 +23,7 @@ public class LoginController {
      * @return 200 si el login es exitoso, 401 si no lo es
      */
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody UsuarioDto usuario) {
+    public ResponseEntity<String> login(@RequestBody InputRegistroDto usuario) {
         Usuario user;
         try {
             user = usuarioService.login(usuario);

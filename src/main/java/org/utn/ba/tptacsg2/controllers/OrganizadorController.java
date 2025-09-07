@@ -1,5 +1,6 @@
 package org.utn.ba.tptacsg2.controllers;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +22,7 @@ public class OrganizadorController {
         this.organizadorService = organizadorService;
     }
 
+    @PreAuthorize("hasRole('ORGANIZER')")
     @GetMapping("/eventos/{id_organizador}")
     public ResponseEntity<List<Evento>> getEventosDeOrganizador(@PathVariable("id_organizador") String idOrganizador) {
         List<Evento> eventos = organizadorService.getEventosDeOrganizador(idOrganizador);

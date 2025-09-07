@@ -2,6 +2,7 @@ package org.utn.ba.tptacsg2.controllers;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.utn.ba.tptacsg2.dtos.FiltrosDTO;
 import org.utn.ba.tptacsg2.dtos.ParticipanteDTO;
@@ -23,6 +24,7 @@ public class EventoController {
         this.eventoService = eventoService;
     }
 
+    @PreAuthorize("hasRole('ORGANIZER')")
     @PostMapping()
     public ResponseEntity<Evento> crearEvento(@RequestBody SolicitudEvento solicitudEvento) {
         Evento evento = eventoService.registrarEvento(solicitudEvento);
@@ -30,6 +32,7 @@ public class EventoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(evento);
     }
 
+    @PreAuthorize("hasRole('ORGANIZER')")
     @PutMapping("/{id_evento}")
     public ResponseEntity<Evento> modificarEvento(@PathVariable ("id_evento") String idEvento , @RequestParam("estado") TipoEstadoEvento estado) {
         Evento evento = eventoService.cambiarEstado(idEvento, estado);
@@ -42,7 +45,7 @@ public class EventoController {
      * output: 200 + lista con parcipantes,
      *         404 + mensaje de error, en caso de fallo
      */
-
+    @PreAuthorize("hasRole('ORGANIZER')")
     @GetMapping("/{eventoId}/participantes")
     public ResponseEntity<?> getParticipantesFromEvento(@PathVariable("eventoId") String eventoId){
         List<ParticipanteDTO> participantesDTO;
@@ -62,6 +65,7 @@ public class EventoController {
      * output: 200 + lista con eventos, total de eventos y total de paginas,
      *         404 + mensaje de error, en caso de fallo
      */
+    @PreAuthorize("hasRole('USER')")
     @GetMapping()
     public ResponseEntity<ResultadoBusquedaEvento> buscarEventos(
             @RequestParam(required = false) LocalDate fechaInicio,
@@ -73,7 +77,7 @@ public class EventoController {
             @RequestParam() String palabrasClave,
             @RequestParam(defaultValue = "1") Integer nroPagina){
 
-        FiltrosDTO filtros = new FiltrosDTO(fechaInicio, fechaFin, categoria, precioMin, precioMax, palabrasClave, nroPagina);
+        FiltrosDTO filtros = new FiltrosDTO(fechaInicio, fechaFin, categoria, ubicacion, precioMin, precioMax, palabrasClave, nroPagina);
 
         ResultadoBusquedaEvento resultado = eventoService.buscarEventos(filtros);
 
