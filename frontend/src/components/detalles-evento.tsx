@@ -1,15 +1,31 @@
-import React from 'react';
-import { 
-  Card, 
-  Button, 
-  Row, 
-  Col, 
-  Container, 
-  Badge, 
-  ListGroup, 
+import * as React from 'react';
+import {
+  Container,
+  Card,
+  CardMedia,
+  CardContent,
+  CardActions,
+  Typography,
+  Button,
+  Chip,
   Alert,
-  Modal
-} from 'react-bootstrap';
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Stack,
+  Divider,
+  Box,
+} from '@mui/material';
+import Grid from '@mui/material/Grid'; // ✅ MUI 7: Grid v2 estable
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import EventIcon from '@mui/icons-material/Event';
+import PlaceIcon from '@mui/icons-material/Place';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import PersonIcon from '@mui/icons-material/Person';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import type { Evento } from '../services/eventoService';
 
 interface DetallesEventoProps {
@@ -18,211 +34,185 @@ interface DetallesEventoProps {
   onInscribirse?: () => void;
 }
 
-const DetallesEvento: React.FC<DetallesEventoProps> = ({
-  evento,
-  onVolver,
-  onInscribirse
-}) => {
+function renderPrecio(precio?: any) {
+  if (!precio) return null;
+  if (typeof precio === 'string') return precio;
+  if (precio?.cantidad != null && precio?.moneda) return `${precio.cantidad} ${precio.moneda}`;
+  return String(precio);
+}
+
+const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onInscribirse }) => {
   const [showModal, setShowModal] = React.useState(false);
 
-  const handleInscribirse = () => {
-    if (onInscribirse) {
-      onInscribirse();
-    } else {
-      setShowModal(true);
-    }
-  };
+  const handleInscribirse = () => (onInscribirse ? onInscribirse() : setShowModal(true));
+
+  const estadoColor: 'success' | 'error' | 'warning' =
+    evento.estado === 'ACTIVO' ? 'success' : evento.estado === 'CANCELADO' ? 'error' : 'warning';
 
   return (
-    <Container className="py-4">
-      {/* Botón de volver */}
-      <Row className="mb-4">
-        <Col>
-          <Button 
-            variant="outline-secondary" 
-            onClick={onVolver}
-            className="mb-3"
-          >
-            ← Volver al listado
-          </Button>
-        </Col>
-      </Row>
+    <Container sx={{ py: 4 }}>
+      <Box sx={{ mb: 3 }}>
+        <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={onVolver}>
+          Volver al listado
+        </Button>
+      </Box>
 
-      <Row>
+      <Grid container spacing={3}>
         {/* Imagen principal */}
-        <Col lg={6} className="mb-4">
+        <Grid size={{ xs: 12, lg: 6 }}>
           {evento.imagen && (
             <Card>
-              <Card.Img 
-                variant="top" 
-                src={evento.imagen} 
+              <CardMedia
+                component="img"
+                image={evento.imagen}
                 alt={evento.titulo}
-                style={{ height: '400px', objectFit: 'cover' }}
+                sx={{ height: 400, objectFit: 'cover' }}
               />
             </Card>
           )}
-        </Col>
+        </Grid>
 
         {/* Información principal */}
-        <Col lg={6}>
-          <Card className="h-100">
-            <Card.Body>
-              <div className="d-flex justify-content-between align-items-start mb-3">
-                <Card.Title className="h2">{evento.titulo}</Card.Title>
-                {evento.categoria && (
-                  <Badge bg="primary" className="ms-2">
-                    {evento.categoria}
-                  </Badge>
-                )}
-              </div>
+        <Grid size={{ xs: 12, lg: 6 }}>
+          <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2, gap: 2 }}>
+                <Typography variant="h4" component="h1">
+                  {evento.titulo}
+                </Typography>
+                {evento.categoria && <Chip label={evento.categoria} color="primary" />}
+              </Box>
 
-              <Card.Text className="lead mb-4">
+              <Typography variant="subtitle1" sx={{ mb: 3 }}>
                 {evento.descripcion}
-              </Card.Text>
+              </Typography>
 
-              {/* Información básica */}
-              <ListGroup className="mb-4">
-                <ListGroup.Item className="d-flex align-items-center">
-                  <i className="bi bi-calendar-event me-3 text-primary"></i>
-                  <div>
+              <Stack spacing={1.5} divider={<Divider flexItem />} sx={{ mb: 3 }}>
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <EventIcon color="action" fontSize="small" />
+                  <Typography variant="body2">
                     <strong>Fecha:</strong> {evento.fecha}
-                  </div>
-                </ListGroup.Item>
+                  </Typography>
+                </Stack>
 
-                <ListGroup.Item className="d-flex align-items-center">
-                  <i className="bi bi-geo-alt me-3 text-primary"></i>
-                  <div>
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <PlaceIcon color="action" fontSize="small" />
+                  <Typography variant="body2">
                     <strong>Ubicación:</strong> {evento.ubicacion.localidad} - {evento.ubicacion.direccion}
-                  </div>
-                </ListGroup.Item>
+                  </Typography>
+                </Stack>
 
                 {evento.duracion && (
-                  <ListGroup.Item className="d-flex align-items-center">
-                    <i className="bi bi-clock me-3 text-primary"></i>
-                    <div>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <ScheduleIcon color="action" fontSize="small" />
+                    <Typography variant="body2">
                       <strong>Duración:</strong> {evento.duracion}
-                    </div>
-                  </ListGroup.Item>
+                    </Typography>
+                  </Stack>
                 )}
 
                 {evento.organizador && (
-                  <ListGroup.Item className="d-flex align-items-center">
-                    <i className="bi bi-person me-3 text-primary"></i>
-                    <div>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <PersonIcon color="action" fontSize="small" />
+                    <Typography variant="body2">
                       <strong>Organizador:</strong> {evento.organizador}
-                    </div>
-                  </ListGroup.Item>
+                    </Typography>
+                  </Stack>
                 )}
 
                 {evento.precio && (
-                  <ListGroup.Item className="d-flex align-items-center">
-                    <i className="bi bi-currency-dollar me-3 text-success"></i>
-                    <div>
-                      <strong>Precio:</strong> 
-                      <span className="text-success fw-bold ms-2">
-                        {evento.precio.cantidad} {evento.precio.moneda}
-                      </span>
-                    </div>
-                  </ListGroup.Item>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <AttachMoneyIcon color="success" fontSize="small" />
+                    <Typography variant="body2" color="success.main" fontWeight="bold">
+                      <strong>Precio:</strong> {renderPrecio(evento.precio)}
+                    </Typography>
+                  </Stack>
                 )}
-              </ListGroup>
+              </Stack>
 
-              {/* Cupos */}
               {(evento.cupoMinimo || evento.cupoMaximo) && (
-                <Alert variant="info" className="mb-4">
-                  <div className="d-flex justify-content-between">
-                    {evento.cupoMinimo && (
-                      <span>Cupo Mínimo: <strong>{evento.cupoMinimo}</strong></span>
+                <Alert icon={<InfoOutlinedIcon />} severity="info" sx={{ mb: 3 }}>
+                  <Stack direction="row" justifyContent="space-between" flexWrap="wrap" gap={2}>
+                    {evento.cupoMinimo != null && (
+                      <span>
+                        Cupo Mínimo: <strong>{evento.cupoMinimo}</strong>
+                      </span>
                     )}
-                    {evento.cupoMaximo && (
-                      <span>Cupo Máximo: <strong>{evento.cupoMaximo}</strong></span>
+                    {evento.cupoMaximo != null && (
+                      <span>
+                        Cupo Máximo: <strong>{evento.cupoMaximo}</strong>
+                      </span>
                     )}
-                  </div>
+                  </Stack>
                 </Alert>
               )}
+            </CardContent>
 
-              {/* Botón de acción */}
-              <Button 
-                variant="primary" 
-                size="lg"
-                onClick={handleInscribirse}
-                className="w-100"
-              >
+            <Box sx={{ flexGrow: 1 }} />
+
+            <CardActions sx={{ p: 2, pt: 0 }}>
+              <Button variant="contained" size="large" fullWidth onClick={handleInscribirse}>
                 Inscribirse al Evento
               </Button>
-            </Card.Body>
+            </CardActions>
           </Card>
-        </Col>
-      </Row>
+        </Grid>
+      </Grid>
 
-      {/* Información adicional */}
-      <Row className="mt-4">
-        <Col lg={6}>
-          {/* Etiquetas */}
+      <Grid container spacing={3} sx={{ mt: 0 }}>
+        <Grid size={{ xs: 12, lg: 6 }}>
           {evento.etiquetas && evento.etiquetas.length > 0 && (
-            <Card className="mb-4">
-              <Card.Header>
-                <h5 className="mb-0">
-                  <i className="bi bi-tags me-2"></i>
-                  Etiquetas
-                </h5>
-              </Card.Header>
-              <Card.Body>
-                <div className="d-flex flex-wrap gap-2">
-                  {evento.etiquetas.map((etiqueta, index) => (
-                    <Badge key={index} bg="secondary" className="fs-6">
-                      {etiqueta}
-                    </Badge>
+            <Card sx={{ mb: 3 }}>
+              <CardContent>
+                <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+                  <LocalOfferIcon />
+                  <Typography variant="h6" component="h2" sx={{ m: 0 }}>
+                    Etiquetas
+                  </Typography>
+                </Stack>
+                <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                  {evento.etiquetas.map((etiqueta, i) => (
+                    <Chip key={`${etiqueta}-${i}`} label={etiqueta} variant="outlined" />
                   ))}
-                </div>
-              </Card.Body>
+                </Stack>
+              </CardContent>
             </Card>
           )}
-        </Col>
+        </Grid>
 
-        <Col lg={6}>
-          {/* Estado del evento */}
-          <Card className="mb-4">
-            <Card.Header>
-              <h5 className="mb-0">
-                <i className="bi bi-info-circle me-2"></i>
-                Estado del Evento
-              </h5>
-            </Card.Header>
-            <Card.Body>
-              <div className="d-flex align-items-center">
-                <Badge 
-                  bg={evento.estado === 'ACTIVO' ? 'success' : evento.estado === 'CANCELADO' ? 'danger' : 'warning'}
-                  className="fs-6"
-                >
-                  {evento.estado}
-                </Badge>
-              </div>
-            </Card.Body>
+        <Grid size={{ xs: 12, lg: 6 }}>
+          <Card sx={{ mb: 3 }}>
+            <CardContent>
+              <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+                <InfoOutlinedIcon />
+                <Typography variant="h6" component="h2" sx={{ m: 0 }}>
+                  Estado del Evento
+                </Typography>
+              </Stack>
+              <Chip label={evento.estado} color={estadoColor} sx={{ fontWeight: 600 }} />
+            </CardContent>
           </Card>
-        </Col>
-      </Row>
+        </Grid>
+      </Grid>
 
-      {/* Modal de confirmación */}
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirmar Inscripción</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          ¿Estás seguro de que quieres inscribirte a "{evento.titulo}"?
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Cancelar
-          </Button>
-          <Button variant="primary" onClick={() => {
-            setShowModal(false);
-            alert(`Te has inscrito a: ${evento.titulo}`);
-          }}>
+      <Dialog open={showModal} onClose={() => setShowModal(false)}>
+        <DialogTitle>Confirmar Inscripción</DialogTitle>
+        <DialogContent>
+          <Typography>¿Estás seguro de que quieres inscribirte a “{evento.titulo}”?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowModal(false)}>Cancelar</Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setShowModal(false);
+              alert(`Te has inscrito a: ${evento.titulo}`);
+            }}
+          >
             Confirmar Inscripción
           </Button>
-        </Modal.Footer>
-      </Modal>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };

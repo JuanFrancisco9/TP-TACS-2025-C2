@@ -1,7 +1,20 @@
-import React from 'react';
-import { Card, Button, ListGroup, Row, Col } from 'react-bootstrap';
+import * as React from 'react';
+import {
+  Card,
+  CardMedia,
+  CardContent,
+  CardActions,
+  Typography,
+  Button,
+  Stack,
+  Divider,
+  Box
+} from '@mui/material';
+import EventIcon from '@mui/icons-material/Event';
+import PlaceIcon from '@mui/icons-material/Place';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 
-interface CardEventoProps {
+interface CardEvento {
   titulo: string;
   descripcion: string;
   fecha: string;
@@ -12,7 +25,7 @@ interface CardEventoProps {
   onInscribirse?: () => void;
 }
 
-const CardEvento: React.FC<CardEventoProps> = ({
+const CardEvento: React.FC<CardEvento> = ({
   titulo,
   descripcion,
   fecha,
@@ -23,72 +36,96 @@ const CardEvento: React.FC<CardEventoProps> = ({
   onInscribirse
 }) => {
   return (
-    <Card className="h-100 shadow-sm" style={{ minHeight: '400px' }}>
+    <Card
+      sx={{
+        height: '100%',
+        minHeight: 400,
+        display: 'flex',
+        flexDirection: 'column',
+        borderRadius: 2,
+        boxShadow: 3
+      }}
+    >
       {imagen && (
-        <Card.Img 
-          variant="top" 
-          src={imagen} 
+        <CardMedia
+          component="img"
+          height="200"
+          image={imagen}
           alt={titulo}
-          style={{ height: '200px', objectFit: 'cover' }}
+          sx={{ objectFit: 'cover' }}
         />
       )}
-      
-      <Card.Body className="d-flex flex-column">
-        <Card.Title>{titulo}</Card.Title>
-        
-        <Card.Text className="text-muted flex-grow-1">
+
+      <CardContent sx={{ flexGrow: 1 }}>
+        <Typography variant="h6" gutterBottom>
+          {titulo}
+        </Typography>
+
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{
+            mb: 2,
+            display: '-webkit-box',
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden'
+          }}
+        >
           {descripcion}
-        </Card.Text>
-        
-        <ListGroup className="list-group-flush mb-3">
-          <ListGroup.Item className="d-flex align-items-center">
-            <i className="bi bi-calendar-event me-2"></i>
-            <small className="text-muted">{fecha}</small>
-          </ListGroup.Item>
-          
-          <ListGroup.Item className="d-flex align-items-center">
-            <i className="bi bi-geo-alt me-2"></i>
-            <small className="text-muted">{ubicacion}</small>
-          </ListGroup.Item>
-          
+        </Typography>
+
+        <Stack spacing={1} divider={<Divider flexItem />}>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <EventIcon fontSize="small" color="action" />
+            <Typography variant="body2" color="text.secondary">
+              {fecha}
+            </Typography>
+          </Stack>
+
+          <Stack direction="row" spacing={1} alignItems="center">
+            <PlaceIcon fontSize="small" color="action" />
+            <Typography variant="body2" color="text.secondary">
+              {ubicacion}
+            </Typography>
+          </Stack>
+
           {precio && (
-            <ListGroup.Item className="d-flex align-items-center">
-              <i className="bi bi-currency-dollar me-2"></i>
-              <small className="text-success fw-bold">{precio}</small>
-            </ListGroup.Item>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <AttachMoneyIcon fontSize="small" color="success" />
+              <Typography variant="body2" color="success.main" fontWeight="bold">
+                {precio}
+              </Typography>
+            </Stack>
           )}
-        </ListGroup>
-        
-        <Card.Body className="pt-0">
-          <Row className="g-2">
-            {onVerDetalle && (
-              <Col>
-                <Button 
-                  variant="outline-primary" 
-                  size="sm" 
-                  className="w-100"
-                  onClick={onVerDetalle}
-                >
-                  Ver Detalle
-                </Button>
-              </Col>
-            )}
-            
-            {onInscribirse && (
-              <Col>
-                <Button 
-                  variant="primary" 
-                  size="sm" 
-                  className="w-100"
-                  onClick={onInscribirse}
-                >
-                  Inscribirse
-                </Button>
-              </Col>
-            )}
-          </Row>
-        </Card.Body>
-      </Card.Body>
+        </Stack>
+      </CardContent>
+
+      <Box sx={{ flexGrow: 1 }} />
+
+      <CardActions sx={{ p: 2, pt: 0 }}>
+        {onVerDetalle && (
+          <Button
+            variant="outlined"
+            size="small"
+            fullWidth
+            onClick={onVerDetalle}
+          >
+            Ver Detalle
+          </Button>
+        )}
+
+        {onInscribirse && (
+          <Button
+            variant="contained"
+            size="small"
+            fullWidth
+            onClick={onInscribirse}
+          >
+            Inscribirse
+          </Button>
+        )}
+      </CardActions>
     </Card>
   );
 };

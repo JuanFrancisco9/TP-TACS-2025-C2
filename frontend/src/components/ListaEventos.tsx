@@ -1,5 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Row, Col, Container, Pagination } from 'react-bootstrap';
+import * as React from 'react';
+import {
+  Container,
+  Typography,
+  Pagination,
+  CircularProgress,
+  Alert,
+  Button,
+  Box,
+  Stack,
+} from '@mui/material';
+import Grid from '@mui/material/Grid'; // ✅ Grid v2 en MUI 7
 import CardEvento from './card-evento';
 import { EventoService } from '../services/eventoService';
 import type { Evento } from '../services/eventoService';
@@ -11,16 +21,16 @@ interface ListaEventosProps {
 
 const ListaEventos: React.FC<ListaEventosProps> = ({
   onVerDetalle,
-  onInscribirse
+  onInscribirse,
 }) => {
-  const [eventos, setEventos] = useState<Evento[]>([]);
-  const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [paginaActual, setPaginaActual] = useState(0);
-  const [totalPaginas, setTotalPaginas] = useState(0);
-  const [totalElementos, setTotalElementos] = useState(0);
+  const [eventos, setEventos] = React.useState<Evento[]>([]);
+  const [cargando, setCargando] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+  const [paginaActual, setPaginaActual] = React.useState(0); // 0-based
+  const [totalPaginas, setTotalPaginas] = React.useState(0);
+  const [totalElementos, setTotalElementos] = React.useState(0);
 
-  useEffect(() => {
+  React.useEffect(() => {
     console.log('useEffect montó / paginaActual=', paginaActual);
     cargarEventos();
   }, [paginaActual]);
@@ -29,147 +39,133 @@ const ListaEventos: React.FC<ListaEventosProps> = ({
     try {
       console.log('🔄 ListaEventos.cargarEventos - Iniciando carga de eventos');
       console.log('📄 Página actual:', paginaActual);
-      
+
       setCargando(true);
       setError(null);
-      
+
       const resultado = await EventoService.obtenerEventos(paginaActual);
-      
+
       console.log('✅ ListaEventos.cargarEventos - Eventos cargados exitosamente:');
-      console.log('�� Eventos recibidos:', resultado.eventos);
+      console.log('📦 Eventos recibidos:', resultado.eventos);
       console.log('📄 Total páginas:', resultado.totalPaginas);
       console.log('🔢 Total elementos:', resultado.totalElementos);
-      
+
       setEventos(resultado.eventos);
       setTotalPaginas(resultado.totalPaginas);
       setTotalElementos(resultado.totalElementos);
-      
     } catch (error) {
       console.error('❌ ListaEventos.cargarEventos - Error cargando eventos:');
       console.error('🚨 Error completo:', error);
       setError('Error al cargar los eventos');
     } finally {
-      console.log('�� ListaEventos.cargarEventos - Finalizando carga');
+      console.log('✅ ListaEventos.cargarEventos - Finalizando carga');
       setCargando(false);
     }
   };
 
+  const handlePageChange = (_: React.ChangeEvent<unknown>, page1Based: number) => {
+    // MUI Pagination es 1-based, nuestro estado es 0-based
+    setPaginaActual(page1Based - 1);
+  };
+
+  // Loading
   if (cargando) {
     return (
-      <Container className="py-4">
-        <div className="text-center">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Cargando...</span>
-          </div>
-          <p className="mt-2">Cargando eventos...</p>
-        </div>
+      <Container sx={{ py: 4 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+          <CircularProgress />
+          <Typography>Cargando eventos...</Typography>
+        </Box>
       </Container>
     );
   }
 
+  // Error
   if (error) {
     return (
-      <Container className="py-4">
-        <div className="alert alert-danger" role="alert">
-          <h4 className="alert-heading">Error</h4>
-          <p>{error}</p>
-          <button 
-            className="btn btn-outline-danger" 
-            onClick={cargarEventos}
-          >
-            Reintentar
-          </button>
-        </div>
+      <Container sx={{ py: 4 }}>
+        <Alert
+          severity="error"
+          action={
+            <Button color="inherit" size="small" onClick={cargarEventos}>
+              Reintentar
+            </Button>
+          }
+        >
+          {error}
+        </Alert>
       </Container>
     );
   }
 
+  // Vacío
   if (eventos.length === 0) {
     console.log('🔍 ListaEventos - No hay eventos para mostrar');
     console.log('📊 Estado actual:', { eventos, cargando, error, totalElementos });
     return (
-      <Container className="py-4">
-        <div className="text-center">
-          <h3>No hay eventos disponibles</h3>
-          <p className="text-muted">Vuelve más tarde para ver nuevos eventos.</p>
-        </div>
+      <Container sx={{ py: 4 }}>
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography variant="h5">No hay eventos disponibles</Typography>
+          <Typography variant="body2" color="text.secondary">
+            Vuelve más tarde para ver nuevos eventos.
+          </Typography>
+        </Box>
       </Container>
     );
   }
 
-  const handlePageChange = (page: number) => {
-    setPaginaActual(page - 1); // Pagination es 1-based, pero nuestra API es 0-based
-  };
-
   return (
-    <Container className="py-5">
-      <Row className="mb-5">
-        <Col>
-          <h1 className="text-center mb-4">Listado de Eventos</h1>
-          <p className="text-center text-muted">
-            Mostrando {eventos.length} de {totalElementos} eventos
-          </p>
-        </Col>
-      </Row>
-      
-      <Row className="g-4 mb-5 justify-content-center">
-        {eventos.map((evento, index) => (
-            <Col key={evento.id || index} lg={4} md={6} sm={12} className="mb-4 d-flex justify-content-center">
-              <div style={{ width: '100%', maxWidth: '350px' }}>
-                <CardEvento
-                  titulo={evento.titulo}
-                  descripcion={evento.descripcion}
-                  fecha={evento.fecha}
-                  ubicacion={evento.ubicacion.localidad} // Usar localidad de la ubicación
-                  precio={evento.precio ? `${evento.precio.cantidad} ${evento.precio.moneda}` : undefined}
-                  imagen={evento.imagen}
-                  onVerDetalle={() => onVerDetalle(evento)}
-                  onInscribirse={() => onInscribirse(evento.titulo)}
-                />
-              </div>
-            </Col>
+    <Container sx={{ py: 5 }}>
+      <Stack spacing={1} sx={{ mb: 4, textAlign: 'center' }}>
+        <Typography variant="h4">Listado de Eventos</Typography>
+        <Typography variant="body2" color="text.secondary">
+          Mostrando {eventos.length} de {totalElementos} eventos
+        </Typography>
+      </Stack>
+
+      <Grid container spacing={3} sx={{ mb: 5, justifyContent: 'center' }}>
+        {eventos.map((evento) => (
+          <Grid
+            key={evento.id}
+            size={{ xs: 12, sm: 6, md: 4, lg: 4 }} // ✅ sin `item`, usando `size`
+            sx={{ display: 'flex', justifyContent: 'center' }}
+          >
+            <Box sx={{ width: '100%', maxWidth: 350 }}>
+              <CardEvento
+                titulo={evento.titulo}
+                descripcion={evento.descripcion}
+                fecha={evento.fecha}
+                ubicacion={evento.ubicacion.localidad}
+                // soporta string o { cantidad, moneda }
+                precio={
+                  (evento as any).precio?.cantidad != null
+                    ? `${(evento as any).precio.cantidad} ${(evento as any).precio.moneda}`
+                    : (evento as any).precio
+                }
+                imagen={evento.imagen}
+                onVerDetalle={() => onVerDetalle(evento)}
+                onInscribirse={() => onInscribirse(evento.titulo)}
+              />
+            </Box>
+          </Grid>
         ))}
-      </Row>
+      </Grid>
 
       {/* Paginación */}
       {totalPaginas > 1 && (
-        <Row className="mt-4">
-          <Col className="d-flex justify-content-center">
-            <Pagination>
-              <Pagination.First 
-                onClick={() => handlePageChange(1)} 
-                disabled={paginaActual === 0}
-              />
-              <Pagination.Prev 
-                onClick={() => handlePageChange(paginaActual)} 
-                disabled={paginaActual === 0}
-              />
-              
-              {/* Mostrar páginas */}
-              {Array.from({ length: Math.min(5, totalPaginas) }, (_, i) => {
-                const pageNumber = i + 1;
-                return (
-                  <Pagination.Item
-                    key={pageNumber}
-                    active={pageNumber === paginaActual + 1}
-                    onClick={() => handlePageChange(pageNumber)}
-                  >
-                    {pageNumber}
-                  </Pagination.Item>
-                );
-              })}
-              
-              <Pagination.Next 
-                onClick={() => handlePageChange(paginaActual + 2)} 
-                disabled={paginaActual >= totalPaginas - 1}
-              />
-              <Pagination.Last 
-                onClick={() => handlePageChange(totalPaginas)} 
-                disabled={paginaActual >= totalPaginas - 1}
-              />
-            </Pagination>
-          </Col>
-        </Row>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+          <Pagination
+            count={totalPaginas}
+            page={paginaActual + 1}
+            onChange={handlePageChange}
+            color="primary"
+            shape="rounded"
+            siblingCount={1}
+            boundaryCount={1}
+            showFirstButton
+            showLastButton
+          />
+        </Box>
       )}
     </Container>
   );
