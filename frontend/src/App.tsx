@@ -1,35 +1,42 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import ListaEventos from './components/ListaEventos';
+import DetallesEvento from './components/detalles-evento';
+import type { Evento } from './services/eventoService';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [eventoSeleccionado, setEventoSeleccionado] = useState<Evento | null>(null);
 
+  const handleVerDetalle = (evento: Evento) => {
+    setEventoSeleccionado(evento);
+  };
+
+  const handleVolver = () => {
+    setEventoSeleccionado(null);
+  };
+
+  const handleInscribirse = (titulo: string) => {
+    alert(`Inscribirse a: ${titulo}`);
+  };
+
+  // Si hay un evento seleccionado, mostrar la página de detalle
+  if (eventoSeleccionado) {
+    return (
+      <DetallesEvento
+        evento={eventoSeleccionado}
+        onVolver={handleVolver}
+        onInscribirse={() => handleInscribirse(eventoSeleccionado.titulo)}
+      />
+    );
+  }
+
+  // Si no hay evento seleccionado, mostrar el listado
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <ListaEventos
+      onVerDetalle={handleVerDetalle}
+      onInscribirse={handleInscribirse}
+    />
+  );
 }
 
-export default App
+export default App;
