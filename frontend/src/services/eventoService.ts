@@ -11,20 +11,32 @@ interface ResultadoBusquedaEvento {
 // Interface para el evento del frontend (estructura que usamos en la UI)
 export interface Evento {
   id: string;
-  titulo: string;
   descripcion: string;
   fecha: string;
   horaInicio: string;
   ubicacion: Ubicacion;
-  precio?: Precio;
-  imagen?: string;
-  categoria?: string;
-  organizador?: string;
-  cupoMinimo?: number;
-  cupoMaximo?: number;
-  duracion?: string;
+  titulo: string;
+  // ...existing code...
+  organizador: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    dni: string;
+    usuario: any;
+  };
+  estado: {
+    id: string;
+    tipoEstado: string;
+  };
+  categoria: {
+    tipo: string;
+  };
+  duracion: number;
+  cupoMinimo: number;
+  cupoMaximo: number;
+  precio: Precio;
   etiquetas: string[];
-  estado: string;
+  imagen: string;
 }
 
 export interface Precio {
@@ -61,36 +73,24 @@ export class EventoService {
   static async obtenerEventos(pagina: number = 0): Promise<{eventos: Evento[], totalPaginas: number, totalElementos: number}> {
     try {
       const url = `/eventos?palabrasClave=&nroPagina=${pagina}`;
-      console.log('🔍 EventoService.obtenerEventos - Iniciando petición:');
-      console.log('�� URL completa:', `${this.BASE_URL}${url}`);
-      console.log('📄 Página solicitada:', pagina);
+      console.log('URL completa:', `${this.BASE_URL}${url}`);
       
       const response = await this.api.get<ResultadoBusquedaEvento>(url);
       
-      console.log('✅ EventoService.obtenerEventos - Respuesta recibida:');
-      console.log('�� Status:', response.status);
-      console.log('📋 Headers:', response.headers);
       console.log('�� Data completa:', response.data);
-      console.log('�� Eventos encontrados:', response.data.eventos?.length || 0);
-      console.log('📄 Total páginas:', response.data.totalPaginas);
-      console.log('🔢 Total elementos:', response.data.totalElementos);
-      
+      response.data.eventos[0].imagen = "https://www.clarin.com/img/2023/11/01/EsW43ik1T_1256x620__1.jpg";
+      response.data.eventos[1].imagen = "https://www.clarin.com/img/2023/11/01/EsW43ik1T_2000x1500__1.jpg"; 
       return {
         eventos: response.data.eventos,
         totalPaginas: response.data.totalPaginas,
         totalElementos: response.data.totalElementos
       };
     } catch (error) {
-      console.error('❌ EventoService.obtenerEventos - Error:');
-      console.error('🚨 Error completo:', error);
+      console.error('🚨 Error:', error);
       
       if (axios.isAxiosError(error)) {
-        console.error('🌐 Error de red:');
-        console.error('�� Status:', error.response?.status);
-        console.error('📋 Headers de respuesta:', error.response?.headers);
         console.error('📦 Data de error:', error.response?.data);
-        console.error('🔗 URL solicitada:', error.config?.url);
-        console.error('⚙️ Configuración:', error.config);
+  
       }
       
       throw new Error('Error al cargar los eventos');

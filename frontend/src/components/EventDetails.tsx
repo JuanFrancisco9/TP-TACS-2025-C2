@@ -17,7 +17,7 @@ import {
   Divider,
   Box,
 } from '@mui/material';
-import Grid from '@mui/material/Grid'; // ✅ MUI 7: Grid v2 estable
+import Grid from '@mui/material/Grid';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EventIcon from '@mui/icons-material/Event';
 import PlaceIcon from '@mui/icons-material/Place';
@@ -47,10 +47,12 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
   const handleInscribirse = () => (onInscribirse ? onInscribirse() : setShowModal(true));
 
   const estadoColor: 'success' | 'error' | 'warning' =
-    evento.estado === 'ACTIVO' ? 'success' : evento.estado === 'CANCELADO' ? 'error' : 'warning';
+    evento.estado?.tipoEstado === 'ACTIVO' ? 'success' : evento.estado?.tipoEstado === 'CANCELADO' ? 'error' : 'warning';
 
   return (
-    <Container sx={{ py: 4 }}>
+    <Box sx={{ minHeight: '100vh', py: 4 }}>
+      <Container maxWidth="md">
+        <Box sx={{ bgcolor: 'white', borderRadius: 3, boxShadow: 2, p: 3 }}>
       <Box sx={{ mb: 3 }}>
         <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={onVolver}>
           Volver al listado
@@ -74,13 +76,13 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
 
         {/* Información principal */}
         <Grid size={{ xs: 12, lg: 6 }}>
-          <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+          <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', boxShadow: 4, border: '1px solid #e0e0e0', borderRadius: 3 }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2, gap: 2 }}>
                 <Typography variant="h4" component="h1">
                   {evento.titulo}
                 </Typography>
-                {evento.categoria && <Chip label={evento.categoria} color="primary" />}
+                {evento.categoria?.tipo && <Chip label={evento.categoria.tipo} color="primary" />}
               </Box>
 
               <Typography variant="subtitle1" sx={{ mb: 3 }}>
@@ -106,7 +108,7 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
                   <Stack direction="row" spacing={1} alignItems="center">
                     <ScheduleIcon color="action" fontSize="small" />
                     <Typography variant="body2">
-                      <strong>Duración:</strong> {evento.duracion}
+                      <strong>Duración:</strong> {evento.duracion} hs
                     </Typography>
                   </Stack>
                 )}
@@ -115,7 +117,7 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
                   <Stack direction="row" spacing={1} alignItems="center">
                     <PersonIcon color="action" fontSize="small" />
                     <Typography variant="body2">
-                      <strong>Organizador:</strong> {evento.organizador}
+                      <strong>Organizador:</strong> {evento.organizador.nombre} {evento.organizador.apellido}
                     </Typography>
                   </Stack>
                 )}
@@ -159,7 +161,7 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
         </Grid>
       </Grid>
 
-      <Grid container spacing={3} sx={{ mt: 0 }}>
+      <Grid container spacing={3} sx={{ mt: 1 }}>
         <Grid size={{ xs: 12, lg: 6 }}>
           {evento.etiquetas && evento.etiquetas.length > 0 && (
             <Card sx={{ mb: 3 }}>
@@ -181,7 +183,7 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
         </Grid>
 
         <Grid size={{ xs: 12, lg: 6 }}>
-          <Card sx={{ mb: 3 }}>
+          <Card sx={{ mb: 3, boxShadow: 4, border: '1px solid #e0e0e0', borderRadius: 3 }}>
             <CardContent>
               <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
                 <InfoOutlinedIcon />
@@ -189,7 +191,7 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
                   Estado del Evento
                 </Typography>
               </Stack>
-              <Chip label={evento.estado} color={estadoColor} sx={{ fontWeight: 600 }} />
+              <Chip label={evento.estado?.tipoEstado} color={estadoColor} sx={{ fontWeight: 600 }} />
             </CardContent>
           </Card>
         </Grid>
@@ -213,7 +215,9 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
           </Button>
         </DialogActions>
       </Dialog>
-    </Container>
+        </Box>
+      </Container>
+    </Box>
   );
 };
 
