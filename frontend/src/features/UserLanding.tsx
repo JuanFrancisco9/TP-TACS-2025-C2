@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import EventCard from '../components/EventCard';
-import inscripcionesService from '../services/inscripcionesService';
+import inscripcionesService from '../services/inscripcionesParticipanteService.ts';
 import type { Inscripcion } from '../types/inscripciones';
 
 function UserLanding() {

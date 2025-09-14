@@ -1,10 +1,10 @@
 import type { Inscripcion } from '../types/inscripciones';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-const API_USERNAME = import.meta.env.VITE_API_USERNAME || 'admin';
-const API_PASSWORD = import.meta.env.VITE_API_PASSWORD || 'admin';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_USERNAME = import.meta.env.VITE_API_USERNAME;
+const API_PASSWORD = import.meta.env.VITE_API_PASSWORD;
 
-class InscripcionesService {
+class InscripcionesParticipanteService {
     private getAuthHeaders() {
         const credentials = btoa(`${API_USERNAME}:${API_PASSWORD}`);
         return {
@@ -33,4 +33,4 @@ class InscripcionesService {
     }
 }
 
-export default new InscripcionesService();
+export default new InscripcionesParticipanteService();
