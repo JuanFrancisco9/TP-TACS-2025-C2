@@ -1,18 +1,18 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
-import StatCard from '../components/StatCard'
-import estadisticasService from '../services/estadisticasService'
-import {type EstadisticasUsoDTO, TipoEstadistica, type EstadisticasParams } from '../types/estadisticas'
+import StatCard from '../components/StatCard.tsx'
+import estadisticasService from '../services/estadisticasService.ts'
+import {type EstadisticasUsoDTO, TipoEstadistica, type EstadisticasParams } from '../types/estadisticas.ts'
 
 function Statistics() {
     const [stats, setStats] = useState<EstadisticasUsoDTO | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [fechaDesde, setFechaDesde] = useState<Date | null>(null);
     const [fechaHasta, setFechaHasta] = useState<Date | null>(null);
     const [estadisticasSeleccionadas, setEstadisticasSeleccionadas] = useState<TipoEstadistica[]>([]);
-    const [mostrarFiltros, setMostrarFiltros] = useState(false);
+    const [mostrarFiltros, setMostrarFiltros] = useState(true);
 
     const fetchStats = async () => {
         try {
@@ -39,9 +39,6 @@ function Statistics() {
         }
     };
 
-    useEffect(() => {
-        fetchStats();
-    }, []);
 
     const handleEstadisticaChange = (estadistica: TipoEstadistica) => {
         setEstadisticasSeleccionadas(prev =>
@@ -185,7 +182,7 @@ function Statistics() {
                                             disabled={loading}
                                             style={{ borderRadius: '8px' }}
                                         >
-                                            ✅ Aplicar Filtros
+                                            ✅ Consultar
                                         </button>
                                         <button
                                             className="btn btn-outline-secondary px-3"
