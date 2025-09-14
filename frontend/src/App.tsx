@@ -4,6 +4,7 @@ import EventOverview from './features/EventOverview'
 import AppLayout from './components/AppLayout'
 import UserPage from './features/UserPage'
 import Statistics from "./features/Statistics.tsx";
+import UserLanding from "./features/UserLanding.tsx";
 
 function App() {
     return (
@@ -13,8 +14,9 @@ function App() {
                     <Route path="/" element={<LandingPage/>}/>
                     <Route path="/eventos" element={<EventOverview/>}/>
                     <Route path="/perfil" element={<UserPage/>}/>
-                    <Route path="*" element={<Navigate to="/" replace/>}/>
+                    <Route path="/mis-eventos" element={<UserLanding/>}/>
                     <Route path="/estadisticas" element={<Statistics/>}/>
+                    <Route path="*" element={<Navigate to="/" replace/>}/>
                 </Route>
             </Routes>
         </BrowserRouter>
