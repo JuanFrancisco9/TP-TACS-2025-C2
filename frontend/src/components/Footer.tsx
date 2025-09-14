@@ -37,7 +37,7 @@ const Footer: React.FC = () => {
               Enlaces Rápidos
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <Link href="#" color="text.primary" underline="hover">
+              <Link href="https://wiki.archlinux.org/title/Desktop_environment_(Espa%C3%B1ol)" color="text.primary" underline="hover">
                 Eventos
               </Link>
               <Link href="#" color="text.primary" underline="hover">

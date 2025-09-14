@@ -16,7 +16,6 @@ import MapView from '../components/MapView';
 import EventCard from '../components/EventCard';
 import DetallesEvento from '../components/EventDetails';
 import { EventoService, type Evento } from '../services/eventoService';
-import { useNavigate, useSearchParams } from 'react-router-dom';
 
 
 
@@ -69,7 +68,12 @@ const EventOverview: React.FC = () => {
 
               <Stack spacing={1}>
                 <Typography variant="subtitle2">Filtro</Typography>
-                <TextField size="small" placeholder="Buscar" fullWidth defaultValue={searchParams.get('q') || ''} />
+                <TextField
+                  size="small"
+                  placeholder="Buscar"
+                  fullWidth
+                  defaultValue={new URLSearchParams(window.location.search).get('q') || ''}
+                />
               </Stack>
               <Divider sx={{ my: 2 }} />
               <Typography variant="subtitle2" sx={{ mb: 1 }}>Categorías</Typography>
