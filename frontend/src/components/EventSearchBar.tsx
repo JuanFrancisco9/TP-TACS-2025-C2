@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { Form, InputGroup, Button, Card, Spinner } from 'react-bootstrap';
+import {
+  TextField,
+  Button,
+  Card,
+  CardContent,
+  CircularProgress,
+  Stack
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 import { eventoApiService } from '../services/eventoApiService';
 import type { ResultadoBusquedaEvento } from '../services/eventoApiService';
 
@@ -19,8 +28,7 @@ const EventSearchBar: React.FC<EventSearchBarProps> = ({
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // TODO: Hacer un redirect a la página de ver eventos con el filtro de nombre pre-asignado 
+
     if (!palabrasClave.trim()) {
       onError('Las palabras clave son obligatorias');
       return;
@@ -30,11 +38,11 @@ const EventSearchBar: React.FC<EventSearchBarProps> = ({
       setLoading(true);
       onLoading(true);
       onError(null);
-      
+
       const resultados = await eventoApiService.buscarEventos({
         palabrasClave: palabrasClave.trim(),
       });
-      
+
       onSearchResults(resultados);
     } catch (error) {
       onError(error instanceof Error ? error.message : 'Error desconocido');
@@ -50,44 +58,41 @@ const EventSearchBar: React.FC<EventSearchBarProps> = ({
   };
 
   return (
-    <Card className="mb-4">
-      <Card.Body>
-        <Form onSubmit={handleSearch}>
-          <InputGroup size="lg">
-            <Form.Control
-              type="text"
+    <Card sx={{ mb: 4 }}>
+      <CardContent>
+        <form onSubmit={handleSearch}>
+          <Stack direction="row" spacing={2}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              size="medium"
               placeholder="Ingrese palabras clave para buscar eventos..."
               value={palabrasClave}
               onChange={(e) => setPalabrasClave(e.target.value)}
               disabled={loading}
             />
-            <Button 
-              type="submit" 
-              variant="primary"
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
               disabled={loading || !palabrasClave.trim()}
+              startIcon={!loading ? <SearchIcon /> : undefined}
             >
-              {loading ? (
-                <Spinner size="sm" animation="border" role="status">
-                  <span className="visually-hidden">Buscando...</span>
-                </Spinner>
-              ) : (
-                <>
-                  <i className="bi bi-search me-1"></i>
-                  Buscar
-                </>
-              )}
+              {loading ? <CircularProgress size={20} color="inherit" /> : 'Buscar'}
             </Button>
-            <Button 
-              type="button" 
-              variant="outline-secondary"
+            <Button
+              type="button"
+              variant="outlined"
+              color="secondary"
               onClick={handleClear}
               disabled={loading}
+              startIcon={<ClearIcon />}
             >
-              <i className="bi bi-x-circle"> X </i>
+              Limpiar
             </Button>
-          </InputGroup>
-        </Form>
-      </Card.Body>
+          </Stack>
+        </form>
+      </CardContent>
     </Card>
   );
 };
