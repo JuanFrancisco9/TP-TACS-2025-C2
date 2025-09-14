@@ -16,6 +16,8 @@ import MapView from '../components/MapView';
 import EventCard from '../components/EventCard';
 import DetallesEvento from '../components/EventDetails';
 import { EventoService, type Evento } from '../services/eventoService';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+
 
 
 // const MOCK_EVENTS: EventItem[] = [
@@ -53,7 +55,7 @@ const EventOverview: React.FC = () => {
           height: '100vh',
           p: 2,
           overflowY: 'auto',
-          bgcolor: 'background.default',
+          bgcolor: '#FDF3E0',
         }}
       >
         <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
@@ -64,9 +66,10 @@ const EventOverview: React.FC = () => {
           {/* Filtros */}
           <Grid size={{ xs: 12, md: 4 }}>
             <Paper variant="outlined" sx={{ p: 2 }}>
+
               <Stack spacing={1}>
                 <Typography variant="subtitle2">Filtro</Typography>
-                <TextField size="small" placeholder="Buscar" fullWidth />
+                <TextField size="small" placeholder="Buscar" fullWidth defaultValue={searchParams.get('q') || ''} />
               </Stack>
               <Divider sx={{ my: 2 }} />
               <Typography variant="subtitle2" sx={{ mb: 1 }}>Categorías</Typography>
