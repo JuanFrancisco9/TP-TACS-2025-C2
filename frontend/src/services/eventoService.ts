@@ -156,7 +156,19 @@ export class EventoService {
   static async inscribirseAEvento(eventoId: string): Promise<boolean> {
     try {
       console.log('🔍 EventoService.inscribirseAEvento - Evento ID:', eventoId);
-      await this.api.post(`/eventos/${eventoId}/inscribirse`);
+      // TODO: Obtener de algun lado la info del participante logueado
+      const body = { 
+        participante:{ 
+          id: '1',
+          nombre: 'Carlos',
+          apellido: 'López',
+          dni: '12345678',
+          usuario: { id: '1', username: 'carlos', password: 'carlos'}
+        },
+        evento_id: "0" 
+      };
+
+      await this.api.post(`/inscripciones`, body);
       console.log('✅ Inscripción exitosa');
       return true;
     } catch (error) {

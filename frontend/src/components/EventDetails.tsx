@@ -9,14 +9,12 @@ import {
   Button,
   Chip,
   Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Stack,
   Divider,
   Box,
 } from '@mui/material';
+import InscripcionDialog from './InscripcionDialog';
+import { EventoService } from '../services/eventoService';
 import Grid from '@mui/material/Grid';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EventIcon from '@mui/icons-material/Event';
@@ -27,6 +25,7 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import type { Evento } from '../services/eventoService';
+import { formatFecha } from '../utils/formatFecha';
 
 interface DetallesEventoProps {
   evento: Evento;
@@ -42,16 +41,32 @@ function renderPrecio(precio?: any) {
 }
 
 const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onInscribirse }) => {
-  const [showModal, setShowModal] = React.useState(false);
+  const [showDialog, setShowDialog] = React.useState(false);
+  const [showSnackbar, setShowSnackbar] = React.useState(false);
+  const [snackbarMsg, setSnackbarMsg] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
 
-  const handleInscribirse = () => (onInscribirse ? onInscribirse() : setShowModal(true));
+  const handleInscribirse = () => (onInscribirse ? onInscribirse() : setShowDialog(true));
+
+  const handleConfirmar = async () => {
+    setLoading(true);
+    try {
+      await EventoService.inscribirseAEvento(evento.id);
+      setSnackbarMsg(`Inscripción confirmada a: ${evento.titulo}`);
+    } catch (e) {
+      setSnackbarMsg('Error al inscribirse. Intenta nuevamente.');
+    }
+    setShowSnackbar(true);
+    setShowDialog(false);
+    setLoading(false);
+  };
 
   const estadoColor: 'success' | 'error' | 'warning' =
     evento.estado?.tipoEstado === 'ACTIVO' ? 'success' : evento.estado?.tipoEstado === 'CANCELADO' ? 'error' : 'warning';
 
   return (
-    <Box sx={{ minHeight: '100vh', py: 4 }}>
-      <Container maxWidth="md">
+    <Box sx={{ minHeight: '100vh', py: 4, bgcolor: 'white' }}>
+      <Container maxWidth={false} sx={{ width: '98vw', maxWidth: '1800px', mx: 'auto' }}>
         <Box sx={{ bgcolor: 'white', borderRadius: 3, boxShadow: 2, p: 3 }}>
       <Box sx={{ mb: 3 }}>
         <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={onVolver}>
@@ -93,7 +108,7 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
                 <Stack direction="row" spacing={1} alignItems="center">
                   <EventIcon color="action" fontSize="small" />
                   <Typography variant="body2">
-                    <strong>Fecha:</strong> {evento.fecha}
+                    <strong>Fecha:</strong> {formatFecha(evento.fecha)}
                   </Typography>
                 </Stack>
 
@@ -197,24 +212,16 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
         </Grid>
       </Grid>
 
-      <Dialog open={showModal} onClose={() => setShowModal(false)}>
-        <DialogTitle>Confirmar Inscripción</DialogTitle>
-        <DialogContent>
-          <Typography>¿Estás seguro de que quieres inscribirte a “{evento.titulo}”?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowModal(false)}>Cancelar</Button>
-          <Button
-            variant="contained"
-            onClick={() => {
-              setShowModal(false);
-              alert(`Te has inscrito a: ${evento.titulo}`);
-            }}
-          >
-            Confirmar Inscripción
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <InscripcionDialog
+        open={showDialog}
+        onClose={() => setShowDialog(false)}
+        onConfirm={handleConfirmar}
+        loading={loading}
+        snackbarMsg={snackbarMsg}
+        showSnackbar={showSnackbar}
+        onSnackbarClose={() => setShowSnackbar(false)}
+        titulo={evento.titulo}
+      />
         </Box>
       </Container>
     </Box>

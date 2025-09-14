@@ -17,21 +17,11 @@ import EventCard from '../components/EventCard';
 import DetallesEvento from '../components/EventDetails';
 import { EventoService, type Evento } from '../services/eventoService';
 
-type EventItem = {
-  id: string;
-  title: string;
-  image: string;
-  price?: string;
-  rating?: number;
-  badges?: string[];
-};
 
-
-
-const MOCK_EVENTS: EventItem[] = [
-  { id: '1', title: 'Graphic Design Meetup', image: 'https://picsum.photos/id/1062/600/400', price: 'Gratis', rating: 4.8, badges: ['Sale'] },
-  { id: '2', title: 'React Buenos Aires', image: 'https://picsum.photos/id/1050/600/400', price: '$ 5.000', rating: 4.9 },
-];
+// const MOCK_EVENTS: EventItem[] = [
+//   { id: '1', title: 'Graphic Design Meetup', image: 'https://picsum.photos/id/1062/600/400', price: 'Gratis', rating: 4.8, badges: ['Sale'] },
+//   { id: '2', title: 'React Buenos Aires', image: 'https://picsum.photos/id/1050/600/400', price: '$ 5.000', rating: 4.9 },
+// ];
 
 const MOCK_POINTS: MapPoint[] = [
   { id: 'p1', title: 'Villa Crespo', position: [-34.5975, -58.4385] },
@@ -42,20 +32,11 @@ const MOCK_POINTS: MapPoint[] = [
 
 const EventOverview: React.FC = () => {
   const [eventos, setEventos] = useState<Evento[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [eventoSeleccionado, setEventoSeleccionado] = useState<Evento | null>(null);
-
   useEffect(() => {
     EventoService.obtenerEventos()
-      .then((res) => {
-        setEventos(res.eventos);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
+      .then((res) => setEventos(res.eventos))
+      .catch(() => setEventos([]));
   }, []);
 
   return eventoSeleccionado ? (
@@ -112,6 +93,7 @@ const EventOverview: React.FC = () => {
                   <EventCard
                     item={ev}
                     onVerDetalle={() => setEventoSeleccionado(ev)}
+                    // Inscripción ahora se maneja en EventCard
                   />
                 </Grid>
               ))}
