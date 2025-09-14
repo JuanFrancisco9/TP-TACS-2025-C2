@@ -5,7 +5,7 @@ import AppLayout from './components/AppLayout'
 import UserPage from './features/UserPage'
 
 function App() {
-  return (
+    return (
     <BrowserRouter>
       <Routes>
         <Route element={<AppLayout />}>
