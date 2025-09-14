@@ -1,49 +1,84 @@
 import React from 'react';
-import { Container, Row, Col, Nav } from 'react-bootstrap';
+import { 
+  Container, 
+  Grid, 
+  Typography, 
+  Link, 
+  Box, 
+  Divider,
+  Paper
+} from '@mui/material';
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-dark text-light mt-5 py-4">
-      <Container>
-        <Row>
-          <Col md={4}>
-            <h5>TP TACS</h5>
-            <p className="text-muted">
+    <Paper 
+      elevation={0} 
+      sx={{ 
+        backgroundColor: 'grey.50',
+        borderTop: 1,
+        borderColor: 'grey.300',
+        width: '100%',
+        py: 4
+      }}
+    >
+      <Container maxWidth="lg">
+        <Grid container spacing={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <Typography variant="h6" color="primary" gutterBottom>
+              TP TACS
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
               Sistema de gestión de eventos desarrollado para el curso de Técnicas Avanzadas de Construcción de Software.
-            </p>
-          </Col>
-          <Col md={4}>
-            <h5>Enlaces Rápidos</h5>
-            <Nav className="flex-column">
-              <Nav.Link href="#" className="text-light p-0 mb-1">Eventos</Nav.Link>
-              <Nav.Link href="#" className="text-light p-0 mb-1">Inscripciones</Nav.Link>
-              <Nav.Link href="#" className="text-light p-0 mb-1">Estadísticas</Nav.Link>
-              <Nav.Link href="#" className="text-light p-0 mb-1">Contacto</Nav.Link>
-            </Nav>
-          </Col>
-          <Col md={4}>
-            <h5>Información</h5>
-            <p className="text-muted mb-1">
-              <strong>Universidad:</strong> UTN FRBA
-            </p>
-            <p className="text-muted mb-1">
-              <strong>Materia:</strong> TACS
-            </p>
-            <p className="text-muted">
-              <strong>Año:</strong> 2025
-            </p>
-          </Col>
-        </Row>
-        <hr className="my-3" />
-        <Row>
-          <Col className="text-center text-muted">
-            <p className="mb-0">
-              © 2025 TP TACS. Todos los derechos reservados.
-            </p>
-          </Col>
-        </Row>
+            </Typography>
+          </Grid>
+          
+          <Grid size={{ xs: 12, md: 4 }}>
+            <Typography variant="h6" color="primary" gutterBottom>
+              Enlaces Rápidos
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Link href="https://wiki.archlinux.org/title/Desktop_environment_(Espa%C3%B1ol)" color="text.primary" underline="hover">
+                Eventos
+              </Link>
+              <Link href="#" color="text.primary" underline="hover">
+                Inscripciones
+              </Link>
+              <Link href="#" color="text.primary" underline="hover">
+                Estadísticas
+              </Link>
+              <Link href="#" color="text.primary" underline="hover">
+                Contacto
+              </Link>
+            </Box>
+          </Grid>
+          
+          <Grid size={{ xs: 12, md: 4 }}>
+            <Typography variant="h6" color="primary" gutterBottom>
+              Información
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Typography variant="body2" color="text.secondary">
+                <strong>Universidad:</strong> UTN FRBA
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                <strong>Materia:</strong> TACS
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                <strong>Año:</strong> 2025
+              </Typography>
+            </Box>
+          </Grid>
+        </Grid>
+        
+        <Divider sx={{ my: 3 }} />
+        
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography variant="body2" color="text.secondary">
+            © 2025 TP TACS. Todos los derechos reservados.
+          </Typography>
+        </Box>
       </Container>
-    </footer>
+    </Paper>
   );
 };
 
