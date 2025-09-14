@@ -1,5 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+<<<<<<< HEAD
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material'
 import App from './App'
 import './index.css' // si querés mantener tus estilos globales propios
@@ -18,6 +19,12 @@ const theme = createTheme({
     borderRadius: 12,
   },
 })
+=======
+import 'bootstrap/dist/css/bootstrap.min.css'
+import 'leaflet/dist/leaflet.css'
+import './index.css'
+import App from './App.tsx'
+>>>>>>> origin/feature/frontend
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
