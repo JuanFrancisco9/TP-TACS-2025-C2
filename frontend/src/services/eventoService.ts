@@ -25,6 +25,7 @@ export interface Evento {
     usuario: any;
   };
   estado: {
+    fechaCambio: string;
     id: string;
     tipoEstado: string;
   };
@@ -79,7 +80,7 @@ export class EventoService {
       
       console.log('�� Data completa:', response.data);
       response.data.eventos[0].imagen = "https://www.clarin.com/img/2023/11/01/EsW43ik1T_1256x620__1.jpg";
-      response.data.eventos[1].imagen = "https://www.clarin.com/img/2023/11/01/EsW43ik1T_2000x1500__1.jpg"; 
+      response.data.eventos[1].imagen = "https://www.clarin.com/img/2023/11/01/EsW43ik1T_2000x1500__1.jpg";
       return {
         eventos: response.data.eventos,
         totalPaginas: response.data.totalPaginas,
@@ -194,6 +195,7 @@ export class EventoService {
   static async actualizarEvento(id: string, evento: Partial<Evento>): Promise<Evento> {
     try {
       console.log('🔍 EventoService.actualizarEvento - Actualizando evento ID:', id);
+      console.log(evento)
       const response = await this.api.put<Evento>(`/eventos/${id}`, evento);
       console.log('✅ Evento actualizado:', response.data);
       return response.data;

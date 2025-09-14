@@ -7,55 +7,58 @@ import {
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import ListAltIcon from "@mui/icons-material/ListAlt";
-
-import type {Event} from '../services/participanteApiService'
+import type {Evento} from '../services/eventoService.ts'
 import FormControl from "@mui/material/FormControl";
+import { EventoService } from '../services/eventoService';
+import { formatDateForInput } from "../utils/formatFecha.ts";
 
 interface EditEvent {
-    event: Event | null;
+    event: Evento | null;
     onClose: () => void;
-    onSave: (updated: Event) => void | null;
+    onSave: (updated: Evento) => void | null;
 }
 
 interface ViewModal {
-    event: Event | null;
+    event: Evento | null;
     onClose: () => void;
 }
 
 export default function PerfilOrganizador() {
-    const [events, setEvents] = useState<Event[]>([
-        {
-            id: '1',
-            titulo: 'Seminario de Mocks',
-            descripcion: 'Introducción a Mocks',
-            fecha: '2025-09-10',
-            horaInicio: '19:00',
-            duracion: 2.5,
-            ubicacion: { provincia: 'Buenos Aires', ciudad: 'CABA', direccion: 'Av. Siempre Viva 123' },
-            cupoMaximo: 30,
-            cupoMinimo: 10,
-            precio: { moneda: 'ARS', monto: 1000 },
-            organizador: { id: '1', nombre: 'Juan', apellido: 'Pérez',dni: '22515565', usuario: null },
-            estado: { tipoEstado: 'CONFIRMADO', fechaCambio: '2025-08-27' },
-            categoria: { tipo: 'TECNOLOGIA' },
-            etiquetas: ['mocks', 'testing', 'java']
-        }
-    ]);
+    const [events, setEvents] = useState<Evento[]>([]);
 
     const [user] = useState("Juan");
 
     // ---- estados de modal ----
-    const [editEvent, setEditEvent] = useState<Event | null>(null);
-    const [viewEvent, setViewEvent] = useState<Event | null>(null);
-    const [waitlistEvent, setWaitlistEvent] = useState<Event | null>(null);
+    const [editEvent, setEditEvent] = useState<Evento | null>(null);
+    const [viewEvent, setViewEvent] = useState<Evento | null>(null);
+    const [waitlistEvent, setWaitlistEvent] = useState<Evento | null>(null);
 
     // ---- handlers ----
-    const handleSaveEdit = (updatedEvent: Event) => {
-        setEvents(prev =>
-            prev.map(ev => ev.id === updatedEvent.id ? updatedEvent : ev)
-        );
-        setEditEvent(null);
+    const handleSaveEdit = async (updatedEvent: Evento) => {
+        try{
+            const eventoAcutalizado = await EventoService.actualizarEvento(updatedEvent.id,updatedEvent)
+            setEvents(prev =>
+                prev.map(ev => ev.id === eventoAcutalizado.id ? updatedEvent : ev)
+            );
+            setEditEvent(null);
+        }catch (error){
+            console.error(error)
+        }
     };
+
+    useEffect(() => {
+        const cargarEventos = async () => {
+            try {
+                const { eventos } = await EventoService.obtenerEventos();
+                setEvents(eventos);
+            } catch (error) {
+                console.error("Error al cargar los eventos:", error);
+            }
+        };
+
+        cargarEventos();
+    }, []);
+
 
     return (
         <div style={{ padding: "2rem" }}>
@@ -76,7 +79,7 @@ export default function PerfilOrganizador() {
                             <TableRow key={e.id}>
                                 <TableCell>{e.titulo}</TableCell>
                                 <TableCell>{e.fecha}</TableCell>
-                                <TableCell>{e.ubicacion.ciudad}, {e.ubicacion.direccion}</TableCell>
+                                <TableCell>{e.ubicacion.localidad}, {e.ubicacion.direccion}</TableCell>
                                 <TableCell>
                                     <Button onClick={() => setEditEvent(e)}><EditIcon /></Button>
                                     <Button onClick={() => setViewEvent(e)}><VisibilityIcon /></Button>
@@ -96,7 +99,7 @@ export default function PerfilOrganizador() {
 }
 
 const EditEvent = ({ event, onClose, onSave }: EditEvent) => {
-    const [localEvent, setLocalEvent] = useState<Event | null>(null);
+    const [localEvent, setLocalEvent] = useState<Evento | null>(null);
 
     useEffect(() => {
         setLocalEvent(event ? { ...event } : null);
@@ -104,13 +107,13 @@ const EditEvent = ({ event, onClose, onSave }: EditEvent) => {
 
     if (!localEvent) return null;
 
-    const handleChange = (field: keyof Event, value: any) => {
+    const handleChange = (field: keyof Evento, value: any) => {
         setLocalEvent(prev => prev ? { ...prev, [field]: value } : prev);
     };
 
-    const handleNestedChange = <K extends keyof Event>(
+    const handleNestedChange = <K extends keyof Evento>(
         parent: K,
-        subfield: keyof Event[K],
+        subfield: keyof Evento[K],
         value: any
     ) => {
         setLocalEvent(prev =>
@@ -125,7 +128,15 @@ const EditEvent = ({ event, onClose, onSave }: EditEvent) => {
 
     const handleSubmit = () => {
         if (localEvent) {
-            onSave(localEvent);
+            const updatedEvent = {
+                ...localEvent,
+                estado: {
+                    id: localEvent.estado.id,
+                    tipoEstado: localEvent.estado.tipoEstado,
+                    fechaCambio: localEvent.estado.fechaCambio || new Date().toISOString()
+                }
+            };
+            onSave(updatedEvent);
         }
         onClose();
     };
@@ -150,15 +161,14 @@ const EditEvent = ({ event, onClose, onSave }: EditEvent) => {
                     onChange={e => handleChange("descripcion", e.target.value)}
                 />
                 <TextField
-                    type="date"
+                    type="datetime-local"
                     fullWidth
                     margin="normal"
-                    value={localEvent.fecha}
+                    value={formatDateForInput(localEvent.fecha)}
                     onChange={e => handleChange("fecha", e.target.value)}
                 />
                 <TextField
                     label="Hora de inicio"
-                    type="time"
                     fullWidth
                     margin="normal"
                     value={localEvent.horaInicio}
@@ -175,18 +185,18 @@ const EditEvent = ({ event, onClose, onSave }: EditEvent) => {
 
                 {/* Ubicación */}
                 <TextField
-                    label="Provincia"
+                    label="Latitud"
                     fullWidth
                     margin="normal"
-                    value={localEvent.ubicacion.provincia}
-                    onChange={e => handleNestedChange("ubicacion", "provincia", e.target.value)}
+                    value={localEvent.ubicacion.latitud}
+                    onChange={e => handleNestedChange("ubicacion", "latitud", e.target.value)}
                 />
                 <TextField
-                    label="Ciudad"
+                    label="Longitud"
                     fullWidth
                     margin="normal"
-                    value={localEvent.ubicacion.ciudad}
-                    onChange={e => handleNestedChange("ubicacion", "ciudad", e.target.value)}
+                    value={localEvent.ubicacion.longitud}
+                    onChange={e => handleNestedChange("ubicacion", "longitud", e.target.value)}
                 />
                 <TextField
                     label="Dirección"
@@ -222,12 +232,12 @@ const EditEvent = ({ event, onClose, onSave }: EditEvent) => {
                     onChange={e => handleNestedChange("precio", "moneda", e.target.value)}
                 />
                 <TextField
-                    label="Monto"
+                    label="Precio"
                     type="number"
                     fullWidth
                     margin="normal"
-                    value={localEvent.precio.monto}
-                    onChange={e => handleNestedChange("precio", "monto", parseFloat(e.target.value))}
+                    value={localEvent.precio.cantidad}
+                    onChange={e => handleNestedChange("precio", "cantidad", parseFloat(e.target.value))}
                 />
 
                 {/* Estado */}
