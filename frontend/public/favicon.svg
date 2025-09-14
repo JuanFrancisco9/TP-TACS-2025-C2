@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <style>
+      .purple{fill:#2f1d4a}
+      .orange{fill:#f28c28}
+      .link{stroke:#f28c28;stroke-width:16;stroke-linecap:round}
+    </style>
+  </defs>
+  <!-- Big brand dot -->
+  <circle class="purple" cx="88" cy="128" r="60"/>
+  <!-- Connected molecule dots -->
+  <circle class="orange" cx="176" cy="72" r="24"/>
+  <circle class="orange" cx="176" cy="184" r="24"/>
+  <circle class="orange" cx="220" cy="128" r="24"/>
+  <!-- Links between orange dots and purple core -->
+  <path class="link" d="M148 96 L120 120"/>
+  <path class="link" d="M148 160 L120 136"/>
+  <path class="link" d="M196 128 L148 128"/>
+</svg>
+

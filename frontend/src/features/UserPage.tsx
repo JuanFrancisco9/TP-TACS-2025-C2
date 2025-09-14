@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Alert, Spinner } from 'react-bootstrap';
-import UserInfo from './UserInfo';
+import UserInfo from '../components/UserInfo';
 import { participanteApiService } from '../services/participanteApiService';
 import type { Participante } from '../services/participanteApiService';
 
