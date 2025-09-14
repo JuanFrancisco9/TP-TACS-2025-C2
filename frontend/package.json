@@ -15,6 +15,7 @@
     "@mui/icons-material": "^7.3.2",
     "@mui/material": "^7.3.2",
     "@mui/material-pigment-css": "^7.3.2",
+    "axios": "^1.12.2",
     "bootstrap": "^5.3.8",
     "leaflet": "^1.9.4",
     "react": "^19.1.1",

@@ -13,7 +13,26 @@ export interface Participante {
   dni: string;
   usuario: Usuario | null;
 }
-
+export interface Event {
+    id: string;
+    titulo: string;
+    descripcion: string;
+    fecha: string;
+    horaInicio: string;
+    duracion: number;
+    ubicacion: {
+        provincia: string;
+        ciudad: string;
+        direccion: string;
+    };
+    cupoMaximo: number;
+    cupoMinimo: number;
+    precio: { moneda: string; monto: number };
+    organizador: Participante;
+    estado: { tipoEstado: 'CONFIRMADO' | 'PENDENTE' | 'CANCELADO'; fechaCambio: string };
+    categoria: { tipo: string };
+    etiquetas: string[];
+}
 // Mock data service using the same data structure as ParticipanteRepository
 export class ParticipanteApiService {
   // Mock data based on ParticipanteRepository.initializeData()

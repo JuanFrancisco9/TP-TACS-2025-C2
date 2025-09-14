@@ -6,6 +6,7 @@ import UserPage from './features/UserPage'
 import LoginPage from './features/LoginPage'
 import InscripcionPage from './features/InscripcionPage'
 import CreateEventPage from './features/CreateEventPage'
+import PerfilOrganizadorPage from './features/PerfilOrganizadorPage'
 
 function App() {
     return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/inscripcion/:id" element={<InscripcionPage />} />
           <Route path="/crear-evento" element={<CreateEventPage />} />
           <Route path="/perfil" element={<UserPage />} />
+          <Route path="/perfil-organizador" element={<PerfilOrganizadorPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
