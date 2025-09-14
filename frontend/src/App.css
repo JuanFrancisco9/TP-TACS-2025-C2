@@ -1,8 +1,11 @@
+/* Reset Vite template constraints to allow full-width layouts */
 #root {
   width: 100%;
   height: 100vh;
   margin: 0;
   padding: 0;
+  max-width: none;
+  text-align: initial;
 }
 
 /* Global styles to ensure full screen coverage */

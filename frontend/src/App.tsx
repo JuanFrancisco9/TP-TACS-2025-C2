@@ -1,50 +1,29 @@
-import { 
-  ThemeProvider, 
-  createTheme, 
-  CssBaseline,
-  Container,
-  Typography,
-  Box
-} from '@mui/material';
-import Footer from './components/Footer';
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
-  },
-});
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import LandingPage from './features/LandingPage'
+import EventOverview from './features/EventOverview'
+import AppLayout from './components/AppLayout'
+import UserPage from './features/UserPage'
+import LoginPage from './features/LoginPage'
+import InscripcionPage from './features/InscripcionPage'
+import CreateEventPage from './features/CreateEventPage'
 
 function App() {
-  return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Box sx={{ 
-        minHeight: '100vh', 
-        minWidth: '100vw',
-        display: 'flex', 
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <Container maxWidth="lg" sx={{ py: 4, flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Box sx={{ textAlign: 'center', mb: 4 }}>
-            <Typography variant="h3" component="h1" color="primary" gutterBottom>
-              TP TACS
-            </Typography>
-            <Typography variant="h6" color="text.secondary">
-              Sistema de gestión de eventos
-            </Typography>
-          </Box>
-        </Container>
-        <Footer />
-      </Box>
-    </ThemeProvider>
-  );
+    return (
+    <BrowserRouter>
+      <Routes>
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/eventos" element={<EventOverview />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/inscripcion" element={<InscripcionPage />} />
+          <Route path="/inscripcion/:id" element={<InscripcionPage />} />
+          <Route path="/crear-evento" element={<CreateEventPage />} />
+          <Route path="/perfil" element={<UserPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  )
 }
 
 export default App;

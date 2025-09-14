@@ -58,13 +58,13 @@ public class EventoRepository {
         EstadoEvento estadoEvento2 = this.estadoEventoRepository.getEstadoInscripcionById("2");
 
         this.guardarEvento(new Evento("0", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
-                            "19;00",5F, new Ubicacion("","","", ""), 10, 0,
+                            "19;00",5F, new Ubicacion("-32.05322857239074", "-58.61824002335356","CABA", "Av. Press. Figueroa Alcorta 2099"), 10, 0,
                             new Precio("Pesos", 100F), new Organizador("1","","","", null),
                 estadoEvento1,new Categoria("Educativo"),new ArrayList<>()));
 
         // Segundo evento de prueba
         this.guardarEvento(new Evento("2", "Workshop de Testing", "Testing", LocalDateTime.now().plusDays(7),
-                "10:00", 3F, new Ubicacion("","","", ""), 20, 0,
+                "10:00", 3F, new Ubicacion("-32.05322857239074", "-58.61824002335356","CABA", "Av. Press. Figueroa Alcorta 2099"), 20, 0,
                 new Precio("Pesos", 150F), new Organizador("2","María","González","87654321", null),
                 estadoEvento2, new Categoria("Tecnología"), new ArrayList<>()));
 
