@@ -38,9 +38,9 @@ export default function FormularioLogin() {
             username: null,
             password: contrasenia,
             rol: null,
-            nombre,
-            apellido,
-            dni,
+            nombre: nombre,
+            apellido: apellido,
+            dni: dni
         };
 
         try {
