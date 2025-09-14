@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import type { MapPoint } from '../components/MapView';
 import MapView from '../components/MapView';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 type EventItem = {
   id: string;
@@ -39,7 +39,7 @@ const MOCK_POINTS: MapPoint[] = [
   { id: 'p4', title: 'San Telmo', position: [-34.621, -58.371] },
 ];
 
-const EventCard: React.FC<{ item: EventItem }> = ({ item }) => (
+const EventCard: React.FC<{ item: EventItem; onInscribirse: (id: string) => void }> = ({ item, onInscribirse }) => (
   <Paper variant="outlined" sx={{ overflow: 'hidden' }}>
     <Box component="img" src={item.image} alt={item.title} sx={{ width: '100%', height: 160, objectFit: 'cover' }} />
     <Box sx={{ p: 1.5 }}>
@@ -57,18 +57,23 @@ const EventCard: React.FC<{ item: EventItem }> = ({ item }) => (
       )}
       <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
         <Button size="small" variant="outlined">Ver más</Button>
-        <Button size="small" variant="contained">Inscribirme</Button>
+        <Button size="small" variant="contained" onClick={() => onInscribirse(item.id)}>Inscribirme</Button>
       </Stack>
     </Box>
   </Paper>
 );
 
 const EventOverview: React.FC = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const q = (searchParams.get('q') || '').toLowerCase();
   const filtered = q
     ? MOCK_EVENTS.filter((ev) => ev.title.toLowerCase().includes(q))
     : MOCK_EVENTS;
+
+  const handleInscribirse = (id: string) => {
+    navigate(`/inscripcion/${id}`);
+  };
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', width: '100vw' }}>
@@ -116,7 +121,7 @@ const EventOverview: React.FC = () => {
             <Grid container spacing={2}>
               {filtered.map((ev) => (
                 <Grid key={ev.id} item xs={12} sm={6}>
-                  <EventCard item={ev} />
+                  <EventCard item={ev} onInscribirse={handleInscribirse} />
                 </Grid>
               ))}
             </Grid>

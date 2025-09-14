@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   AppBar, Toolbar, Container as MuiContainer, Box, Stack, TextField,
   Button, IconButton, useMediaQuery
@@ -55,8 +55,8 @@ const SiteHeader: React.FC = () => {
           )}
 
           <Stack direction="row" spacing={1} sx={{ ml: 'auto' }}>
-            <Button startIcon={<PersonOutlineIcon />} color="inherit">Iniciar Sesión /  Registrarse</Button>
-            <Button startIcon={<EventAvailableIcon />} color="inherit">Crear eventos</Button>
+            <Button startIcon={<PersonOutlineIcon />} color="inherit" onClick={() => navigate('/login')}>Iniciar Sesión /  Registrarse</Button>
+            <Button startIcon={<EventAvailableIcon />} color="inherit" onClick={() => navigate('/crear-evento')}>Crear eventos</Button>
           </Stack>
         </Toolbar>
       </MuiContainer>
@@ -65,3 +65,5 @@ const SiteHeader: React.FC = () => {
 };
 
 export default SiteHeader;
+
+
