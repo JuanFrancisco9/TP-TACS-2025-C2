@@ -17,6 +17,7 @@ import InscripcionDialog from './InscripcionDialog';
 import { EventoService } from '../services/eventoService';
 import Grid from '@mui/material/Grid';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
 import EventIcon from '@mui/icons-material/Event';
 import PlaceIcon from '@mui/icons-material/Place';
 import ScheduleIcon from '@mui/icons-material/Schedule';
@@ -69,7 +70,23 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
       <Container maxWidth={false} sx={{ width: '98vw', maxWidth: '1800px', mx: 'auto' }}>
         <Box sx={{ bgcolor: 'white', borderRadius: 3, boxShadow: 2, p: 3 }}>
       <Box sx={{ mb: 3 }}>
-        <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={onVolver}>
+        <Button
+          variant="outlined"
+          color="secondary"
+          startIcon={<ArrowBackIcon />}
+          onClick={onVolver}
+          sx={{
+            borderRadius: 2,
+            boxShadow: 1,
+            textTransform: 'none',
+            fontWeight: 500,
+            transition: 'box-shadow 0.3s, transform 0.3s',
+            ':hover': {
+              boxShadow: 6,
+              transform: 'translateY(-2px) scale(1.04)'
+            }
+          }}
+        >
           Volver al listado
         </Button>
       </Box>
@@ -168,7 +185,25 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
             <Box sx={{ flexGrow: 1 }} />
 
             <CardActions sx={{ p: 2, pt: 0 }}>
-              <Button variant="contained" size="large" fullWidth onClick={handleInscribirse}>
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                fullWidth
+                startIcon={<HowToRegIcon />}
+                onClick={handleInscribirse}
+                sx={{
+                  borderRadius: 2,
+                  boxShadow: 1,
+                  textTransform: 'none',
+                  fontWeight: 500,
+                  transition: 'box-shadow 0.3s, transform 0.3s',
+                  ':hover': {
+                    boxShadow: 8,
+                    transform: 'translateY(-2px) scale(1.04)'
+                  }
+                }}
+              >
                 Inscribirse al Evento
               </Button>
             </CardActions>
