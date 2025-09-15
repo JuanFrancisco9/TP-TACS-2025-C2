@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import EventCard from '../components/EventCard';
+import InscripcionCard from '../components/InscripcionCard';
 import inscripcionesService from '../services/inscripcionesParticipanteService.ts';
 import type { Inscripcion } from '../types/inscripciones';
 
@@ -7,7 +7,7 @@ function UserLanding() {
     const [inscripciones, setInscripciones] = useState<Inscripcion[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [participanteId, setParticipanteId] = useState<string>('1'); // Por ahora hardcodeado
+    const [participanteId, setParticipanteId] = useState<string>('1'); //TODO Por ahora hardcodeado
 
     const fetchInscripciones = async () => {
         try {
@@ -15,7 +15,30 @@ function UserLanding() {
             setError(null);
 
             const data = await inscripcionesService.obtenerInscripcionesDeParticipante(participanteId);
-            setInscripciones(data);
+
+            // Filtrar duplicados por ID, quedándose con la más reciente
+            const inscripcionesFiltradas = data.reduce((acc: Inscripcion[], current: Inscripcion) => {
+                const existingIndex = acc.findIndex(item => item.id === current.id);
+
+                if (existingIndex === -1) {
+                    // No existe, agregar
+                    acc.push(current);
+                } else {
+                    // Existe, comparar fechas y quedarse con la más reciente
+                    const existing = acc[existingIndex];
+                    const currentDate = new Date(current.estado.fechaDeCambio);
+                    const existingDate = new Date(existing.estado.fechaDeCambio);
+                    console.log("Comparando fechas:", currentDate, existingDate,current.estado.tipoEstado, existing.estado.tipoEstado);
+
+                    if (currentDate > existingDate) {
+                        acc[existingIndex] = current;
+                    }
+                }
+
+                return acc;
+            }, []);
+
+            setInscripciones(inscripcionesFiltradas);
         } catch (err) {
             setError('No se pudieron cargar las inscripciones');
             console.error('Error:', err);
@@ -154,7 +177,11 @@ function UserLanding() {
                     <div className="row g-4">
                         {inscripciones.map((inscripcion) => (
                             <div key={inscripcion.id} className="col-lg-6 col-xl-4">
-                                <EventCard inscripcion={inscripcion} />
+                                <InscripcionCard
+                                    inscripcion={inscripcion}
+                                    onVerDetalle={() => console.log('Ver detalle:', inscripcion.evento.id)}
+                                    onInscripcionCancelada={fetchInscripciones}
+                                />
                             </div>
                         ))}
                     </div>

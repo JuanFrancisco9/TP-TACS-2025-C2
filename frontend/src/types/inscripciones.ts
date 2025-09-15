@@ -14,7 +14,7 @@ export interface Participante {
 
 export interface Estado {
   tipoEstado: string;
-  fechaCambio: string;
+  fechaDeCambio: string;
 }
 
 export interface EventoResumen {

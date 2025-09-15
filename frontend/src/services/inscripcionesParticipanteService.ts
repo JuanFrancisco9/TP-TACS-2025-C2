@@ -31,6 +31,21 @@ class InscripcionesParticipanteService {
 
         return response.json();
     }
+
+    async cancelarInscripcion(inscripcionId: string): Promise<boolean> {
+        const url = `${API_BASE_URL}/inscripciones/${inscripcionId}`;
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: this.getAuthHeaders(),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error al cancelar inscripción: ${response.status} - ${response.statusText}`);
+        }
+
+        return true;
+    }
 }
 
 export default new InscripcionesParticipanteService();
