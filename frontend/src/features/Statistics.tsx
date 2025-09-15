@@ -1,11 +1,14 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import StatCard from '../components/StatCard.tsx'
 import estadisticasService from '../services/estadisticasService.ts'
+import authService from '../services/authService.ts'
 import {type EstadisticasUsoDTO, TipoEstadistica, type EstadisticasParams } from '../types/estadisticas.ts'
 
 function Statistics() {
+    useNavigate();
     const [stats, setStats] = useState<EstadisticasUsoDTO | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -13,6 +16,7 @@ function Statistics() {
     const [fechaHasta, setFechaHasta] = useState<Date | null>(null);
     const [estadisticasSeleccionadas, setEstadisticasSeleccionadas] = useState<TipoEstadistica[]>([]);
     const [mostrarFiltros, setMostrarFiltros] = useState(true);
+    const [currentUser] = useState(authService.getCurrentUser());
 
     const fetchStats = async () => {
         try {
@@ -71,16 +75,16 @@ function Statistics() {
 
                 {/* HEADER LIMPIO */}
                 <div className="row mb-5">
-                    <div className="col-lg-8">
+                    <div className="col-lg-6">
                         <h1 className="display-4 fw-bold text-dark mb-3">
                             📊 Dashboard Analytics
                         </h1>
                         <p className="lead text-muted">
-                            Métricas clave actualizadas en tiempo real
+                            Métricas clave actualizadas en tiempo real • Bienvenido {currentUser?.username}
                         </p>
                     </div>
 
-                    <div className="col-lg-4 d-flex align-items-center justify-content-lg-end gap-2">
+                    <div className="col-lg-6 d-flex align-items-center justify-content-lg-end gap-2">
                         <button
                             className="btn btn-outline-secondary px-3 py-2"
                             onClick={() => setMostrarFiltros(!mostrarFiltros)}
@@ -88,6 +92,7 @@ function Statistics() {
                         >
                             ⚙️ Filtros
                         </button>
+
                         <button
                             className="btn btn-primary px-4 py-2 d-flex align-items-center"
                             onClick={fetchStats}

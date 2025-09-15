@@ -1,17 +1,23 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import InscripcionCard from '../components/InscripcionCard';
 import inscripcionesService from '../services/inscripcionesParticipanteService.ts';
+import authService from '../services/authService.ts';
 import type { Inscripcion } from '../types/inscripciones';
+import { Rol } from '../types/auth';
 
 function UserLanding() {
+    const navigate = useNavigate();
     const [inscripciones, setInscripciones] = useState<Inscripcion[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [participanteId, setParticipanteId] = useState<string>('1'); //TODO Por ahora hardcodeado
+    const [currentUser] = useState(authService.getCurrentUser());
+    const [participanteId, setParticipanteId] = useState<string>(authService.getCurrentUser()?.id?.toString() || '');
 
     const fetchInscripciones = async () => {
         try {
             setLoading(true);
+
             setError(null);
 
             const data = await inscripcionesService.obtenerInscripcionesDeParticipante(participanteId);
@@ -48,7 +54,22 @@ function UserLanding() {
     };
 
     useEffect(() => {
-        fetchInscripciones();
+        // Si es organizador, redirigir a crear eventos
+        if (currentUser?.rol === Rol.ROLE_ORGANIZER) {
+            navigate('/crear-evento');
+            return;
+        }
+
+        // Actualizar participanteId cuando cambie el usuario
+        if (currentUser?.id) {
+            setParticipanteId(currentUser.id.toString());
+        }
+    }, [currentUser, navigate]);
+
+    useEffect(() => {
+        if (participanteId && currentUser?.rol !== Rol.ROLE_ORGANIZER) {
+            fetchInscripciones();
+        }
     }, [participanteId]);
 
     const inscripcionesActivas = inscripciones.filter(i =>
@@ -61,16 +82,27 @@ function UserLanding() {
 
                 {/* HEADER */}
                 <div className="row mb-5">
-                    <div className="col-lg-8">
+                    <div className="col-lg-6">
                         <h1 className="display-4 fw-bold text-dark mb-3">
-                            👋 Bienvenido
+                            👋 Bienvenido {currentUser?.username}
                         </h1>
                         <p className="lead text-muted">
                             Aquí puedes ver todos los eventos donde estás inscrito
                         </p>
                     </div>
 
-                    <div className="col-lg-4 d-flex align-items-center justify-content-lg-end">
+                    <div className="col-lg-6 d-flex align-items-center justify-content-lg-end gap-2">
+                        {/* Botón de Estadísticas solo para Admin */}
+                        {currentUser?.rol === Rol.ROLE_ADMIN && (
+                            <button
+                                className="btn btn-success px-4 py-2 d-flex align-items-center"
+                                onClick={() => navigate('/statistics')}
+                                style={{ borderRadius: '12px' }}
+                            >
+                                📊 Estadísticas
+                            </button>
+                        )}
+
                         <button
                             className="btn btn-primary px-4 py-2 d-flex align-items-center"
                             onClick={fetchInscripciones}
@@ -87,6 +119,17 @@ function UserLanding() {
                                     🔄 Actualizar
                                 </>
                             )}
+                        </button>
+
+                        <button
+                            className="btn btn-outline-danger px-3 py-2"
+                            onClick={() => {
+                                authService.logout();
+                                navigate('/login');
+                            }}
+                            style={{ borderRadius: '12px' }}
+                        >
+                            🚪 Salir
                         </button>
                     </div>
                 </div>

@@ -23,13 +23,13 @@ public class LoginController {
      * @return 200 si el login es exitoso, 401 si no lo es
      */
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody InputRegistroDto usuario) {
+    public ResponseEntity<Usuario> login(@RequestBody InputRegistroDto usuario) {
         Usuario user;
         try {
             user = usuarioService.login(usuario);
         } catch (Exception e) {
            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return ResponseEntity.status(200).build();
+        return ResponseEntity.ok(user);
     }
 }

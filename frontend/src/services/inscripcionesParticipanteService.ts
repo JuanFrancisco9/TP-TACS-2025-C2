@@ -1,16 +1,11 @@
 import type { Inscripcion } from '../types/inscripciones';
+import authService from './authService';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-const API_USERNAME = import.meta.env.VITE_API_USERNAME;
-const API_PASSWORD = import.meta.env.VITE_API_PASSWORD;
 
 class InscripcionesParticipanteService {
     private getAuthHeaders() {
-        const credentials = btoa(`${API_USERNAME}:${API_PASSWORD}`);
-        return {
-            'Content-Type': 'application/json',
-            'Authorization': `Basic ${credentials}`
-        };
+        return authService.getAuthHeaders();
     }
 
     async obtenerInscripcionesDeParticipante(idParticipante: string): Promise<Inscripcion[]> {
