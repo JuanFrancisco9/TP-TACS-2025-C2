@@ -78,7 +78,6 @@ public class EventoService {
     }
 
     public Evento actualizarEvento(String idEvento, Evento eventoUpdate) {
-        System.out.println(eventoUpdate);
         if(eventoRepository.getEvento(idEvento).isPresent()) {
         Evento eventoActualizado = new Evento(
                 eventoUpdate.id(),

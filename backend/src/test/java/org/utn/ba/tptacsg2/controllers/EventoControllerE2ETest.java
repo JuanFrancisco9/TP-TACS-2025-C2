@@ -58,7 +58,7 @@ public class EventoControllerE2ETest {
         String id = objectMapper.readTree(response).get("id").asText();
 
         // Modificar el estado del evento
-        mockMvc.perform(put("/eventos/" + id + "?estado=CONFIRMADO"))
+        mockMvc.perform(patch("/eventos/" + id + "?estado=CONFIRMADO"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.estado.tipoEstado").value("CONFIRMADO"));
     }

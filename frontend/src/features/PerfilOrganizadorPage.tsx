@@ -51,6 +51,7 @@ export default function PerfilOrganizador() {
             try {
                 const { eventos } = await EventoService.obtenerEventos();
                 setEvents(eventos);
+                console.log(eventos)
             } catch (error) {
                 console.error("Error al cargar los eventos:", error);
             }
@@ -128,15 +129,20 @@ const EditEvent = ({ event, onClose, onSave }: EditEvent) => {
 
     const handleSubmit = () => {
         if (localEvent) {
-            const updatedEvent = {
-                ...localEvent,
-                estado: {
-                    id: localEvent.estado.id,
-                    tipoEstado: localEvent.estado.tipoEstado,
-                    fechaCambio: localEvent.estado.fechaCambio || new Date().toISOString()
+            if(localEvent.estado.tipoEstado === event?.estado.tipoEstado){
+                onSave(localEvent);
+            }else{
+                console.log("Se cambio el estado del evento")
+                const eventWithNewState = {
+                    ...localEvent,
+                    estado:{
+                        id: localEvent.id,
+                        tipoEstado: localEvent.estado.tipoEstado,
+                        fechaCambio: new Date().toISOString()
+                    }
                 }
-            };
-            onSave(updatedEvent);
+                onSave(eventWithNewState)
+            }
         }
         onClose();
     };
@@ -248,9 +254,10 @@ const EditEvent = ({ event, onClose, onSave }: EditEvent) => {
                         label="Estado"
                         onChange={e => handleNestedChange("estado", "tipoEstado", e.target.value)}
                     >
-                        <MenuItem value="CONFIRMADO">CONFIRMADO</MenuItem>
-                        <MenuItem value="PENDENTE">PENDENTE</MenuItem>
-                        <MenuItem value="CANCELADO">CANCELADO</MenuItem>
+                        <MenuItem value="CONFIRMADO">Confirmado</MenuItem>
+                        <MenuItem value="PENDENTE">Pendiente</MenuItem>
+                        <MenuItem value="CANCELADO">Cancelado</MenuItem>
+                        <MenuItem value="NO_ACEPTA_INSCRIPCIONES">Incripciones cerradas</MenuItem>
                     </Select>
                 </FormControl>
 
