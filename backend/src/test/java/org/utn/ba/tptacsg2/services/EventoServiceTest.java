@@ -14,14 +14,15 @@ import org.utn.ba.tptacsg2.models.events.*;
 import org.utn.ba.tptacsg2.repositories.EstadoEventoRepository;
 import org.utn.ba.tptacsg2.repositories.EventoRepository;
 import org.utn.ba.tptacsg2.repositories.OrganizadorRepository;
-import org.utn.ba.tptacsg2.services.EventoService;
-import org.utn.ba.tptacsg2.services.GeneradorIDService;
+import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
+
 
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,6 +34,7 @@ public class EventoServiceTest {
     @Mock private EventoRepository eventoRepository;
     @Mock private OrganizadorRepository organizadorRepository;
     @Mock private EstadoEventoRepository estadoEventoRepository;
+    @Mock private InscripcionRepository inscripcionRepository;
     @Mock private GeneradorIDService generadorIDService;
 
     @InjectMocks
@@ -211,5 +213,122 @@ public class EventoServiceTest {
 
         assertEquals(1, resultado.totalElementos());
         assertEquals("E1", resultado.eventos().get(0).id());
+    }
+
+    @Test
+    public void cerrarEventosProximos_cierraEventosEn24Horas() {
+        LocalDateTime ahora = LocalDateTime.now();
+        LocalDateTime fechaProxima = ahora.plusHours(23);
+
+        Evento eventoProximo = new Evento(
+                "E3",
+                "Evento próximo",
+                "Descripción",
+                fechaProxima,
+                fechaProxima.toLocalTime().toString(),
+                2.0f,
+                new Ubicacion("", "", "CABA", ""),
+                50,
+                10,
+                new Precio("ARS", 1000f),
+                organizadorMock,
+                new EstadoEvento("4", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
+                new Categoria("TEST"),
+                new ArrayList<>()
+        );
+
+        Evento eventoLejano = new Evento(
+                "E4",
+                "Evento lejano",
+                "Descripción",
+                ahora.plusDays(2),
+                "20:00",
+                2.0f,
+                new Ubicacion("", "", "CABA", ""),
+                50,
+                10,
+                new Precio("ARS", 1000f),
+                organizadorMock,
+                new EstadoEvento("5", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
+                new Categoria("TEST"),
+                new ArrayList<>()
+        );
+
+        List<Evento> eventos = Arrays.asList(eventoProximo, eventoLejano);
+        when(eventoRepository.getEventos()).thenReturn(eventos);
+        when(eventoRepository.getEvento("E3")).thenReturn(Optional.of(eventoProximo));
+        when(generadorIDService.generarID()).thenReturn("nuevo-estado-id");
+
+        eventoService.cerrarEventosProximos();
+
+        verify(eventoRepository).actualizarEvento(argThat(evento ->
+            evento.id().equals("E3") &&
+            evento.estado().getTipoEstado().equals(TipoEstadoEvento.NO_ACEPTA_INSCRIPCIONES)
+        ));
+        verify(eventoRepository, never()).actualizarEvento(argThat(evento ->
+            evento.id().equals("E4")
+        ));
+    }
+
+    @Test
+    public void cerrarEventosProximos_noAfestaEventosYaCerrados() {
+        LocalDateTime fechaProxima = LocalDateTime.now().plusHours(12);
+
+        Evento eventoCerrado = new Evento(
+                "E5",
+                "Evento ya cerrado",
+                "Descripción",
+                fechaProxima,
+                fechaProxima.toLocalTime().toString(),
+                2.0f,
+                new Ubicacion("", "", "CABA", ""),
+                50,
+                10,
+                new Precio("ARS", 1000f),
+                organizadorMock,
+                new EstadoEvento("6", TipoEstadoEvento.NO_ACEPTA_INSCRIPCIONES, LocalDateTime.now()),
+                new Categoria("TEST"),
+                new ArrayList<>()
+        );
+
+        when(eventoRepository.getEventos()).thenReturn(Arrays.asList(eventoCerrado));
+
+        eventoService.cerrarEventosProximos();
+
+        verify(eventoRepository, never()).actualizarEvento(any());
+    }
+
+    @Test
+    public void cerrarEventosProximos_cierraEventosMismaFechaHoraProxima() {
+        LocalDateTime ahora = LocalDateTime.now();
+        LocalDateTime fechaHoy = LocalDateTime.of(ahora.toLocalDate(), ahora.toLocalTime().plusHours(12));
+
+        Evento eventoHoy = new Evento(
+                "E6",
+                "Evento hoy",
+                "Descripción",
+                fechaHoy,
+                fechaHoy.toLocalTime().toString(),
+                2.0f,
+                new Ubicacion("", "", "CABA", ""),
+                50,
+                10,
+                new Precio("ARS", 1000f),
+                organizadorMock,
+                new EstadoEvento("7", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
+                new Categoria("TEST"),
+                new ArrayList<>()
+        );
+
+        when(eventoRepository.getEventos()).thenReturn(Arrays.asList(eventoHoy));
+        when(eventoRepository.getEvento("E6")).thenReturn(Optional.of(eventoHoy));
+        when(generadorIDService.generarID()).thenReturn("nuevo-estado-id");
+
+        eventoService.cerrarEventosProximos();
+
+        verify(eventoRepository).actualizarEvento(argThat(evento ->
+            evento.id().equals("E6") &&
+            evento.estado().getTipoEstado().equals(TipoEstadoEvento.NO_ACEPTA_INSCRIPCIONES)
+        ));
     }
 }

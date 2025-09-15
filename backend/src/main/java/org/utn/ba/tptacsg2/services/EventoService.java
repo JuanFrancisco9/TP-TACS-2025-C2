@@ -16,11 +16,13 @@ import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
 import org.utn.ba.tptacsg2.repositories.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Service
 public class EventoService {
@@ -116,6 +118,21 @@ public class EventoService {
                 .map(i->i.participante()).toList();
 
         return participantes;
+    }
+
+    public void cerrarEventosProximos() {
+        LocalDateTime ahora = LocalDateTime.now();
+        LocalDateTime limite = ahora.plusHours(24);
+
+        List<Evento> eventos = eventoRepository.getEventos();
+
+        eventos.stream()
+                .filter(evento -> {
+                    LocalDateTime fechaHoraEvento = LocalDateTime.of(LocalDate.from(evento.fecha()), LocalTime.parse(evento.horaInicio()));
+                    return fechaHoraEvento.isBefore(limite);
+                })
+                .filter(evento -> !evento.estado().getTipoEstado().equals(TipoEstadoEvento.NO_ACEPTA_INSCRIPCIONES))
+                .forEach(evento -> cambiarEstado(evento.id(), TipoEstadoEvento.NO_ACEPTA_INSCRIPCIONES));
     }
 
     public ResultadoBusquedaEvento buscarEventos(FiltrosDTO filtros) {
