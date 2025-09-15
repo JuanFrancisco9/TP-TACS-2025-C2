@@ -76,7 +76,7 @@ function Statistics() {
                             📊 Dashboard Analytics
                         </h1>
                         <p className="lead text-muted">
-                            Métricas clave de tu plataforma actualizadas en tiempo real
+                            Métricas clave actualizadas en tiempo real
                         </p>
                     </div>
 
