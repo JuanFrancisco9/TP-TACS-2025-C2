@@ -6,7 +6,7 @@ public class EstadoInscripcion {
 
     private final String id;
     private TipoEstadoInscripcion tipoEstado;
-    private Inscripcion inscripcion;
+    private Inscripcion inscripcion; //TODO hacer un DTO sin la inscripcion para evitar referencias circulares en JSON
     private LocalDateTime fechaDeCambio;
 
     public EstadoInscripcion(String id, TipoEstadoInscripcion tipo, LocalDateTime fechaDeCambio) {
@@ -34,4 +34,11 @@ public class EstadoInscripcion {
         return tipoEstado;
     }
 
+    public LocalDateTime getFechaDeCambio() {
+        return fechaDeCambio;
+    }
+
+    public void setFechaDeCambio(LocalDateTime fechaDeCambio) {
+        this.fechaDeCambio = fechaDeCambio;
+    }
 }

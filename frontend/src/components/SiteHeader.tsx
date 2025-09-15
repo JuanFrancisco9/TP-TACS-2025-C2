@@ -1,11 +1,22 @@
-﻿import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   AppBar, Toolbar, Container as MuiContainer, Box, Stack, TextField,
-  Button, IconButton, useMediaQuery
+  Button, IconButton, useMediaQuery, Menu, MenuItem
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
-import { PersonOutline as PersonOutlineIcon, EventAvailable as EventAvailableIcon, Search as SearchIcon } from '@mui/icons-material'; 
+import {
+  PersonOutline as PersonOutlineIcon,
+  EventAvailable as EventAvailableIcon,
+  Search as SearchIcon,
+  Assessment as AssessmentIcon,
+  Assignment as AssignmentIcon,
+  Logout as LogoutIcon,
+  ArrowDropDown as ArrowDropDownIcon
+} from '@mui/icons-material';
+import authService from '../services/authService';
+import { Rol } from '../types/auth';
+import type { Usuario } from '../types/auth'; 
 
 const SiteHeader: React.FC = () => {
   const theme = useTheme();
@@ -13,11 +24,50 @@ const SiteHeader: React.FC = () => {
   const navigate = useNavigate();
 
   const [query, setQuery] = useState('');
+  const [currentUser, setCurrentUser] = useState<Usuario | null>(null);
+  const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
+
+  useEffect(() => {
+    // Verificar el estado de autenticación al cargar el componente
+    setCurrentUser(authService.getCurrentUser());
+
+    // Escuchar cambios en el estado de autenticación
+    const handleAuthStateChange = (event: any) => {
+      setCurrentUser(event.detail);
+    };
+
+    window.addEventListener('authStateChanged', handleAuthStateChange);
+
+    // Limpiar el event listener al desmontar el componente
+    return () => {
+      window.removeEventListener('authStateChanged', handleAuthStateChange);
+    };
+  }, []);
 
   const handleSearch = () => {
     const params = new URLSearchParams();
     if (query.trim()) params.set('q', query.trim());
     navigate({ pathname: '/eventos', search: params.toString() ? `?${params}` : '' });
+  };
+
+  const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setUserMenuAnchor(event.currentTarget);
+  };
+
+  const handleUserMenuClose = () => {
+    setUserMenuAnchor(null);
+  };
+
+  const handleLogout = () => {
+    authService.logout();
+    setCurrentUser(null);
+    handleUserMenuClose();
+    navigate('/');
+  };
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    handleUserMenuClose();
   };
 
   return (
@@ -55,8 +105,83 @@ const SiteHeader: React.FC = () => {
           )}
 
           <Stack direction="row" spacing={1} sx={{ ml: 'auto' }}>
-            <Button startIcon={<PersonOutlineIcon />} color="inherit" onClick={() => navigate('/login')}>Iniciar Sesión /  Registrarse</Button>
-            <Button startIcon={<EventAvailableIcon />} color="inherit" onClick={() => navigate('/crear-evento')}>Crear eventos</Button>
+            {currentUser ? (
+              // Usuario autenticado
+              <>
+                {/* Botón de Mis Inscripciones solo para participantes */}
+                {currentUser.rol === Rol.ROLE_USER && (
+                  <Button
+                    startIcon={<AssignmentIcon />}
+                    color="inherit"
+                    onClick={() => handleNavigation('/mis-eventos')}
+                  >
+                    Mis Inscripciones
+                  </Button>
+                )}
+
+                {/* Botón de Estadísticas solo para Admin */}
+                {currentUser.rol === Rol.ROLE_ADMIN && (
+                  <Button
+                    startIcon={<AssessmentIcon />}
+                    color="inherit"
+                    onClick={() => handleNavigation('/estadisticas')}
+                  >
+                    Estadísticas
+                  </Button>
+                )}
+
+                {/* Botón de Crear eventos solo para organizadores */}
+                {currentUser.rol === Rol.ROLE_ORGANIZER && (
+                  <Button
+                    startIcon={<EventAvailableIcon />}
+                    color="inherit"
+                    onClick={() => navigate('/crear-evento')}
+                  >
+                    Crear eventos
+                  </Button>
+                )}
+
+                {/* Menú de usuario */}
+                <Button
+                  color="inherit"
+                  endIcon={<ArrowDropDownIcon />}
+                  onClick={handleUserMenuOpen}
+                  sx={{ ml: 1 }}
+                >
+                  {currentUser.username}
+                </Button>
+
+                <Menu
+                  anchorEl={userMenuAnchor}
+                  open={Boolean(userMenuAnchor)}
+                  onClose={handleUserMenuClose}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right',
+                  }}
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                >
+                  <MenuItem onClick={handleLogout}>
+                    <LogoutIcon sx={{ mr: 1 }} />
+                    Cerrar Sesión
+                  </MenuItem>
+                </Menu>
+              </>
+            ) : (
+              // Usuario no autenticado
+              <>
+                <Button
+                  startIcon={<PersonOutlineIcon />}
+                  color="inherit"
+                  onClick={() => navigate('/login')}
+                >
+                  Iniciar Sesión / Registrarse
+                </Button>
+              </>
+            )}
           </Stack>
         </Toolbar>
       </MuiContainer>

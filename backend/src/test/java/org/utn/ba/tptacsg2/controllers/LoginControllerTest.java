@@ -40,16 +40,17 @@ class LoginControllerTest {
     void login_devuelve200CuandoCredencialesValidas() throws Exception {
         // Arrange
         InputRegistroDto dto = new InputRegistroDto(1L, "testuser", "password123", "USER","","","");
-        // Devolvemos cualquier Usuario (podés usar un mock; el controller no lo usa):
+        // Crear un usuario mock con propiedades básicas
+        Usuario mockUsuario = Mockito.mock(Usuario.class);
         when(usuarioService.login(any(InputRegistroDto.class)))
-                .thenReturn(Mockito.mock(Usuario.class));
+                .thenReturn(mockUsuario);
 
         // Act & Assert
         mockMvc.perform(post("/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
-                .andExpect(content().string("")); // el controller no retorna body
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON)); // ahora retorna JSON
 
         verify(usuarioService, times(1)).login(any(InputRegistroDto.class));
     }

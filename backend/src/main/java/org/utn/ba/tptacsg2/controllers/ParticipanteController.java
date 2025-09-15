@@ -22,7 +22,7 @@ public class ParticipanteController {
         this.participanteService = participanteService;
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping("/inscripciones/{id_usuario}")
     public ResponseEntity<List<Inscripcion>> getInscripcionesDeUsuario(@PathVariable("id_usuario") String idUsuario) {
         List<Inscripcion> inscripciones = participanteService.getInscripcionesDeParticipante(idUsuario);
