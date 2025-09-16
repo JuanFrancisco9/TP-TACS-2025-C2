@@ -54,15 +54,6 @@ function Login() {
         }
     };
 
-    const handleQuickLogin = async (userType: 'admin' | 'organizador' | 'usuario') => {
-        const credentials = {
-            admin: {username: 'admin', password: 'admin123'},
-            organizador: {username: 'organizador', password: 'organizador123'},
-            usuario: {username: 'usuario', password: 'usuario123'}
-        };
-
-        setFormData(credentials[userType]);
-    };
 
     return (
         <div className="min-vh-100 d-flex align-items-center" style={{backgroundColor: '#f8f9fa'}}>
@@ -144,42 +135,6 @@ function Login() {
                                     </button>
                                 </form>
 
-                                {/* USUARIOS DE PRUEBA */}
-                                <div className="mt-4">
-                                    <hr/>
-                                    <p className="text-center text-muted small mb-3">
-                                        Usuarios de prueba:
-                                    </p>
-                                    <div className="d-grid gap-2">
-                                        <button
-                                            type="button"
-                                            className="btn btn-outline-primary btn-sm"
-                                            onClick={() => handleQuickLogin('admin')}
-                                            disabled={loading}
-                                            style={{borderRadius: '6px'}}
-                                        >
-                                            👑 Admin
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="btn btn-outline-success btn-sm"
-                                            onClick={() => handleQuickLogin('organizador')}
-                                            disabled={loading}
-                                            style={{borderRadius: '6px'}}
-                                        >
-                                            🎯 Organizador
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="btn btn-outline-info btn-sm"
-                                            onClick={() => handleQuickLogin('usuario')}
-                                            disabled={loading}
-                                            style={{borderRadius: '6px'}}
-                                        >
-                                            👤 Usuario
-                                        </button>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
