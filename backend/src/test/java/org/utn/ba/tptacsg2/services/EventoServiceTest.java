@@ -17,7 +17,6 @@ import org.utn.ba.tptacsg2.repositories.OrganizadorRepository;
 import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
 
 
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -31,11 +30,18 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class EventoServiceTest {
 
-    @Mock private EventoRepository eventoRepository;
-    @Mock private OrganizadorRepository organizadorRepository;
-    @Mock private EstadoEventoRepository estadoEventoRepository;
-    @Mock private InscripcionRepository inscripcionRepository;
-    @Mock private GeneradorIDService generadorIDService;
+    @Mock
+    private EventoRepository eventoRepository;
+    @Mock
+    private OrganizadorRepository organizadorRepository;
+    @Mock
+    private EstadoEventoRepository estadoEventoRepository;
+    @Mock
+    private InscripcionRepository inscripcionRepository;
+    @Mock
+    private GeneradorIDService generadorIDService;
+    @Mock
+    private CategoriaService categoriaService;
 
     @InjectMocks
     private EventoService eventoService;
@@ -50,9 +56,9 @@ public class EventoServiceTest {
 
     @BeforeEach
     public void setUp() {
-        idOrganizadorMock="ORG-123";
-        idEventoMock="EV-123";
-        organizadorMock = new Organizador(idOrganizadorMock, "Juan", "Perez","78414456", null);
+        idOrganizadorMock = "ORG-123";
+        idEventoMock = "EV-123";
+        organizadorMock = new Organizador(idOrganizadorMock, "Juan", "Perez", "78414456", null);
 
         eventoSinId = new Evento(
                 null,
@@ -61,13 +67,13 @@ public class EventoServiceTest {
                 LocalDateTime.of(2025, 9, 10, 20, 0),
                 "20:00",
                 3.5f,
-                new Ubicacion("-34.6037", "-58.3816", "Av. Medrano 951, CABA",""),
+                new Ubicacion("-34.6037", "-58.3816", "Av. Medrano 951, CABA", ""),
                 100,
                 0,
                 new Precio("ARS", 5000f),
                 null,
                 new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.of(2025, 9, 1, 12, 0))
-        , null, new ArrayList<>());
+                , null, new ArrayList<>());
 
         solicitudEvento = new SolicitudEvento(idOrganizadorMock,
                 "Fiesta UTN",
@@ -75,7 +81,7 @@ public class EventoServiceTest {
                 LocalDateTime.of(2025, 9, 10, 20, 0),
                 "20:00",
                 3.5f,
-                new Ubicacion("-34.6037", "-58.3816", "Av. Medrano 951, CABA",""),
+                new Ubicacion("-34.6037", "-58.3816", "Av. Medrano 951, CABA", ""),
                 100,
                 0,
                 new Precio("ARS", 5000f),
@@ -83,21 +89,22 @@ public class EventoServiceTest {
                 null,
                 new ArrayList<>());
 
-            Categoria categoria1 = new Categoria("MUSICA");
-            Categoria categoria2 = new Categoria("TECNOLOGIA");
+        Categoria categoria1 = new Categoria("MUSICA");
+        Categoria categoria2 = new Categoria("TECNOLOGIA");
 
         eventoValido1 = new Evento("E1", "Concierto de rock vivo", "Musica", LocalDateTime.of(2025, 9, 10, 20, 0), "20:00", 2f, new Ubicacion("", "", "La Plata", "CABA"), 100, 0, new Precio("ARS", 1000f), organizadorMock, new EstadoEvento("2", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria1, new ArrayList<>());
-        eventoValido2= new Evento("E2", "Charla", "Tecnologia", LocalDateTime.of(2025, 10, 10, 18, 0), "18:00", 1.5f, new Ubicacion("", "", "CABA", "CABA"), 50, 0,  new Precio("ARS", 500f), organizadorMock, new EstadoEvento("3", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria2, new ArrayList<>());
+        eventoValido2 = new Evento("E2", "Charla", "Tecnologia", LocalDateTime.of(2025, 10, 10, 18, 0), "18:00", 1.5f, new Ubicacion("", "", "CABA", "CABA"), 50, 0, new Precio("ARS", 500f), organizadorMock, new EstadoEvento("3", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria2, new ArrayList<>());
 
-            lenient().when(eventoRepository.getEventos()).thenReturn(Arrays.asList(eventoValido1, eventoValido2));
+        lenient().when(eventoRepository.getEventos()).thenReturn(Arrays.asList(eventoValido1, eventoValido2));
 
-            ReflectionTestUtils.setField(eventoService, "tamanioPagina", 20);
+        ReflectionTestUtils.setField(eventoService, "tamanioPagina", 20);
     }
 
     @Test
     public void registrarEventoGuardaEnMemoria() {
         when(organizadorRepository.getOrganizador(idOrganizadorMock)).thenReturn(Optional.of(organizadorMock));
         when(generadorIDService.generarID()).thenReturn(idOrganizadorMock);
+        doNothing().when(categoriaService).guardarCategoria(null);
 
         Evento resultado = eventoService.registrarEvento(solicitudEvento);
         assertEquals("Fiesta UTN", resultado.titulo());
@@ -105,6 +112,7 @@ public class EventoServiceTest {
 
         verify(eventoRepository).guardarEvento(resultado);
     }
+
     @Test
     public void registrarEventoFallaPorqueElIdDelOrganizadorEsInvalido() {
         when(organizadorRepository.getOrganizador("ORG-INEXISTENTE"))
@@ -116,7 +124,7 @@ public class EventoServiceTest {
                 LocalDateTime.of(2025, 9, 10, 20, 0),
                 "20:00",
                 3.5f,
-                new Ubicacion("-34.6037", "-58.3816", "Av. Medrano 951, CABA",""),
+                new Ubicacion("-34.6037", "-58.3816", "Av. Medrano 951, CABA", ""),
                 100,
                 0,
                 new Precio("ARS", 5000f),
@@ -132,7 +140,7 @@ public class EventoServiceTest {
     }
 
     @Test
-    public void cambiarEstadoEvento(){
+    public void cambiarEstadoEvento() {
         when(eventoRepository.getEvento(idEventoMock)).thenReturn(Optional.of(eventoSinId));
 
         TipoEstadoEvento tipoEstadoEvento = TipoEstadoEvento.CANCELADO;
@@ -262,11 +270,11 @@ public class EventoServiceTest {
         eventoService.cerrarEventosProximos();
 
         verify(eventoRepository).actualizarEvento(argThat(evento ->
-            evento.id().equals("E3") &&
-            evento.estado().getTipoEstado().equals(TipoEstadoEvento.NO_ACEPTA_INSCRIPCIONES)
+                evento.id().equals("E3") &&
+                        evento.estado().getTipoEstado().equals(TipoEstadoEvento.NO_ACEPTA_INSCRIPCIONES)
         ));
         verify(eventoRepository, never()).actualizarEvento(argThat(evento ->
-            evento.id().equals("E4")
+                evento.id().equals("E4")
         ));
     }
 
@@ -327,8 +335,8 @@ public class EventoServiceTest {
         eventoService.cerrarEventosProximos();
 
         verify(eventoRepository).actualizarEvento(argThat(evento ->
-            evento.id().equals("E6") &&
-            evento.estado().getTipoEstado().equals(TipoEstadoEvento.NO_ACEPTA_INSCRIPCIONES)
+                evento.id().equals("E6") &&
+                        evento.estado().getTipoEstado().equals(TipoEstadoEvento.NO_ACEPTA_INSCRIPCIONES)
         ));
     }
 }
