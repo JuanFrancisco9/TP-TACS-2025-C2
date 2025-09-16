@@ -19,6 +19,7 @@ function App() {
           <Route path="/inscripcion/:id" element={<InscripcionPage />} />
           <Route path="/crear-evento" element={<CreateEventPage />} />
           <Route path="/perfil" element={<UserPage />} />
+
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
