@@ -7,3 +7,4 @@ Este documento enumera mejoras a considerar para la próxima Entrega.
 
 - **Repositorios**
   - Si bien se utiliza el Patrón Repositorio para simular la persistencia de datos, habrá un refactor importante cuando se tenga persistencia en la BD no relacional. 
+  - Se esta buscando los eventos del organizador en base al id del usuario, revisar tambien si pasa en participante

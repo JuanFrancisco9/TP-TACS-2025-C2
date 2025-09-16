@@ -32,14 +32,14 @@ public class EventoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(evento);
     }
 
-    //@PreAuthorize("hasRole('ORGANIZER')")
+    @PreAuthorize("hasRole('ORGANIZER')")
     @PatchMapping("/{id_evento}")
     public ResponseEntity<Evento> modificarEstadoEvento(@PathVariable ("id_evento") String idEvento , @RequestParam("estado") TipoEstadoEvento estado) {
         Evento evento = eventoService.cambiarEstado(idEvento, estado);
         return ResponseEntity.status(HttpStatus.OK).body(evento);
     }
 
-    //@PreAuthorize("hasRole('ORGANIZER')")
+    @PreAuthorize("hasRole('ORGANIZER')")
     @PutMapping("/{id_evento}")
     public ResponseEntity<Evento> modificarEvento(@PathVariable ("id_evento") String idEvento,  @RequestBody Evento eventoActualizado) {
         Evento evento = eventoService.actualizarEvento(idEvento, eventoActualizado);
@@ -52,7 +52,7 @@ public class EventoController {
      * output: 200 + lista con parcipantes,
      *         404 + mensaje de error, en caso de fallo
      */
-    //@PreAuthorize("hasRole('ORGANIZER')")
+    @PreAuthorize("hasRole('ORGANIZER')")
     @GetMapping("/{eventoId}/participantes")
     public ResponseEntity<?> getParticipantesFromEvento(@PathVariable("eventoId") String eventoId){
         List<ParticipanteDTO> participantesDTO;

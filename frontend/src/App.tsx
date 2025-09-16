@@ -44,6 +44,11 @@ function App() {
                             <CreateEventPage/>
                         </ProtectedRoute>
                     }/>
+                    <Route path="/organizador/eventos" element={
+                        <ProtectedRoute allowedRoles={[Rol.ROLE_ORGANIZER]}>
+                            <PerfilOrganizadorPage/>
+                        </ProtectedRoute>
+                    }/>
                     <Route path="/mis-eventos" element={
                         <ProtectedRoute allowedRoles={[Rol.ROLE_USER]}>
                             <UserLanding/>
@@ -54,7 +59,6 @@ function App() {
                             <Statistics/>
                         </ProtectedRoute>
                     }/>
-                    <Route path="/perfil-organizador" element={<PerfilOrganizadorPage />} />
                     <Route path="*" element={<Navigate to="/" replace/>}/>
                 </Route>
             </Routes>

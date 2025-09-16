@@ -59,7 +59,7 @@ public class EventoRepository {
 
         Evento evento1 = new Evento("0", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
                 "19;00",5F, new Ubicacion("-32.05322857239074", "-58.61824002335356","CABA", "Av. Press. Figueroa Alcorta 2099"), 10, 0,
-                new Precio("Pesos", 100F), new Organizador("1","","","", null),
+                new Precio("Pesos", 100F), new Organizador("3","","","", null),
                 estadoEvento1 ,new Categoria("Educativo"),new ArrayList<>());
 
         Evento evento2 = new Evento("2", "Workshop de Testing", "Testing", LocalDateTime.now().plusDays(7),

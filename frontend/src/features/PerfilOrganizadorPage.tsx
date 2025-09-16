@@ -2,17 +2,18 @@ import {useEffect, useState} from "react";
 import {
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
     Paper, Button, Dialog, DialogTitle, DialogContent, DialogActions,
-    TextField, Typography, Select, MenuItem, InputLabel
+    TextField, Typography, Select, MenuItem, InputLabel, CircularProgress
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import BlockIcon from '@mui/icons-material/Block';
 import type {Evento} from '../services/eventoService.ts'
-import type {Inscripcion, Participante} from "../types/inscripciones.ts";
+import type {Inscripcion, Participante, Usuario} from "../types/inscripciones.ts";
 import FormControl from "@mui/material/FormControl";
 import { EventoService } from '../services/eventoService';
 import { formatDateForInput } from "../utils/formatFecha.ts";
+import authService from "../services/authService.ts";
 
 interface EditEvent {
     event: Evento | null;
@@ -27,8 +28,8 @@ interface ViewModal {
 
 export default function PerfilOrganizador() {
     const [events, setEvents] = useState<Evento[]>([]);
-
-    const [user] = useState("Juan");
+    const [user, setUser] = useState<Usuario | null>(null);
+    const [loading, setLoading] = useState(true);
 
     // ---- estados de modal ----
     const [editEvent, setEditEvent] = useState<Evento | null>(null);
@@ -37,81 +38,114 @@ export default function PerfilOrganizador() {
 
     // ---- handlers ----
     const handleSaveEdit = async (updatedEvent: Evento) => {
-        try{
-            const eventoAcutalizado = await EventoService.actualizarEvento(updatedEvent.id,updatedEvent)
+        try {
+            const eventoActualizado = await EventoService.actualizarEvento(updatedEvent.id, updatedEvent);
             setEvents(prev =>
-                prev.map(ev => ev.id === eventoAcutalizado.id ? updatedEvent : ev)
+                prev.map(ev => ev.id === eventoActualizado.id ? eventoActualizado : ev)
             );
             setEditEvent(null);
-        }catch (error){
-            console.error(error)
+        } catch (error) {
+            console.error(error);
         }
     };
 
-    const handelCloseInscriptions = async (updatedEvent: Evento)=>{
-        try{
-            const eventoAcutalizado = await EventoService.actualizarEstadoEvento(updatedEvent, "NO_ACEPTA_INSCRIPCIONES")
+    const handelCloseInscriptions = async (updatedEvent: Evento) => {
+        try {
+            const eventoActualizado = await EventoService.actualizarEstadoEvento(updatedEvent, "NO_ACEPTA_INSCRIPCIONES");
             setEvents(prev =>
-                prev.map(ev => ev.id === eventoAcutalizado.id ? eventoAcutalizado : ev)
+                prev.map(ev => ev.id === eventoActualizado.id ? eventoActualizado : ev)
             );
             setEditEvent(null);
-        }catch (error){
-            console.error(error)
+        } catch (error) {
+            console.error(error);
         }
-    }
+    };
 
+    // ---- cargar perfil y eventos ----
     useEffect(() => {
-        const cargarEventos = async () => {
+        const loadData = async () => {
             try {
-                const { eventos } = await EventoService.obtenerEventos();
-                await EventoService.obtenerParticipantesDeEvento(eventos[0])
-                setEvents(eventos);
+                const currentUser = authService.getCurrentUser()
+                setUser(currentUser);
+
+                if (currentUser?.id) {
+                    const eventos = await EventoService.obtenerEventosParaOrganizador(currentUser.id);
+                    setEvents(eventos);
+                }
             } catch (error) {
                 console.error("Error al cargar los eventos:", error);
+            } finally {
+                setLoading(false);
             }
         };
-        cargarEventos();
+
+        loadData();
     }, []);
 
+    // ---- loading ----
+    if (loading) {
+        return (
+            <div style={{ padding: "2rem", textAlign: "center" }}>
+                <CircularProgress />
+                <Typography>Cargando perfil...</Typography>
+            </div>
+        );
+    }
 
+    // ---- UI principal ----
     return (
         <div style={{ padding: "2rem" }}>
-            <Typography variant="h4" gutterBottom>Bienvenido: {user}</Typography>
+            <Typography variant="h4" gutterBottom>
+                Bienvenido: {user?.username}
+            </Typography>
 
-            <TableContainer component={Paper}>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Título</TableCell>
-                            <TableCell>Fecha</TableCell>
-                            <TableCell>Ubicación</TableCell>
-                            <TableCell>Estado</TableCell>
-                            <TableCell>Acciones</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {events.map((e) => (
-                            <TableRow key={e.id}>
-                                <TableCell>{e.titulo}</TableCell>
-                                <TableCell>{e.fecha}</TableCell>
-                                <TableCell>{e.ubicacion.localidad}, {e.ubicacion.direccion}</TableCell>
-                                <TableCell>{e.estado.tipoEstado === "NO_ACEPTA_INSCRIPCIONES" ? "INSCRIPCIONES CERRADAS" : e.estado.tipoEstado} </TableCell>
-                                <TableCell>
-                                    <Button onClick={() => setEditEvent(e)}><EditIcon /></Button>
-                                    <Button onClick={() => setViewEvent(e)}><VisibilityIcon /></Button>
-                                    <Button onClick={() => setWaitlistEvent(e)}><ListAltIcon /></Button>
-                                    <Button onClick={() => handelCloseInscriptions(e)}><BlockIcon /></Button>
-                                </TableCell>
+            {events.length === 0 ? (
+                <Typography variant="h6" color="textSecondary" align="center" sx={{ mt: 4 }}>
+                    No tenés ningún evento por el momento
+                </Typography>
+            ) : (
+                <TableContainer component={Paper}>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Título</TableCell>
+                                <TableCell>Fecha</TableCell>
+                                <TableCell>Ubicación</TableCell>
+                                <TableCell>Estado</TableCell>
+                                <TableCell>Acciones</TableCell>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                        </TableHead>
+                        <TableBody>
+                            {events.map((e) => (
+                                <TableRow key={e.id}>
+                                    <TableCell>{e.titulo}</TableCell>
+                                    <TableCell>{e.fecha}</TableCell>
+                                    <TableCell>
+                                        {e.ubicacion.localidad}, {e.ubicacion.direccion}
+                                    </TableCell>
+                                    <TableCell>
+                                        {e.estado.tipoEstado === "NO_ACEPTA_INSCRIPCIONES"
+                                            ? "INSCRIPCIONES CERRADAS"
+                                            : e.estado.tipoEstado}
+                                    </TableCell>
+                                    <TableCell>
+                                        <Button onClick={() => setEditEvent(e)}><EditIcon /></Button>
+                                        <Button onClick={() => setViewEvent(e)}><VisibilityIcon /></Button>
+                                        <Button onClick={() => setWaitlistEvent(e)}><ListAltIcon /></Button>
+                                        <Button onClick={() => handelCloseInscriptions(e)}><BlockIcon /></Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            )}
 
             <EditEvent event={editEvent} onClose={() => setEditEvent(null)} onSave={handleSaveEdit} />
-            <VerInscriptos event={viewEvent} onClose={() => setViewEvent(null)}/>
+            <VerInscriptos event={viewEvent} onClose={() => setViewEvent(null)} />
             <WaitList event={waitlistEvent} onClose={() => setWaitlistEvent(null)} />
         </div>
+
     );
 }
 
@@ -271,7 +305,7 @@ const EditEvent = ({ event, onClose, onSave }: EditEvent) => {
                         onChange={e => handleNestedChange("estado", "tipoEstado", e.target.value)}
                     >
                         <MenuItem value="CONFIRMADO">Confirmado</MenuItem>
-                        <MenuItem value="PENDENTE">Pendiente</MenuItem>
+                        <MenuItem value="PENDIENTE">Pendiente</MenuItem>
                         <MenuItem value="CANCELADO">Cancelado</MenuItem>
                         <MenuItem value="NO_ACEPTA_INSCRIPCIONES">Incripciones cerradas</MenuItem>
                     </Select>
