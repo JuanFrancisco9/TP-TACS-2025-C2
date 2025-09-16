@@ -54,21 +54,24 @@ public class EventoRepository {
     @PostConstruct
     public void initializeData() {
         // Primer evento de prueba
-        EstadoEvento estadoEvento1 = this.estadoEventoRepository.getEstadoInscripcionById("1");
-        EstadoEvento estadoEvento2 = this.estadoEventoRepository.getEstadoInscripcionById("2");
+        EstadoEvento estadoEvento1 = new EstadoEvento("1",TipoEstadoEvento.CONFIRMADO, LocalDateTime.now().minusDays(7));
+        EstadoEvento estadoEvento2 = new EstadoEvento("2",TipoEstadoEvento.CONFIRMADO, LocalDateTime.now().minusDays(7));
 
-        this.guardarEvento(new Evento("0", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
-                            "19;00",5F, new Ubicacion("-32.05322857239074", "-58.61824002335356","CABA", "Av. Press. Figueroa Alcorta 2099"), 10, 0,
-                            new Precio("Pesos", 100F), new Organizador("1","","","", null),
-                estadoEvento1,new Categoria("Educativo"),new ArrayList<>()));
+        Evento evento1 = new Evento("0", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
+                "19;00",5F, new Ubicacion("-32.05322857239074", "-58.61824002335356","CABA", "Av. Press. Figueroa Alcorta 2099"), 10, 0,
+                new Precio("Pesos", 100F), new Organizador("3","","","", null),
+                estadoEvento1 ,new Categoria("Educativo"),new ArrayList<>());
 
-        // Segundo evento de prueba
-        this.guardarEvento(new Evento("2", "Workshop de Testing", "Testing", LocalDateTime.now().plusDays(7),
+        Evento evento2 = new Evento("2", "Workshop de Testing", "Testing", LocalDateTime.now().plusDays(7),
                 "10:00", 3F, new Ubicacion("-32.05322857239074", "-58.61824002335356","CABA", "Av. Press. Figueroa Alcorta 2099"), 20, 0,
                 new Precio("Pesos", 150F), new Organizador("2","María","González","87654321", null),
-                estadoEvento2, new Categoria("Tecnología"), new ArrayList<>()));
+                estadoEvento2, new Categoria("Tecnología"), new ArrayList<>());
 
-        estadoEvento1.setEvento(this.eventos.get(0));
-        estadoEvento2.setEvento(this.eventos.get(1));
+        this.guardarEvento(evento1);
+        this.guardarEvento(evento2);
+
+        estadoEvento1.setEvento(evento1);
+        estadoEvento2.setEvento(evento2);
+
     }
 }

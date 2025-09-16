@@ -17,3 +17,4 @@ Este documento enumera mejoras a considerar para la próxima Entrega.
     - Sumar las imagenes para devolverlas desde el back, también los íconos de las categorías.
   
 
+  - Se esta buscando los eventos del organizador en base al id del usuario, revisar tambien si pasa en participante

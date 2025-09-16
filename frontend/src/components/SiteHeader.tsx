@@ -16,7 +16,8 @@ import {
 } from '@mui/icons-material';
 import authService from '../services/authService';
 import { Rol } from '../types/auth';
-import type { Usuario } from '../types/auth'; 
+import type { Usuario } from '../types/auth';
+import ListAltIcon from "@mui/icons-material/ListAlt";
 
 const SiteHeader: React.FC = () => {
   const theme = useTheme();
@@ -139,15 +140,25 @@ const SiteHeader: React.FC = () => {
                   </Button>
                 )}
 
-                {/* Bot�n de Crear eventos solo para organizadores */}
+                {/* Botones solo para organizadores */}
                 {currentUser.rol === Rol.ROLE_ORGANIZER && (
-                  <Button
-                    startIcon={<EventAvailableIcon />}
-                    color="inherit"
-                    onClick={() => navigate('/crear-evento')}
-                  >
-                    Crear eventos
-                  </Button>
+                    <>
+                        <Button
+                            startIcon={<EventAvailableIcon />}
+                            color="inherit"
+                            onClick={() => navigate('/crear-evento')}
+                        >
+                            Crear eventos
+                        </Button>
+
+                        <Button
+                            startIcon={<ListAltIcon />}   // <- opcional, un ícono de lista
+                            color="inherit"
+                            onClick={() => navigate('/organizador/eventos')}
+                        >
+                            Mis eventos
+                        </Button>
+                    </>
                 )}
 
                 {/* Men� de usuario */}

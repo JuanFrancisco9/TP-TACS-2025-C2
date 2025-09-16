@@ -81,6 +81,33 @@ public class EventoService {
         return evento;
     }
 
+    public Evento actualizarEvento(String idEvento, Evento eventoUpdate) {
+        if(eventoRepository.getEvento(idEvento).isPresent()) {
+        Evento eventoActualizado = new Evento(
+                eventoUpdate.id(),
+                eventoUpdate.titulo(),
+                eventoUpdate.descripcion(),
+                eventoUpdate.fecha(),
+                eventoUpdate.horaInicio(),
+                eventoUpdate.duracion(),
+                eventoUpdate.ubicacion(),
+                eventoUpdate.cupoMaximo(),
+                eventoUpdate.cupoMinimo(),
+                eventoUpdate.precio(),
+                eventoUpdate.organizador(),
+                eventoUpdate.estado(),
+                eventoUpdate.categoria(),
+                eventoUpdate.etiquetas()
+        );
+
+        eventoRepository.actualizarEvento(eventoActualizado);
+
+        return eventoActualizado;
+        }else  {
+            throw new RuntimeException("No existe el evento con el id: " + idEvento);
+        }
+    }
+
     public Evento cambiarEstado(String idEvento,TipoEstadoEvento estado) {
         Evento evento = eventoRepository.getEvento(idEvento).orElseThrow(() -> new RuntimeException("Evento no encontrado"));
 
