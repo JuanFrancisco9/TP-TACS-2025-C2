@@ -15,7 +15,7 @@ import { formatDateForInput } from "../utils/formatFecha.ts";
 interface EditEvent {
     event: Evento | null;
     onClose: () => void;
-    onSave: (updated: Evento) => void | null;
+    onSave: (updated: Evento) => Promise<void> | null;
 }
 
 interface ViewModal {

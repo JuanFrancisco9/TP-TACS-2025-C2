@@ -10,6 +10,7 @@ import Statistics from "./features/Statistics.tsx";
 import UserLanding from "./features/UserLanding.tsx";
 import ProtectedRoute from './components/ProtectedRoute';
 import { Rol } from './types/auth';
+import PerfilOrganizadorPage from './features/PerfilOrganizadorPage'
 
 function App() {
     return (
@@ -53,7 +54,7 @@ function App() {
                             <Statistics/>
                         </ProtectedRoute>
                     }/>
-
+                    <Route path="/perfil-organizador" element={<PerfilOrganizadorPage />} />
                     <Route path="*" element={<Navigate to="/" replace/>}/>
                 </Route>
             </Routes>
