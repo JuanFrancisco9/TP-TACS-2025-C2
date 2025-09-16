@@ -52,7 +52,7 @@ public class EventoController {
      * output: 200 + lista con parcipantes,
      *         404 + mensaje de error, en caso de fallo
      */
-    @PreAuthorize("hasRole('ORGANIZER')")
+    //@PreAuthorize("hasRole('ORGANIZER')")
     @GetMapping("/{eventoId}/participantes")
     public ResponseEntity<?> getParticipantesFromEvento(@PathVariable("eventoId") String eventoId){
         List<ParticipanteDTO> participantesDTO;

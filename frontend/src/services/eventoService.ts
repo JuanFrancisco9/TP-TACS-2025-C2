@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type {Inscripcion} from "../types/inscripciones.ts";
+import type {Inscripcion, Participante} from "../types/inscripciones.ts";
 
 // Interface para la respuesta del backend
 interface ResultadoBusquedaEvento {
@@ -272,6 +272,17 @@ export class EventoService {
           throw new Error('Error al obtener waitlist');
       }
   }
+
+    static async obtenerParticipantesDeEvento(evento: Evento | null): Promise<Participante[]> {
+        try{
+            const url = `/eventos/${evento?.id}/participantes`
+            const response = await this.api.get(url)
+            return response.data
+        }catch (error){
+            console.log(error)
+            throw new Error('Error al obtener participantes del evento');
+        }
+    }
 
   // Método para buscar eventos con filtros avanzados
   static async buscarEventosConFiltros(filtros: {

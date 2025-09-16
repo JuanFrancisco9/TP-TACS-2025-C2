@@ -8,7 +8,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import type {Evento} from '../services/eventoService.ts'
-import type {Inscripcion} from "../types/inscripciones.ts";
+import type {Inscripcion, Participante} from "../types/inscripciones.ts";
 import FormControl from "@mui/material/FormControl";
 import { EventoService } from '../services/eventoService';
 import { formatDateForInput } from "../utils/formatFecha.ts";
@@ -51,6 +51,7 @@ export default function PerfilOrganizador() {
         const cargarEventos = async () => {
             try {
                 const { eventos } = await EventoService.obtenerEventos();
+                await EventoService.obtenerParticipantesDeEvento(eventos[0])
                 setEvents(eventos);
             } catch (error) {
                 console.error("Error al cargar los eventos:", error);
@@ -294,16 +295,40 @@ const EditEvent = ({ event, onClose, onSave }: EditEvent) => {
 };
 
 const VerInscriptos = ({event, onClose}:ViewModal) => {
+    const [participantes, setParticipantes] = useState<Participante[] | null>(null)
+    useEffect(() => {
+        const getParticipantes = async ()=>{
+            try{
+                const partcipantes = await EventoService.obtenerParticipantesDeEvento(event)
+                setParticipantes(partcipantes)
+            }catch (e){
+                console.log(e)
+            }
+        }
+        if(event){
+            getParticipantes()
+        }
+    }, [event]);
+
     if (!event) return null;
 
     return (
         <Dialog open={!!event} onClose={onClose} maxWidth="sm" fullWidth>
             <DialogTitle>Inscriptos en {event.titulo}</DialogTitle>
             <DialogContent>
-                <ul>
-                    <li>Usuario 1</li>
-                    <li>Usuario 2</li>
-                </ul>
+                {participantes === null ? (
+                    <p>Cargando...</p>
+                ) : participantes.length === 0 ? (
+                    <p>No hay participantes inscriptos.</p>
+                ) : (
+                    <ul>
+                        {participantes.map((p) => (
+                            <li key={p.dni}>
+                                {p.nombre} {p.apellido}
+                            </li>
+                        ))}
+                    </ul>
+                )}
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose}>Cerrar</Button>
