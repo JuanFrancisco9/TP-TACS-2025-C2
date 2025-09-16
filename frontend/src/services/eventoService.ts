@@ -284,6 +284,17 @@ export class EventoService {
         }
     }
 
+    static async actualizarEstadoEvento(evento: Evento, estado: String): Promise<Evento> {
+        try{
+            const url = `/eventos/${evento?.id}?estado=${estado}`
+            const response = await this.api.patch(url)
+            return response.data
+        }catch (error){
+            console.log(error)
+            throw new Error('Error al obtener participantes del evento');
+        }
+    }
+
   // Método para buscar eventos con filtros avanzados
   static async buscarEventosConFiltros(filtros: {
     palabrasClave?: string;

@@ -7,6 +7,7 @@ import {
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import ListAltIcon from "@mui/icons-material/ListAlt";
+import BlockIcon from '@mui/icons-material/Block';
 import type {Evento} from '../services/eventoService.ts'
 import type {Inscripcion, Participante} from "../types/inscripciones.ts";
 import FormControl from "@mui/material/FormControl";
@@ -47,6 +48,18 @@ export default function PerfilOrganizador() {
         }
     };
 
+    const handelCloseInscriptions = async (updatedEvent: Evento)=>{
+        try{
+            const eventoAcutalizado = await EventoService.actualizarEstadoEvento(updatedEvent, "NO_ACEPTA_INSCRIPCIONES")
+            setEvents(prev =>
+                prev.map(ev => ev.id === eventoAcutalizado.id ? eventoAcutalizado : ev)
+            );
+            setEditEvent(null);
+        }catch (error){
+            console.error(error)
+        }
+    }
+
     useEffect(() => {
         const cargarEventos = async () => {
             try {
@@ -72,6 +85,7 @@ export default function PerfilOrganizador() {
                             <TableCell>Título</TableCell>
                             <TableCell>Fecha</TableCell>
                             <TableCell>Ubicación</TableCell>
+                            <TableCell>Estado</TableCell>
                             <TableCell>Acciones</TableCell>
                         </TableRow>
                     </TableHead>
@@ -81,10 +95,12 @@ export default function PerfilOrganizador() {
                                 <TableCell>{e.titulo}</TableCell>
                                 <TableCell>{e.fecha}</TableCell>
                                 <TableCell>{e.ubicacion.localidad}, {e.ubicacion.direccion}</TableCell>
+                                <TableCell>{e.estado.tipoEstado === "NO_ACEPTA_INSCRIPCIONES" ? "INSCRIPCIONES CERRADAS" : e.estado.tipoEstado} </TableCell>
                                 <TableCell>
                                     <Button onClick={() => setEditEvent(e)}><EditIcon /></Button>
                                     <Button onClick={() => setViewEvent(e)}><VisibilityIcon /></Button>
                                     <Button onClick={() => setWaitlistEvent(e)}><ListAltIcon /></Button>
+                                    <Button onClick={() => handelCloseInscriptions(e)}><BlockIcon /></Button>
                                 </TableCell>
                             </TableRow>
                         ))}

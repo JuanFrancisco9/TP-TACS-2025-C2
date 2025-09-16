@@ -32,7 +32,7 @@ public class EventoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(evento);
     }
 
-    @PreAuthorize("hasRole('ORGANIZER')")
+    //@PreAuthorize("hasRole('ORGANIZER')")
     @PatchMapping("/{id_evento}")
     public ResponseEntity<Evento> modificarEstadoEvento(@PathVariable ("id_evento") String idEvento , @RequestParam("estado") TipoEstadoEvento estado) {
         Evento evento = eventoService.cambiarEstado(idEvento, estado);
