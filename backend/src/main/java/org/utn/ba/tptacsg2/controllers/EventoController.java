@@ -33,9 +33,16 @@ public class EventoController {
     }
 
     @PreAuthorize("hasRole('ORGANIZER')")
-    @PutMapping("/{id_evento}")
-    public ResponseEntity<Evento> modificarEvento(@PathVariable ("id_evento") String idEvento , @RequestParam("estado") TipoEstadoEvento estado) {
+    @PatchMapping("/{id_evento}")
+    public ResponseEntity<Evento> modificarEstadoEvento(@PathVariable ("id_evento") String idEvento , @RequestParam("estado") TipoEstadoEvento estado) {
         Evento evento = eventoService.cambiarEstado(idEvento, estado);
+        return ResponseEntity.status(HttpStatus.OK).body(evento);
+    }
+
+    @PreAuthorize("hasRole('ORGANIZER')")
+    @PutMapping("/{id_evento}")
+    public ResponseEntity<Evento> modificarEvento(@PathVariable ("id_evento") String idEvento,  @RequestBody Evento eventoActualizado) {
+        Evento evento = eventoService.actualizarEvento(idEvento, eventoActualizado);
         return ResponseEntity.status(HttpStatus.OK).body(evento);
     }
 

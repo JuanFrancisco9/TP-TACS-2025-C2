@@ -31,16 +31,18 @@ public class EventoService {
     private final OrganizadorRepository organizadorRepository;
     private final GeneradorIDService generadorIDService;
     private final EstadoEventoRepository estadoEventoRepository;
+    private final CategoriaService categoriaService;
     @Value("${app.pagination.default-page-size}")
     private Integer tamanioPagina;
 
     @Autowired
-    public EventoService(EventoRepository eventoRepository, InscripcionRepository inscripcionRepository, OrganizadorRepository organizadorRepository, GeneradorIDService generadorIDService,EstadoEventoRepository estadoEventoRepository) {
+    public EventoService(EventoRepository eventoRepository, InscripcionRepository inscripcionRepository, OrganizadorRepository organizadorRepository, GeneradorIDService generadorIDService,EstadoEventoRepository estadoEventoRepository, CategoriaService categoriaService) {
         this.eventoRepository = eventoRepository;
         this.inscripcionRepository = inscripcionRepository;
         this.organizadorRepository = organizadorRepository;
         this.generadorIDService = generadorIDService;
         this.estadoEventoRepository = estadoEventoRepository;
+        this.categoriaService = categoriaService;
     }
 
     public Integer cuposDisponibles(Evento evento) {
@@ -76,7 +78,36 @@ public class EventoService {
         this.estadoEventoRepository.guardarEstadoEvento(estadoInicial);
         eventoRepository.guardarEvento(evento);
 
+        this.categoriaService.guardarCategoria(solicitud.categoria());
+
         return evento;
+    }
+
+    public Evento actualizarEvento(String idEvento, Evento eventoUpdate) {
+        if(eventoRepository.getEvento(idEvento).isPresent()) {
+        Evento eventoActualizado = new Evento(
+                eventoUpdate.id(),
+                eventoUpdate.titulo(),
+                eventoUpdate.descripcion(),
+                eventoUpdate.fecha(),
+                eventoUpdate.horaInicio(),
+                eventoUpdate.duracion(),
+                eventoUpdate.ubicacion(),
+                eventoUpdate.cupoMaximo(),
+                eventoUpdate.cupoMinimo(),
+                eventoUpdate.precio(),
+                eventoUpdate.organizador(),
+                eventoUpdate.estado(),
+                eventoUpdate.categoria(),
+                eventoUpdate.etiquetas()
+        );
+
+        eventoRepository.actualizarEvento(eventoActualizado);
+
+        return eventoActualizado;
+        }else  {
+            throw new RuntimeException("No existe el evento con el id: " + idEvento);
+        }
     }
 
     public Evento cambiarEstado(String idEvento,TipoEstadoEvento estado) {

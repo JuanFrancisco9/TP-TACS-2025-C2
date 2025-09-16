@@ -14,8 +14,13 @@ function UserLanding() {
     const [currentUser] = useState(authService.getCurrentUser());
     const [participanteId, setParticipanteId] = useState<string>(authService.getCurrentUser()?.id?.toString() || '');
 
+
+
     const fetchInscripciones = async () => {
         try {
+
+            console.log(participanteId); 
+
             setLoading(true);
 
             setError(null);

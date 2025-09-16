@@ -97,7 +97,7 @@ export default function FormularioLogin() {
         }
 
         const payload: InputRegistroDto = {
-            id: null,
+            id: 3,
             username: username,
             password: contrasenia,
             rol: selectedRol,

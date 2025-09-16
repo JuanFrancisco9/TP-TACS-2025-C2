@@ -1,4 +1,6 @@
 import axios from 'axios';
+import type {Inscripcion, Participante} from "../types/inscripciones.ts";
+import authService from "./authService.ts";
 
 // Interface para la respuesta del backend
 interface ResultadoBusquedaEvento {
@@ -16,7 +18,6 @@ export interface Evento {
   horaInicio: string;
   ubicacion: Ubicacion;
   titulo: string;
-  // ...existing code...
   organizador: {
     id: string;
     nombre: string;
@@ -25,6 +26,7 @@ export interface Evento {
     usuario: any;
   };
   estado: {
+    fechaCambio: string;
     id: string;
     tipoEstado: string;
   };
@@ -51,11 +53,18 @@ export interface Ubicacion {
   direccion: string;
 }
 
+export interface CategoriaDTO {
+  tipo: string;
+}
+
 // Service para manejar eventos
 export class EventoService {
   // URL base del backend
-  private static readonly BASE_URL = 'http://localhost:8080';
-  
+  private static readonly BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  private static getAuthHeaders() {
+      return authService.getAuthHeaders();
+  }
   // Configuración de axios
   private static readonly api = axios.create({
     baseURL: this.BASE_URL,
@@ -79,7 +88,7 @@ export class EventoService {
       
       console.log('�� Data completa:', response.data);
       response.data.eventos[0].imagen = "https://www.clarin.com/img/2023/11/01/EsW43ik1T_1256x620__1.jpg";
-      response.data.eventos[1].imagen = "https://www.clarin.com/img/2023/11/01/EsW43ik1T_2000x1500__1.jpg"; 
+      response.data.eventos[1].imagen = "https://www.clarin.com/img/2023/11/01/EsW43ik1T_2000x1500__1.jpg";
       return {
         eventos: response.data.eventos,
         totalPaginas: response.data.totalPaginas,
@@ -111,9 +120,13 @@ export class EventoService {
   }
 
   // Método para buscar eventos (con paginación)
-  static async buscarEventos(termino: string, pagina: number = 0): Promise<{eventos: Evento[], totalPaginas: number, totalElementos: number}> {
+  static async buscarEventos(termino: string, pagina: number = 0, ubicacion?: string): Promise<{eventos: Evento[], totalPaginas: number, totalElementos: number}> {
     try {
-      const url = `/eventos?palabrasClave=${encodeURIComponent(termino)}&nroPagina=${pagina}`;
+      const params = new URLSearchParams();
+      params.set("palabrasClave", termino ?? "");
+      params.set("nroPagina", String(pagina));
+      if (ubicacion && ubicacion.trim()) params.set("ubicacion", ubicacion.trim());
+      const url = `/eventos?${params.toString()}`;
       console.log('🔍 EventoService.buscarEventos - Buscando:', termino);
       console.log('📍 URL:', `${this.BASE_URL}${url}`);
       
@@ -152,30 +165,6 @@ export class EventoService {
     }
   }
 
-  // Método para inscribirse a un evento
-  static async inscribirseAEvento(eventoId: string): Promise<boolean> {
-    try {
-      console.log('🔍 EventoService.inscribirseAEvento - Evento ID:', eventoId);
-      // TODO: Obtener de algun lado la info del participante logueado
-      const body = { 
-        participante:{ 
-          id: '1',
-          nombre: 'Carlos',
-          apellido: 'López',
-          dni: '12345678',
-          usuario: { id: '1', username: 'carlos', password: 'carlos'}
-        },
-        evento_id: "0" 
-      };
-
-      await this.api.post(`/inscripciones`, body);
-      console.log('✅ Inscripción exitosa');
-      return true;
-    } catch (error) {
-      console.error('❌ Error inscribiéndose al evento:', error);
-      throw new Error('Error al inscribirse al evento');
-    }
-  }
 
   // Método para crear un evento (para administradores)
   static async crearEvento(evento: Omit<Evento, 'id'>): Promise<Evento> {
@@ -194,7 +183,10 @@ export class EventoService {
   static async actualizarEvento(id: string, evento: Partial<Evento>): Promise<Evento> {
     try {
       console.log('🔍 EventoService.actualizarEvento - Actualizando evento ID:', id);
-      const response = await this.api.put<Evento>(`/eventos/${id}`, evento);
+      console.log(evento)
+      const response = await axios.put<Evento>(`${this.BASE_URL}/eventos/${id}`, evento, {
+          headers: this.getAuthHeaders()
+      })
       console.log('✅ Evento actualizado:', response.data);
       return response.data;
     } catch (error) {
@@ -259,6 +251,58 @@ export class EventoService {
     }
   }
 
+  static async obtenerWaitlistDeEvento(evento: Evento | null): Promise<Inscripcion[]> {
+      try{
+          const url = `${this.BASE_URL}/waitlist/${evento?.id}`
+          const response = await axios.get(url, {
+              headers: this.getAuthHeaders()
+          })
+          return response.data.inscripcionesSinConfirmar
+      }catch (error){
+          console.log(error)
+          throw new Error('Error al obtener waitlist');
+      }
+  }
+
+    static async obtenerParticipantesDeEvento(evento: Evento | null): Promise<Participante[]> {
+        try{
+            const url = `${this.BASE_URL}/eventos/${evento?.id}/participantes`
+            const response = await axios.get(url,{
+                headers: this.getAuthHeaders()
+            })
+            return response.data
+        }catch (error){
+            console.log(error)
+            throw new Error('Error al obtener participantes del evento');
+        }
+    }
+
+    static async actualizarEstadoEvento(evento: Evento, estado: String): Promise<Evento> {
+        try{
+            const url = `${this.BASE_URL}/eventos/${evento?.id}?estado=${estado}`
+            const response = await axios.patch(url, null, {
+                headers: this.getAuthHeaders()
+            });
+            return response.data
+        }catch (error){
+            console.log(error)
+            throw new Error('Error al actualizar el estado del evento');
+        }
+    }
+
+    static async obtenerEventosParaOrganizador(organizadorId: String): Promise<Evento[]> {
+        try{
+            const url = `${this.BASE_URL}/organizadores/eventos/${organizadorId}`
+            const response = await axios.get(url,{
+                headers: this.getAuthHeaders()
+            })
+            return response.data
+        }catch (error){
+            console.log(error)
+            throw new Error('Error al obtener eventos para organizador');
+        }
+    }
+
   // Método para buscar eventos con filtros avanzados
   static async buscarEventosConFiltros(filtros: {
     palabrasClave?: string;
@@ -298,6 +342,51 @@ export class EventoService {
     } catch (error) {
       console.error('❌ Error buscando eventos con filtros:', error);
       throw new Error('Error al buscar eventos con filtros');
+    }
+  }
+
+  // Obtener lista de categorías desde el backend
+  static async obtenerCategorias(): Promise<string[]> {
+    try {
+      const url = `/categorias`;
+      const response = await this.api.get<CategoriaDTO[]>(url);
+      return (response.data || []).map(c => c.tipo);
+    } catch (error) {
+      console.error('Error obteniendo categorías:', error);
+      return [];
+    }
+  }
+
+  // Inscribirse a un evento usando el usuario del localStorage
+  static async inscribirseAEvento(eventoId: string): Promise<boolean> {
+    try {
+      const storedUser = localStorage.getItem('currentUser');
+      const user = storedUser ? JSON.parse(storedUser) as { id: number; username: string; rol?: string } : null;
+
+      const participante: any = user
+        ? {
+            id: String(user.id),
+            nombre: '',
+            apellido: '',
+            dni: '',
+            usuario: { id: user.id, username: user.username },
+          }
+        : {
+            nombre: '',
+            apellido: '',
+            dni: '',
+          };
+
+      const body = {
+        participante,
+        evento_id: String(eventoId),
+      };
+
+      await this.api.post('/inscripciones', body);
+      return true;
+    } catch (error) {
+      console.error('Error inscribi�ndose al evento:', error);
+      throw new Error('Error al inscribirse al evento');
     }
   }
 }

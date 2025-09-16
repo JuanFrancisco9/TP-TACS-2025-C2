@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   AppBar, Toolbar, Container as MuiContainer, Box, Stack, TextField,
   Button, IconButton, useMediaQuery, Menu, MenuItem
@@ -16,7 +16,8 @@ import {
 } from '@mui/icons-material';
 import authService from '../services/authService';
 import { Rol } from '../types/auth';
-import type { Usuario } from '../types/auth'; 
+import type { Usuario } from '../types/auth';
+import ListAltIcon from "@mui/icons-material/ListAlt";
 
 const SiteHeader: React.FC = () => {
   const theme = useTheme();
@@ -24,14 +25,15 @@ const SiteHeader: React.FC = () => {
   const navigate = useNavigate();
 
   const [query, setQuery] = useState('');
+  const [ubicacion, setUbicacion] = useState('');
   const [currentUser, setCurrentUser] = useState<Usuario | null>(null);
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
 
   useEffect(() => {
-    // Verificar el estado de autenticación al cargar el componente
+    // Verificar el estado de autenticaci�n al cargar el componente
     setCurrentUser(authService.getCurrentUser());
 
-    // Escuchar cambios en el estado de autenticación
+    // Escuchar cambios en el estado de autenticaci�n
     const handleAuthStateChange = (event: any) => {
       setCurrentUser(event.detail);
     };
@@ -45,9 +47,16 @@ const SiteHeader: React.FC = () => {
   }, []);
 
   const handleSearch = () => {
+    const q = query.trim();
+    const ub = ubicacion.trim();
     const params = new URLSearchParams();
-    if (query.trim()) params.set('q', query.trim());
-    navigate({ pathname: '/eventos', search: params.toString() ? `?${params}` : '' });
+    if (q) params.set('q', q);
+    if (ub) params.set('loc', ub);
+
+    navigate(
+      { pathname: '/eventos', search: params.toString() ? `?${params}` : '' },
+      { state: { filtros: { palabrasClave: q, ubicacion: ub || undefined, nroPagina: 1 } } }
+    );
   };
 
   const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -96,7 +105,8 @@ const SiteHeader: React.FC = () => {
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
               />
-              <TextField size="small" label="Ubicación" sx={{ width: 160 }} />
+              <TextField size="small" label="Ubicación" sx={{ width: 160 }} value={ubicacion} 
+              onChange={(e) => setUbicacion(e.target.value) } onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }} />
               <IconButton aria-label="Buscar" title="Buscar" onClick={handleSearch}
                 sx={{ bgcolor: '#2F1D4A', color: '#fff', '&:hover': { bgcolor: '#26173d' } }}>
                 <SearchIcon />
@@ -108,7 +118,7 @@ const SiteHeader: React.FC = () => {
             {currentUser ? (
               // Usuario autenticado
               <>
-                {/* Botón de Mis Inscripciones solo para participantes */}
+                {/* Bot�n de Mis Inscripciones solo para participantes */}
                 {currentUser.rol === Rol.ROLE_USER && (
                   <Button
                     startIcon={<AssignmentIcon />}
@@ -119,7 +129,7 @@ const SiteHeader: React.FC = () => {
                   </Button>
                 )}
 
-                {/* Botón de Estadísticas solo para Admin */}
+                {/* Bot�n de Estad�sticas solo para Admin */}
                 {currentUser.rol === Rol.ROLE_ADMIN && (
                   <Button
                     startIcon={<AssessmentIcon />}
@@ -130,18 +140,28 @@ const SiteHeader: React.FC = () => {
                   </Button>
                 )}
 
-                {/* Botón de Crear eventos solo para organizadores */}
+                {/* Botones solo para organizadores */}
                 {currentUser.rol === Rol.ROLE_ORGANIZER && (
-                  <Button
-                    startIcon={<EventAvailableIcon />}
-                    color="inherit"
-                    onClick={() => navigate('/crear-evento')}
-                  >
-                    Crear eventos
-                  </Button>
+                    <>
+                        <Button
+                            startIcon={<EventAvailableIcon />}
+                            color="inherit"
+                            onClick={() => navigate('/crear-evento')}
+                        >
+                            Crear eventos
+                        </Button>
+
+                        <Button
+                            startIcon={<ListAltIcon />}   // <- opcional, un ícono de lista
+                            color="inherit"
+                            onClick={() => navigate('/organizador/eventos')}
+                        >
+                            Mis eventos
+                        </Button>
+                    </>
                 )}
 
-                {/* Menú de usuario */}
+                {/* Men� de usuario */}
                 <Button
                   color="inherit"
                   endIcon={<ArrowDropDownIcon />}

@@ -10,6 +10,7 @@ import Statistics from "./features/Statistics.tsx";
 import UserLanding from "./features/UserLanding.tsx";
 import ProtectedRoute from './components/ProtectedRoute';
 import { Rol } from './types/auth';
+import PerfilOrganizadorPage from './features/PerfilOrganizadorPage'
 
 function App() {
     return (
@@ -43,6 +44,11 @@ function App() {
                             <CreateEventPage/>
                         </ProtectedRoute>
                     }/>
+                    <Route path="/organizador/eventos" element={
+                        <ProtectedRoute allowedRoles={[Rol.ROLE_ORGANIZER]}>
+                            <PerfilOrganizadorPage/>
+                        </ProtectedRoute>
+                    }/>
                     <Route path="/mis-eventos" element={
                         <ProtectedRoute allowedRoles={[Rol.ROLE_USER]}>
                             <UserLanding/>
@@ -53,7 +59,6 @@ function App() {
                             <Statistics/>
                         </ProtectedRoute>
                     }/>
-
                     <Route path="*" element={<Navigate to="/" replace/>}/>
                 </Route>
             </Routes>
