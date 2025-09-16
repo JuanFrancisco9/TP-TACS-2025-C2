@@ -12,14 +12,17 @@ public class CategoriaRepository {
     static private final List<Categoria> categorias =  new ArrayList<>();
     static private CategoriaRepository categoriaRepository;
 
-    public CategoriaRepository() { }
-
     public List<Categoria> getCategorias() {
         return categorias;
     }
 
     public void guardarCategoria(Categoria categoria){
-        categorias.add(categoria);
+        if(!this.existeCategoria(categoria))
+            categorias.add(new Categoria(categoria.getTipo().toLowerCase()));
+    }
+
+    private boolean existeCategoria(Categoria categoria){
+        return this.getCategorias().stream().map(c -> c.getTipo().toLowerCase()).toList().contains(categoria.getTipo().toLowerCase());
     }
 
     @PostConstruct

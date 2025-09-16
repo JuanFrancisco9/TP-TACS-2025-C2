@@ -19,4 +19,8 @@ public class CategoriaService {
     public List<Categoria> getCategorias() {
         return this.categoriaRepository.getCategorias();
     }
+
+    public void guardarCategoria(Categoria categoria) {
+        this.categoriaRepository.guardarCategoria(categoria);
+    }
 }
