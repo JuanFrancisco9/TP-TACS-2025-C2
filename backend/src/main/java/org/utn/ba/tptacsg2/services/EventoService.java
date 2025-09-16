@@ -29,16 +29,18 @@ public class EventoService {
     private final OrganizadorRepository organizadorRepository;
     private final GeneradorIDService generadorIDService;
     private final EstadoEventoRepository estadoEventoRepository;
+    private final CategoriaService categoriaService;
     @Value("${app.pagination.default-page-size}")
     private Integer tamanioPagina;
 
     @Autowired
-    public EventoService(EventoRepository eventoRepository, InscripcionRepository inscripcionRepository, OrganizadorRepository organizadorRepository, GeneradorIDService generadorIDService,EstadoEventoRepository estadoEventoRepository) {
+    public EventoService(EventoRepository eventoRepository, InscripcionRepository inscripcionRepository, OrganizadorRepository organizadorRepository, GeneradorIDService generadorIDService,EstadoEventoRepository estadoEventoRepository, CategoriaService categoriaService) {
         this.eventoRepository = eventoRepository;
         this.inscripcionRepository = inscripcionRepository;
         this.organizadorRepository = organizadorRepository;
         this.generadorIDService = generadorIDService;
         this.estadoEventoRepository = estadoEventoRepository;
+        this.categoriaService = categoriaService;
     }
 
     public Integer cuposDisponibles(Evento evento) {
@@ -73,6 +75,8 @@ public class EventoService {
         estadoInicial.setEvento(evento);
         this.estadoEventoRepository.guardarEstadoEvento(estadoInicial);
         eventoRepository.guardarEvento(evento);
+
+        this.categoriaService.guardarCategoria(solicitud.categoria());
 
         return evento;
     }
