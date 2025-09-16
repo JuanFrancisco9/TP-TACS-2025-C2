@@ -7,7 +7,7 @@ WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:go-offline
 
-COPY backend/src ./src
+COPY backend ./backend
 
 # Compila y empaqueta la aplicación en un JAR ejecutable.
 RUN mvn clean package
