@@ -40,6 +40,9 @@ const EventOverview: React.FC = () => {
   const location = useLocation() as any;
   const [eventos, setEventos] = useState<Evento[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [loadingCats, setLoadingCats] = useState<boolean>(false);
+  const [selectedCategories, setSelectedCategories] = useState<Record<string, boolean>>({});
   const [eventoSeleccionado, setEventoSeleccionado] = useState<Evento | null>(null);
   useEffect(() => {
     const stateFilters = location?.state?.filtros;
@@ -63,6 +66,54 @@ const EventOverview: React.FC = () => {
       .catch(() => setEventos([]))
       .finally(() => setLoading(false));
   }, [location?.state]);
+
+  // Cargar categorías para filtros
+  useEffect(() => {
+    setLoadingCats(true);
+    EventoService.obtenerCategorias()
+      .then((cats) => {
+        setCategories(cats);
+        const map: Record<string, boolean> = {};
+        cats.forEach((c) => (map[c] = true));
+        setSelectedCategories(map);
+      })
+      .finally(() => setLoadingCats(false));
+  }, []);
+  
+  // Buscar con filtros cuando cambian categorías
+  const refetchWithCategory = (updated: Record<string, boolean>) => {
+    const stateFilters = location?.state?.filtros;
+    const qs = new URLSearchParams(window.location.search);
+    const urlQ = qs.get('q') || '';
+    const urlLoc = qs.get('loc') || '';
+    const palabrasClave = stateFilters?.palabrasClave ?? urlQ ?? '';
+    const ubicacion = stateFilters?.ubicacion ?? urlLoc ?? '';
+    const pagina = Math.max(0, (stateFilters?.nroPagina ?? 1) - 1);
+
+    const active = Object.entries(updated)
+      .filter(([, v]) => v)
+      .map(([k]) => k);
+    const categoria = active.length === 1 ? active[0] : undefined;
+
+    setLoading(true);
+    EventoService
+      .buscarEventosConFiltros({ palabrasClave, ubicacion, categoria, pagina })
+      .then((res) => {
+        const withImages = res.eventos.map((ev) => ({
+          ...ev,
+          imagen: ev.imagen || `https://picsum.photos/seed/${encodeURIComponent(ev.id)}/800/400`,
+        }));
+        setEventos(withImages);
+      })
+      .catch(() => setEventos([]))
+      .finally(() => setLoading(false));
+  };
+
+  const handleToggleCategory = (name: string) => {
+    const updated = { ...selectedCategories, [name]: !selectedCategories[name] };
+    setSelectedCategories(updated);
+    refetchWithCategory(updated);
+  };
 
   if (loading) {
     return (
@@ -114,11 +165,27 @@ const EventOverview: React.FC = () => {
               </Stack>
               <Divider sx={{ my: 2 }} />
               <Typography variant="subtitle2" sx={{ mb: 1 }}>Categorías</Typography>
-              <FormGroup>
-                {['Música', 'Gastronomía', 'Vida nocturna', 'Artes', 'Negocios'].map((n) => (
-                  <FormControlLabel key={n} control={<Checkbox size="small" />} label={n} />
-                ))}
-              </FormGroup>
+              {loadingCats ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
+                  <CircularProgress size={20} />
+                </Box>
+              ) : (
+                <FormGroup>
+                  {categories.map((n) => (
+                    <FormControlLabel
+                      key={n}
+                      control={
+                        <Checkbox
+                          size="small"
+                          checked={selectedCategories[n] ?? true}
+                          onChange={() => handleToggleCategory(n)}
+                        />
+                      }
+                      label={n}
+                    />
+                  ))}
+                </FormGroup>
+              )}
               <Divider sx={{ my: 2 }} />
               <Typography variant="subtitle2" sx={{ mb: 1 }}>Precio</Typography>
               <FormGroup>

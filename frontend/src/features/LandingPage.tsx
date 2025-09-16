@@ -1,25 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import HeroCarousel from '../components/HeroCarousel';
 import './styles/landing.css';
 import { useNavigate } from 'react-router-dom';
+import { CircularProgress } from '@mui/material';
+import { EventoService } from '../services/eventoService';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<string | null>(null);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const categories = [
-    { key: 'music', label: 'Música', icon: '🎵' },
-    { key: 'night', label: 'Vida nocturna', icon: '🎉' },
-    { key: 'arts', label: 'Artes escénicas', icon: '🎭' },
-    { key: 'holidays', label: 'Feriados', icon: '🎈' },
-    { key: 'dating', label: 'Citas', icon: '💖' },
-    { key: 'hobbies', label: 'Pasatiempos', icon: '🎮' },
-    { key: 'business', label: 'Negocios', icon: '💼' },
-    { key: 'food', label: 'Gastronomía', icon: '🍽️' },
-  ];
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    EventoService.obtenerCategorias()
+      .then((cats) => { if (mounted) setCategories(cats); })
+      .finally(() => { if (mounted) setLoading(false); });
+    return () => { mounted = false };
+  }, []);
 
-  const handleCategoryClick = (key: string) => {
-    const next = key === selected ? null : key;
+  const handleCategoryClick = (tipo: string) => {
+    const next = tipo === selected ? null : tipo;
     setSelected(next);
     const search = next ? `?categoria=${encodeURIComponent(next)}` : '';
     navigate({ pathname: '/eventos', search }, { replace: false });
@@ -32,20 +34,26 @@ const LandingPage: React.FC = () => {
 
         {/* Categorías como círculos */}
         <section className="categories-row" aria-label="Categorías principales">
-          {categories.map((c) => (
-            <button
-              key={c.key}
-              className={`category-button ${selected === c.key ? 'active' : ''}`}
-              onClick={() => handleCategoryClick(c.key)}
-              aria-pressed={selected === c.key}
-              aria-label={`Filtrar por ${c.label}`}
-            >
-              <div className="category-circle" aria-hidden>
-                <span>{c.icon}</span>
-              </div>
-              <div className="category-label">{c.label}</div>
-            </button>
-          ))}
+          {loading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', width: '100%', padding: '12px 0' }}>
+              <CircularProgress size={28} />
+            </div>
+          ) : (
+            categories.map((tipo) => (
+              <button
+                key={tipo}
+                className={`category-button ${selected === tipo ? 'active' : ''}`}
+                onClick={() => handleCategoryClick(tipo)}
+                aria-pressed={selected === tipo}
+                aria-label={`Filtrar por ${tipo}`}
+              >
+                <div className="category-circle" aria-hidden>
+                  <span>{tipo.substring(0, 1).toUpperCase()}</span>
+                </div>
+                <div className="category-label">{tipo}</div>
+              </button>
+            ))
+          )}
         </section>
       </main>
     </div>
@@ -53,3 +61,4 @@ const LandingPage: React.FC = () => {
 };
 
 export default LandingPage;
+

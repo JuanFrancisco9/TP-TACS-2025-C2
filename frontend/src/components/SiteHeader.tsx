@@ -135,7 +135,7 @@ const SiteHeader: React.FC = () => {
                     color="inherit"
                     onClick={() => handleNavigation('/estadisticas')}
                   >
-                    Estad�sticas
+                    Estadísticas
                   </Button>
                 )}
 
