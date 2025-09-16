@@ -14,6 +14,8 @@ public class EstadoEvento {
     @JsonBackReference
     private Evento evento;
 
+    public EstadoEvento() {}
+
     public EstadoEvento(String id, TipoEstadoEvento tipoEstado, LocalDateTime fechaCambio, Evento evento) {
         this.id = id;
         this.tipoEstado = tipoEstado;

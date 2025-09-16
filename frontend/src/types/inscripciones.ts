@@ -1,8 +1,9 @@
+import type {Rol} from "./auth.ts";
+
 export interface Usuario {
-  id: string;
-  nombre: string;
-  apellido: string;
-  dni: string;
+    id: string;
+    username: string;
+    rol: Rol;
 }
 
 export interface Participante {

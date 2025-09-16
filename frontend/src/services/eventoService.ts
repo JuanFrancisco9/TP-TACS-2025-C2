@@ -1,4 +1,6 @@
 import axios from 'axios';
+import type {Inscripcion, Participante} from "../types/inscripciones.ts";
+import authService from "./authService.ts";
 
 // Interface para la respuesta del backend
 interface ResultadoBusquedaEvento {
@@ -16,7 +18,6 @@ export interface Evento {
   horaInicio: string;
   ubicacion: Ubicacion;
   titulo: string;
-  // ...existing code...
   organizador: {
     id: string;
     nombre: string;
@@ -25,6 +26,7 @@ export interface Evento {
     usuario: any;
   };
   estado: {
+    fechaCambio: string;
     id: string;
     tipoEstado: string;
   };
@@ -54,8 +56,11 @@ export interface Ubicacion {
 // Service para manejar eventos
 export class EventoService {
   // URL base del backend
-  private static readonly BASE_URL = 'http://localhost:8080';
-  
+  private static readonly BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  private static getAuthHeaders() {
+      return authService.getAuthHeaders();
+  }
   // Configuración de axios
   private static readonly api = axios.create({
     baseURL: this.BASE_URL,
@@ -79,7 +84,7 @@ export class EventoService {
       
       console.log('�� Data completa:', response.data);
       response.data.eventos[0].imagen = "https://www.clarin.com/img/2023/11/01/EsW43ik1T_1256x620__1.jpg";
-      response.data.eventos[1].imagen = "https://www.clarin.com/img/2023/11/01/EsW43ik1T_2000x1500__1.jpg"; 
+      response.data.eventos[1].imagen = "https://www.clarin.com/img/2023/11/01/EsW43ik1T_2000x1500__1.jpg";
       return {
         eventos: response.data.eventos,
         totalPaginas: response.data.totalPaginas,
@@ -194,7 +199,10 @@ export class EventoService {
   static async actualizarEvento(id: string, evento: Partial<Evento>): Promise<Evento> {
     try {
       console.log('🔍 EventoService.actualizarEvento - Actualizando evento ID:', id);
-      const response = await this.api.put<Evento>(`/eventos/${id}`, evento);
+      console.log(evento)
+      const response = await axios.put<Evento>(`${this.BASE_URL}/eventos/${id}`, evento, {
+          headers: this.getAuthHeaders()
+      })
       console.log('✅ Evento actualizado:', response.data);
       return response.data;
     } catch (error) {
@@ -258,6 +266,58 @@ export class EventoService {
       throw new Error('Error al obtener eventos por estado');
     }
   }
+
+  static async obtenerWaitlistDeEvento(evento: Evento | null): Promise<Inscripcion[]> {
+      try{
+          const url = `${this.BASE_URL}/waitlist/${evento?.id}`
+          const response = await axios.get(url, {
+              headers: this.getAuthHeaders()
+          })
+          return response.data.inscripcionesSinConfirmar
+      }catch (error){
+          console.log(error)
+          throw new Error('Error al obtener waitlist');
+      }
+  }
+
+    static async obtenerParticipantesDeEvento(evento: Evento | null): Promise<Participante[]> {
+        try{
+            const url = `${this.BASE_URL}/eventos/${evento?.id}/participantes`
+            const response = await axios.get(url,{
+                headers: this.getAuthHeaders()
+            })
+            return response.data
+        }catch (error){
+            console.log(error)
+            throw new Error('Error al obtener participantes del evento');
+        }
+    }
+
+    static async actualizarEstadoEvento(evento: Evento, estado: String): Promise<Evento> {
+        try{
+            const url = `${this.BASE_URL}/eventos/${evento?.id}?estado=${estado}`
+            const response = await axios.patch(url, null, {
+                headers: this.getAuthHeaders()
+            });
+            return response.data
+        }catch (error){
+            console.log(error)
+            throw new Error('Error al actualizar el estado del evento');
+        }
+    }
+
+    static async obtenerEventosParaOrganizador(organizadorId: String): Promise<Evento[]> {
+        try{
+            const url = `${this.BASE_URL}/organizadores/eventos/${organizadorId}`
+            const response = await axios.get(url,{
+                headers: this.getAuthHeaders()
+            })
+            return response.data
+        }catch (error){
+            console.log(error)
+            throw new Error('Error al obtener eventos para organizador');
+        }
+    }
 
   // Método para buscar eventos con filtros avanzados
   static async buscarEventosConFiltros(filtros: {
