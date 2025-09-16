@@ -111,9 +111,13 @@ export class EventoService {
   }
 
   // Método para buscar eventos (con paginación)
-  static async buscarEventos(termino: string, pagina: number = 0): Promise<{eventos: Evento[], totalPaginas: number, totalElementos: number}> {
+  static async buscarEventos(termino: string, pagina: number = 0, ubicacion?: string): Promise<{eventos: Evento[], totalPaginas: number, totalElementos: number}> {
     try {
-      const url = `/eventos?palabrasClave=${encodeURIComponent(termino)}&nroPagina=${pagina}`;
+      const params = new URLSearchParams();
+      params.set("palabrasClave", termino ?? "");
+      params.set("nroPagina", String(pagina));
+      if (ubicacion && ubicacion.trim()) params.set("ubicacion", ubicacion.trim());
+      const url = `/eventos?${params.toString()}`;
       console.log('🔍 EventoService.buscarEventos - Buscando:', termino);
       console.log('📍 URL:', `${this.BASE_URL}${url}`);
       
