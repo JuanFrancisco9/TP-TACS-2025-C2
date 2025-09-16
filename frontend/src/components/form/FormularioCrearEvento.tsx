@@ -8,6 +8,9 @@ import {
     Typography,
     MenuItem,
 } from "@mui/material";
+import authService from "../../services/authService";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 type Ubicacion = {
     latitud: string;
@@ -127,13 +130,9 @@ export default function FormularioCrearEvento() {
         try {
             setSubmitting(true);
 
-            const token = localStorage.getItem("token"); // si usás JWT
-            const res = await fetch("/eventos", {
+            const res = await fetch(`${API_BASE_URL}/eventos`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                },
+                headers: authService.getAuthHeaders(),
                 body: JSON.stringify(payload),
             });
 
@@ -394,9 +393,6 @@ export default function FormularioCrearEvento() {
                 </Button>
             </Box>
 
-            <Typography variant="caption" sx={{ mt: 1, display: "block", color: "text.secondary" }}>
-                Requiere rol ORGANIZER. Si usás JWT, se toma de <code>localStorage.token</code> para el header <code>Authorization</code>.
-            </Typography>
         </Box>
     );
 }
