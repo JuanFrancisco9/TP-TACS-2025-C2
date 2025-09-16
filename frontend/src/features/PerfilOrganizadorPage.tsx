@@ -8,6 +8,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import type {Evento} from '../services/eventoService.ts'
+import type {Inscripcion} from "../types/inscripciones.ts";
 import FormControl from "@mui/material/FormControl";
 import { EventoService } from '../services/eventoService';
 import { formatDateForInput } from "../utils/formatFecha.ts";
@@ -51,12 +52,10 @@ export default function PerfilOrganizador() {
             try {
                 const { eventos } = await EventoService.obtenerEventos();
                 setEvents(eventos);
-                console.log(eventos)
             } catch (error) {
                 console.error("Error al cargar los eventos:", error);
             }
         };
-
         cargarEventos();
     }, []);
 
@@ -315,16 +314,41 @@ const VerInscriptos = ({event, onClose}:ViewModal) => {
 }
 
 const WaitList = ({event, onClose}:ViewModal) =>{
+    const [inscripciones, setInscripciones] = useState<Inscripcion[] | null>(null)
+    useEffect(() => {
+        const getWaitlist = async ()=>{
+            try{
+                const inscripciones = await EventoService.obtenerWaitlistDeEvento(event)
+                setInscripciones(inscripciones)
+            }catch (e){
+                console.log(e)
+            }
+        }
+        if(event){
+            getWaitlist()
+        }
+    }, [event]);
+
     if (!event) return null;
 
     return (
         <Dialog open={!!event} onClose={onClose} maxWidth="sm" fullWidth>
             <DialogTitle>Lista de espera de {event.titulo}</DialogTitle>
             <DialogContent>
-                <ul>
-                    <li>Usuario 3</li>
-                    <li>Usuario 4</li>
-                </ul>
+                {inscripciones === null ? (
+                    <p>Cargando...</p>
+                ) : inscripciones.length === 0 ? (
+                    <p>No hay inscripciones en lista de espera.</p>
+                ) : (
+                    <ul>
+                        {inscripciones.map((inscripcion) => (
+                            <li key={inscripcion.id}>
+                                {inscripcion.participante.nombre} {inscripcion.participante.apellido} —
+                                Registrado: {new Date(inscripcion.fechaRegistro).toLocaleDateString()}
+                            </li>
+                        ))}
+                    </ul>
+                )}
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose}>Cerrar</Button>
