@@ -61,3 +61,8 @@ dist-ssr/
 *.sln
 *.sw?
 
+# Lockfiles (añadidos)
+package-lock.json
+pnpm-lock.yaml
+frontend/package-lock.json
+frontend/pnpm-lock.yaml
