@@ -175,7 +175,7 @@ const SiteHeader: React.FC = () => {
                 >
                   <MenuItem onClick={handleLogout}>
                     <LogoutIcon sx={{ mr: 1 }} />
-                    Cerrar Sesi�n
+                    Cerrar Sesión
                   </MenuItem>
                 </Menu>
               </>
