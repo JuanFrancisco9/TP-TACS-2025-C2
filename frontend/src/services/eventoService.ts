@@ -53,6 +53,10 @@ export interface Ubicacion {
   direccion: string;
 }
 
+export interface CategoriaDTO {
+  tipo: string;
+}
+
 // Service para manejar eventos
 export class EventoService {
   // URL base del backend
@@ -116,9 +120,13 @@ export class EventoService {
   }
 
   // Método para buscar eventos (con paginación)
-  static async buscarEventos(termino: string, pagina: number = 0): Promise<{eventos: Evento[], totalPaginas: number, totalElementos: number}> {
+  static async buscarEventos(termino: string, pagina: number = 0, ubicacion?: string): Promise<{eventos: Evento[], totalPaginas: number, totalElementos: number}> {
     try {
-      const url = `/eventos?palabrasClave=${encodeURIComponent(termino)}&nroPagina=${pagina}`;
+      const params = new URLSearchParams();
+      params.set("palabrasClave", termino ?? "");
+      params.set("nroPagina", String(pagina));
+      if (ubicacion && ubicacion.trim()) params.set("ubicacion", ubicacion.trim());
+      const url = `/eventos?${params.toString()}`;
       console.log('🔍 EventoService.buscarEventos - Buscando:', termino);
       console.log('📍 URL:', `${this.BASE_URL}${url}`);
       
@@ -157,30 +165,6 @@ export class EventoService {
     }
   }
 
-  // Método para inscribirse a un evento
-  static async inscribirseAEvento(eventoId: string): Promise<boolean> {
-    try {
-      console.log('🔍 EventoService.inscribirseAEvento - Evento ID:', eventoId);
-      // TODO: Obtener de algun lado la info del participante logueado
-      const body = { 
-        participante:{ 
-          id: '1',
-          nombre: 'Carlos',
-          apellido: 'López',
-          dni: '12345678',
-          usuario: { id: '1', username: 'carlos', password: 'carlos'}
-        },
-        evento_id: "0" 
-      };
-
-      await this.api.post(`/inscripciones`, body);
-      console.log('✅ Inscripción exitosa');
-      return true;
-    } catch (error) {
-      console.error('❌ Error inscribiéndose al evento:', error);
-      throw new Error('Error al inscribirse al evento');
-    }
-  }
 
   // Método para crear un evento (para administradores)
   static async crearEvento(evento: Omit<Evento, 'id'>): Promise<Evento> {
@@ -358,6 +342,51 @@ export class EventoService {
     } catch (error) {
       console.error('❌ Error buscando eventos con filtros:', error);
       throw new Error('Error al buscar eventos con filtros');
+    }
+  }
+
+  // Obtener lista de categorías desde el backend
+  static async obtenerCategorias(): Promise<string[]> {
+    try {
+      const url = `/categorias`;
+      const response = await this.api.get<CategoriaDTO[]>(url);
+      return (response.data || []).map(c => c.tipo);
+    } catch (error) {
+      console.error('Error obteniendo categorías:', error);
+      return [];
+    }
+  }
+
+  // Inscribirse a un evento usando el usuario del localStorage
+  static async inscribirseAEvento(eventoId: string): Promise<boolean> {
+    try {
+      const storedUser = localStorage.getItem('currentUser');
+      const user = storedUser ? JSON.parse(storedUser) as { id: number; username: string; rol?: string } : null;
+
+      const participante: any = user
+        ? {
+            id: String(user.id),
+            nombre: '',
+            apellido: '',
+            dni: '',
+            usuario: { id: user.id, username: user.username },
+          }
+        : {
+            nombre: '',
+            apellido: '',
+            dni: '',
+          };
+
+      const body = {
+        participante,
+        evento_id: String(eventoId),
+      };
+
+      await this.api.post('/inscripciones', body);
+      return true;
+    } catch (error) {
+      console.error('Error inscribi�ndose al evento:', error);
+      throw new Error('Error al inscribirse al evento');
     }
   }
 }

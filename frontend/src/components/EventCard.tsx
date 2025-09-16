@@ -63,6 +63,7 @@ const EventCard: React.FC<EventCardProps> = ({ item, onVerDetalle }) => {
           src={item.imagen}
           alt={item.titulo}
           sx={{ width: '100%', height: 160, objectFit: 'cover', transition: 'filter 0.3s', cursor: 'pointer', ':hover': { filter: 'brightness(0.95)' } }}
+          onError={(e: any) => { e.currentTarget.src = `/logo.PNG`; }}
           onClick={onVerDetalle}
           tabIndex={0}
           role="button"

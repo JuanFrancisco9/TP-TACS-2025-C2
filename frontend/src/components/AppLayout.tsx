@@ -5,9 +5,17 @@ import Footer from './Footer';
 
 const AppLayout: React.FC = () => {
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#FDF3E0', color: '#2F1D4A' }}>
+    <div
+      style={{
+        minHeight: '100vh',
+        backgroundColor: '#FDF3E0',
+        color: '#2F1D4A',
+        display: 'flex',
+        flexDirection: 'column'
+      }}
+    >
       <SiteHeader />
-      <main>
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Outlet />
       </main>
       <Footer />
