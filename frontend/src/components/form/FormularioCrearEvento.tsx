@@ -182,6 +182,7 @@ export default function FormularioCrearEvento() {
                 <Grid item xs={12} sm={6}>
                     <TextField
                         label="Organizador ID"
+                        placeholder="1"
                         value={organizadorId}
                         onChange={(e) => setOrganizadorId(e.target.value)}
                         fullWidth

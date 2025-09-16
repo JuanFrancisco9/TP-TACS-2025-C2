@@ -7,7 +7,7 @@ El objetivo del TP es desarrollar una aplicación que permita a los usuarios pub
 
 ## Stack Tecnológico
 - Backend: Java 21, SpringBoot 3.5.4, Maven
-- Frontend: -
+- Frontend: React, TypeScript Vite
 - Base de datos: -
 
 
@@ -26,6 +26,41 @@ curl http://localhost:8080/actuator/health
 ```
 
 Y viendo que el status devuelto sea UP.
+
+## Entrega 2 - Interfaz de Usuario (UI)
+
+### Configuración del Frontend
+
+Para ejecutar la interfaz de usuario, es necesario:
+
+1. **Crear archivo de configuración .env**:
+   - Copiar el archivo `frontend/.env.example` como `frontend/.env`
+   - Este archivo contiene la configuración para conectar con el backend:
+
+   ```bash
+   # Desde la carpeta raíz del proyecto
+   cp frontend/.env.example frontend/.env
+   ```
+
+2. **Instalar dependencias y ejecutar**:
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+   La aplicación estará disponible en: http://localhost:5173
+
+### Usuarios Precargados para Pruebas
+
+El sistema incluye usuarios de prueba con diferentes roles:
+
+| Rol | Username | Password |
+|-----|----------|----------|
+| Usuario | `usuario` | `usuario` |
+| Organizador | `organizador` | `organizador` |
+| Administrador | `admin` | `admin` |
+
 
 
 ## Endpoints
