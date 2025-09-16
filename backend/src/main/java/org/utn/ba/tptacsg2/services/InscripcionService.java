@@ -124,6 +124,10 @@ public class InscripcionService {
 
         Inscripcion inscripcionAConfirmar = this.inscripcionRepository.getPrimerInscripcionDeWaitlist(evento);
 
+        if (inscripcionAConfirmar == null) {
+            return;
+        }
+
         EstadoInscripcion nuevoEstado = new EstadoInscripcion(this.generadorIDService.generarID(), TipoEstadoInscripcion.ACEPTADA, inscripcionAConfirmar, LocalDateTime.now());
 
         Inscripcion inscripcionActualizada = new Inscripcion(

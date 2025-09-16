@@ -39,7 +39,7 @@ class LoginControllerTest {
     @DisplayName("POST /login -> 200 OK cuando las credenciales son válidas")
     void login_devuelve200CuandoCredencialesValidas() throws Exception {
         // Arrange
-        InputRegistroDto dto = new InputRegistroDto(1L, "testuser", "password123", "USER","","","");
+        InputRegistroDto dto = new InputRegistroDto("testuser", "password123", "USER","","","");
         // Crear un usuario mock con propiedades básicas
         Usuario mockUsuario = Mockito.mock(Usuario.class);
         when(usuarioService.login(any(InputRegistroDto.class)))
@@ -59,7 +59,7 @@ class LoginControllerTest {
     @DisplayName("POST /login -> 401 Unauthorized cuando el usuario no existe")
     void login_devuelve401CuandoUsuarioNoExiste() throws Exception {
         // Arrange
-        InputRegistroDto dto = new InputRegistroDto(null, "nouser", "whatever", "USER", "","","");
+        InputRegistroDto dto = new InputRegistroDto("nouser", "whatever", "USER", "","","");
         when(usuarioService.login(any(InputRegistroDto.class)))
                 .thenThrow(new UsernameNotFoundException("Usuario no encontrado"));
 
@@ -77,7 +77,7 @@ class LoginControllerTest {
     @DisplayName("POST /login -> 401 Unauthorized cuando la contraseña es incorrecta")
     void login_devuelve401CuandoPasswordIncorrecta() throws Exception {
         // Arrange
-        InputRegistroDto dto = new InputRegistroDto(null, "testuser", "badpass", "USER", "","","");
+        InputRegistroDto dto = new InputRegistroDto("testuser", "badpass", "USER", "","","");
         when(usuarioService.login(any(InputRegistroDto.class)))
                 .thenThrow(new RuntimeException("Contraseña incorrecta"));
 

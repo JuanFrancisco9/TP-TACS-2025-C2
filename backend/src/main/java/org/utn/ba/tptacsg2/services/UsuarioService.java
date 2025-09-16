@@ -20,13 +20,16 @@ public class UsuarioService {
     private PasswordEncoder passwordEncoder;
     private ParticipanteRepository participanteRepository;
     private OrganizadorRepository organizadorRepository;
+    private GeneradorIDService generadorIDService;
 
     public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder,
-                          ParticipanteRepository participanteRepository, OrganizadorRepository organizadorRepository) {
+                          ParticipanteRepository participanteRepository, OrganizadorRepository organizadorRepository,
+                          GeneradorIDService generadorIDService) {
         this.participanteRepository = participanteRepository;
         this.organizadorRepository = organizadorRepository;
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.generadorIDService = generadorIDService;
     }
 
     /**
@@ -41,13 +44,13 @@ public class UsuarioService {
         }
         Rol rol;
         try {
-            rol = Rol.valueOf("ROLE_" + usuario.getRol().strip().toUpperCase());
+            rol = Rol.valueOf(usuario.getRol().strip().toUpperCase());
         } catch (IllegalArgumentException e) {
             rol = Rol.ROLE_USER;
         }
 
         Usuario nuevoUsuario = new Usuario(
-                usuario.getId(),
+                generadorIDService.generarID(),
                 usuario.getUsername().strip(),
                 passwordEncoder.encode(usuario.getPassword()),
                 rol

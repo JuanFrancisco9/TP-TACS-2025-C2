@@ -42,7 +42,7 @@ class UsuarioControllerTest {
     @DisplayName("Debe devolver 201 cuando se registra un usuario correctamente")
     void registrarUsuario_devuelve201CuandoSeRegistraCorrectamente() throws Exception {
         // Arrange
-        InputRegistroDto inputRegistroDto = new InputRegistroDto(1L, "testuser", "password123", "PARTICIPANTE", "juan", "Perez", "123");
+        InputRegistroDto inputRegistroDto = new InputRegistroDto("testuser", "password123", "PARTICIPANTE", "juan", "Perez", "123");
         doNothing().when(usuarioService).registrar(any(InputRegistroDto.class));
 
         // Act & Assert
@@ -59,7 +59,7 @@ class UsuarioControllerTest {
     @DisplayName("Debe devolver 400 cuando ocurre una excepción durante el registro")
     void registrarUsuario_devuelve400CuandoOcurreExcepcion() throws Exception {
         // Arrange
-        InputRegistroDto inputRegistroDto = new InputRegistroDto(1L, "testuser", "password123", "PARTICIPANTE", "juan", "Perez", "123");
+        InputRegistroDto inputRegistroDto = new InputRegistroDto("testuser", "password123", "PARTICIPANTE", "juan", "Perez", "123");
         doThrow(new RuntimeException("El usuario ya existe")).when(usuarioService).registrar(any(InputRegistroDto.class));
 
         // Act & Assert
@@ -77,8 +77,8 @@ class UsuarioControllerTest {
     @WithMockUser(roles = "ADMIN")
     void getUsuarios_devuelve200YListaDeUsuarios() throws Exception {
         // Arrange
-        Usuario usuario1 = new Usuario(1L, "user1", "pass1", Rol.ROLE_USER);
-        Usuario usuario2 = new Usuario(2L, "user2", "pass2", Rol.ROLE_ORGANIZER);
+        Usuario usuario1 = new Usuario("1", "user1", "pass1", Rol.ROLE_USER);
+        Usuario usuario2 = new Usuario("2", "user2", "pass2", Rol.ROLE_ORGANIZER);
         
         when(usuarioService.getUsuarios())
             .thenReturn(Arrays.asList(usuario1, usuario2));

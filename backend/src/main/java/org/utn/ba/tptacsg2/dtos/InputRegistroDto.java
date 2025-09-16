@@ -5,7 +5,6 @@ import lombok.Data;
 
 @Data
 public class InputRegistroDto {
-    private Long id;
     @NotBlank(message = "Debe completar todos los campos")
     private String username;
     @NotBlank(message = "Debe completar todos los campos")
@@ -19,8 +18,7 @@ public class InputRegistroDto {
     @NotBlank(message = "Debe completar todos los campos")
     private String dni;
 
-    public InputRegistroDto(Long id, String username, String password, String rol, String nombre, String apellido, String dni) {
-        this.id = id;
+    public InputRegistroDto(String username, String password, String rol, String nombre, String apellido, String dni) {
         this.username = username;
         this.password = password;
         this.rol = rol;
@@ -29,9 +27,6 @@ public class InputRegistroDto {
         this.dni = dni;
     }
 
-    public Long getId() {
-        return id;
-    }
 
     public @NotBlank(message = "Debe completar todos los campos") String getUsername() {
         return username;

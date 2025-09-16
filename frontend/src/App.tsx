@@ -22,6 +22,13 @@ function App() {
                     <Route path="/login" element={<LoginPage/>}/>
 
                     {/* Rutas que requieren autenticación */}
+                    <Route path="/perfil" element={
+                        <ProtectedRoute>
+                            <UserPage/>
+                        </ProtectedRoute>
+                    }/>
+
+                    {/* Rutas específicas por rol */}
                     <Route path="/inscripcion" element={
                         <ProtectedRoute allowedRoles={[Rol.ROLE_USER]}>
                             <InscripcionPage/>
@@ -32,13 +39,7 @@ function App() {
                             <InscripcionPage/>
                         </ProtectedRoute>
                     }/>
-                    <Route path="/perfil" element={
-                        <ProtectedRoute>
-                            <UserPage/>
-                        </ProtectedRoute>
-                    }/>
 
-                    {/* Rutas específicas por rol */}
                     <Route path="/crear-evento" element={
                         <ProtectedRoute allowedRoles={[Rol.ROLE_ORGANIZER]}>
                             <CreateEventPage/>
