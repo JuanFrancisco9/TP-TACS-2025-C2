@@ -1,63 +1,10 @@
 import axios from 'axios';
-import type {Inscripcion, Participante} from "../types/inscripciones.ts";
+import type {Inscripcion} from "../types/inscripciones.ts";
 import authService from "./authService.ts";
+import type { Evento, ResultadoBusquedaEvento, CategoriaDTO } from "../types/evento.ts";
+import type {Participante} from "../types/auth.ts";
 
-// Interface para la respuesta del backend
-interface ResultadoBusquedaEvento {
-  eventos: Evento[];
-  siguientePagina: number;
-  totalElementos: number;
-  totalPaginas: number;
-}
-
-// Interface para el evento del frontend (estructura que usamos en la UI)
-export interface Evento {
-  id: string;
-  descripcion: string;
-  fecha: string;
-  horaInicio: string;
-  ubicacion: Ubicacion;
-  titulo: string;
-  organizador: {
-    id: string;
-    nombre: string;
-    apellido: string;
-    dni: string;
-    usuario: any;
-  };
-  estado: {
-    fechaCambio: string;
-    id: string;
-    tipoEstado: string;
-  };
-  categoria: {
-    tipo: string;
-  };
-  duracion: number;
-  cupoMinimo: number;
-  cupoMaximo: number;
-  precio: Precio;
-  etiquetas: string[];
-  imagen: string;
-}
-
-export interface Precio {
-  moneda: string;
-  cantidad: number;
-}
-
-export interface Ubicacion {
-  latitud: string;
-  longitud: string;
-  localidad: string;
-  direccion: string;
-}
-
-export interface CategoriaDTO {
-  tipo: string;
-}
-
-// Service para manejar eventos
+// Service para manejar eventoss
 export class EventoService {
   // URL base del backend
   private static readonly BASE_URL = import.meta.env.VITE_API_BASE_URL;

@@ -16,3 +16,18 @@ export interface LoginRequest {
     username: string;
     password: string;
 }
+
+export interface Participante {
+    id: string;
+    nombre: string;
+    apellido: string;
+    dni: string;
+}
+
+export interface Organizador {
+    id: string;
+    nombre: string;
+    apellido: string;
+    dni: string;
+    usuario: Usuario;
+}
