@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Alert, Spinner } from 'react-bootstrap';
 import UserInfo from '../components/UserInfo';
 import { participanteApiService } from '../services/participanteApiService';
-import type { Participante } from '../services/participanteApiService';
+import type { Participante } from '../types/auth.ts';
 
 const UserPage: React.FC = () => {
   const [participante, setParticipante] = useState<Participante | null>(null);

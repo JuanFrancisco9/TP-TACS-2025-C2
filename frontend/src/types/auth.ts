@@ -22,6 +22,7 @@ export interface Participante {
     nombre: string;
     apellido: string;
     dni: string;
+    usuario: Usuario | null //TODO: Sacar el o null cuando se deshardcode el participantesApiService
 }
 
 export interface Organizador {
