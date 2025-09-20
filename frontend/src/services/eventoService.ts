@@ -237,9 +237,9 @@ export class EventoService {
         }
     }
 
-    static async obtenerEventosParaOrganizador(organizadorId: String): Promise<Evento[]> {
+    static async obtenerEventosParaOrganizador(usuarioId: String): Promise<Evento[]> {
         try{
-            const url = `${this.BASE_URL}/organizadores/eventos/${organizadorId}`
+            const url = `${this.BASE_URL}/organizadores/eventos/${usuarioId}`
             const response = await axios.get(url,{
                 headers: this.getAuthHeaders()
             })

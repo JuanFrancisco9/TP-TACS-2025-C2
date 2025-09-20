@@ -35,6 +35,7 @@ public class SecurityConfig {
                 4   // Iterations
         );
     }
+
     /**
      * Custom AuthenticationEntryPoint to handle unauthorized access attempts.
      * Responds with 401 status and a WWW-Authenticate header for Basic Auth.
@@ -77,8 +78,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST,"/login").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user").permitAll()
                         .anyRequest().authenticated()
                 )

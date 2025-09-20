@@ -60,7 +60,6 @@ const ESTADOS: TipoEstadoEvento[] = [
 const MONEDAS = ["ARS", "USD", "EUR"];
 
 export default function FormularioCrearEvento() {
-    const [organizadorId, setOrganizadorId] = React.useState("");
     const [titulo, setTitulo] = React.useState("");
     const [descripcion, setDescripcion] = React.useState("");
 
@@ -93,8 +92,8 @@ export default function FormularioCrearEvento() {
         setErrorMsg(null);
         setSuccessMsg(null);
 
-        if (!organizadorId || !titulo || !fecha || !horaInicio) {
-            setErrorMsg("Completá organizador, título, fecha y hora de inicio.");
+        if (!titulo || !fecha || !horaInicio) {
+            setErrorMsg("Completá título, fecha y hora de inicio.");
             return;
         }
         if (!categoriaTipo) {
@@ -104,8 +103,14 @@ export default function FormularioCrearEvento() {
 
         const fechaISO = `${fecha}T${horaInicio}:00`;
 
+        const currentUser = authService.getCurrentUser();
+        if (!currentUser?.id) {
+            setErrorMsg("Usuario no encontrado. Por favor, iniciá sesión.");
+            return;
+        }
+
         const payload: SolicitudEventoDto = {
-            organizadorId: organizadorId.trim(),
+            organizadorId: String(currentUser.id),
             titulo: titulo.trim(),
             descripcion: descripcion.trim(),
             fecha: fechaISO,
@@ -179,19 +184,7 @@ export default function FormularioCrearEvento() {
             {successMsg && <Alert severity="success" sx={{ mb: 2 }}>{successMsg}</Alert>}
 
             <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                    <TextField
-                        label="Organizador ID"
-                        placeholder="1"
-                        value={organizadorId}
-                        onChange={(e) => setOrganizadorId(e.target.value)}
-                        fullWidth
-                        required
-                        disabled={submitting}
-                    />
-                </Grid>
-
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12}>
                     <TextField
                         label="Título"
                         value={titulo}
