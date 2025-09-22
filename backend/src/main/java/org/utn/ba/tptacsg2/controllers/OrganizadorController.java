@@ -23,9 +23,9 @@ public class OrganizadorController {
     }
 
     @PreAuthorize("hasRole('ORGANIZER')")
-    @GetMapping("/eventos/{id_usuario}")
-    public ResponseEntity<List<Evento>> getEventosDeOrganizadorPorUsuario(@PathVariable("id_usuario") String idUsuario) {
-        List<Evento> eventos = organizadorService.getEventosDeOrganizadorPorUsuario(idUsuario);
+    @GetMapping("/eventos/{id_organizador}")
+    public ResponseEntity<List<Evento>> getEventosDeOrganizadorPorUsuario(@PathVariable("id_organizador") String idOrganizador) {
+        List<Evento> eventos = organizadorService.getEventosDeOrganizador(idOrganizador);
         if (eventos.isEmpty()) {
             return ResponseEntity.noContent().build();
         }

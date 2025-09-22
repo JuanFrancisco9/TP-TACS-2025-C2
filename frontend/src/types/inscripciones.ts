@@ -1,4 +1,4 @@
-import type {Participante} from "./auth.ts";
+import type {export Participante} from "./auth.ts";
 
 export interface Estado {
   tipoEstado: string;

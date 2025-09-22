@@ -16,5 +16,9 @@ public class OrganizadorService {
     public List<Evento> getEventosDeOrganizadorPorUsuario(String idUsuario) {
         return eventoRepository.getEventosDeOrganizadorPorUsuario(idUsuario);
     }
+
+    public List<Evento> getEventosDeOrganizador(String idOrganizador) {
+        return eventoRepository.getEventosDeOrganizador(idOrganizador);
+    }
 }
 

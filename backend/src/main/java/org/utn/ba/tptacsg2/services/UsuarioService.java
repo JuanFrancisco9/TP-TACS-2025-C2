@@ -4,6 +4,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.utn.ba.tptacsg2.dtos.InputRegistroDto;
+import org.utn.ba.tptacsg2.dtos.LoginResponseDto;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.actors.Participante;
 import org.utn.ba.tptacsg2.models.users.Rol;
@@ -71,18 +72,35 @@ public class UsuarioService {
      * Autentica a un usuario en el sistema.
      *
      * @param usuario Un objeto UsuarioDto que contiene las credenciales del usuario a autenticar.
-     * @return El objeto Usuario correspondiente si la autenticación es exitosa.
+     * @return El objeto LoginResponseDto con datos del usuario y ID del actor correspondiente si la autenticación es exitosa.
      * @throws UsernameNotFoundException Si el nombre de usuario no existe en el sistema.
      * @throws RuntimeException Si la contraseña es incorrecta.
      */
-    public Usuario login(InputRegistroDto usuario) {
+    public LoginResponseDto login(InputRegistroDto usuario) {
         Usuario user = usuarioRepository.findAll().stream()
                 .filter(u -> u.username().equals(usuario.getUsername())).findFirst().orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
         if (!passwordEncoder.matches(usuario.getPassword(), user.passwordHash())) {
             throw new RuntimeException("Contraseña incorrecta");
         }
-        return  user;
+
+        String actorId = null;
+        switch (user.rol()) {
+            case ROLE_ORGANIZER -> {
+                Organizador organizador = organizadorRepository.getOrganizadorPorUsuarioId(user.id()).orElse(null);
+                if (organizador != null) {
+                    actorId = organizador.id();
+                }
+            }
+            case ROLE_USER -> {
+                Participante participante = participanteRepository.getParticipantePorUsuarioId(user.id()).orElse(null);
+                if (participante != null) {
+                    actorId = participante.id();
+                }
+            }
+        }
+
+        return new LoginResponseDto(user.id(), user.username(), user.rol(), actorId);
     }
 
     private void crearParticipante(Usuario usuario, InputRegistroDto usuarioDto) {

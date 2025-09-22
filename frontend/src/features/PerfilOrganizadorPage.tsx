@@ -8,12 +8,13 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import BlockIcon from '@mui/icons-material/Block';
-import type {Evento} from '../services/eventoService.ts'
-import type {Inscripcion, Participante, Usuario} from "../types/inscripciones.ts";
+import type {Inscripcion} from "../types/inscripciones.ts";
 import FormControl from "@mui/material/FormControl";
 import { EventoService } from '../services/eventoService';
 import { formatDateForInput } from "../utils/formatFecha.ts";
 import authService from "../services/authService.ts";
+import type { Evento } from "../types/evento.ts";
+import type {Participante, Usuario} from "../types/auth.ts";
 
 interface EditEvent {
     event: Evento | null;
@@ -69,7 +70,7 @@ export default function PerfilOrganizador() {
                 setUser(currentUser);
 
                 if (currentUser?.id) {
-                    const eventos = await EventoService.obtenerEventosParaOrganizador(currentUser.id);
+                    const eventos = await EventoService.obtenerEventosParaOrganizador(currentUser.actorId);
                     setEvents(eventos);
                 }
             } catch (error) {

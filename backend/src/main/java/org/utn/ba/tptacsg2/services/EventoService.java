@@ -52,7 +52,7 @@ public class EventoService {
     }
 
     public Evento registrarEvento(SolicitudEvento solicitud) {
-        Organizador organizador = organizadorRepository.getOrganizadorPorUsuarioId(solicitud.organizadorId())
+        Organizador organizador = organizadorRepository.getOrganizador(solicitud.organizadorId())
                 .orElseThrow(() -> new RuntimeException("Organizador no encontrado"));
 
         EstadoEvento estadoInicial = new EstadoEvento(this.generadorIDService.generarID(), solicitud.estado(), LocalDateTime.now());

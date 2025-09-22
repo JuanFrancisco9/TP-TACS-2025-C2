@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type {Inscripcion} from "../types/inscripciones.ts";
 import authService from "./authService.ts";
-import type { Evento, ResultadoBusquedaEvento, CategoriaDTO } from "../types/evento.ts";
+import type {Evento, ResultadoBusquedaEvento, CategoriaDTO } from "../types/evento.ts";
 import type {Participante} from "../types/auth.ts";
 
 // Service para manejar eventoss
@@ -237,9 +237,9 @@ export class EventoService {
         }
     }
 
-    static async obtenerEventosParaOrganizador(usuarioId: String): Promise<Evento[]> {
+    static async obtenerEventosParaOrganizador(organizadorId: string | undefined): Promise<Evento[]> {
         try{
-            const url = `${this.BASE_URL}/organizadores/eventos/${usuarioId}`
+            const url = `${this.BASE_URL}/organizadores/eventos/${organizadorId}`
             const response = await axios.get(url,{
                 headers: this.getAuthHeaders()
             })
