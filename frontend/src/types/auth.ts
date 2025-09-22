@@ -16,3 +16,19 @@ export interface LoginRequest {
     username: string;
     password: string;
 }
+
+export interface Participante {
+    id: string;
+    nombre: string;
+    apellido: string;
+    dni: string;
+    usuario: Usuario | null //TODO: Sacar el o null cuando se deshardcode el participantesApiService
+}
+
+export interface Organizador {
+    id: string;
+    nombre: string;
+    apellido: string;
+    dni: string;
+    usuario: Usuario;
+}

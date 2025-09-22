@@ -1,39 +1,6 @@
-// Types for the API responses based on existing backend models
-export interface Usuario {
-  id: number;
-  username: string;
-  passwordHash: string;
-  rol: string;
-}
-
-export interface Participante {
-  id: string;
-  nombre: string;
-  apellido: string;
-  dni: string;
-  usuario: Usuario | null;
-}
-export interface Event {
-    id: string;
-    titulo: string;
-    descripcion: string;
-    fecha: string;
-    horaInicio: string;
-    duracion: number;
-    ubicacion: {
-        provincia: string;
-        ciudad: string;
-        direccion: string;
-    };
-    cupoMaximo: number;
-    cupoMinimo: number;
-    precio: { moneda: string; monto: number };
-    organizador: Participante;
-    estado: { tipoEstado: 'CONFIRMADO' | 'PENDENTE' | 'CANCELADO'; fechaCambio: string };
-    categoria: { tipo: string };
-    etiquetas: string[];
-}
 // Mock data service using the same data structure as ParticipanteRepository
+import type {Participante} from "../types/auth.ts";
+
 export class ParticipanteApiService {
   // Mock data based on ParticipanteRepository.initializeData()
   private mockParticipantes: Participante[] = [
