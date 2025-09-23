@@ -60,7 +60,7 @@ public class EventoServiceTest {
     public void setUp() {
         idOrganizadorMock = "ORG-123";
         idEventoMock = "EV-123";
-        organizadorMock = new Organizador("1", "Juan", "Perez", "78414456", new Usuario(idOrganizadorMock, "juanp", "password", Rol.ROLE_ORGANIZER));
+        organizadorMock = new Organizador(idOrganizadorMock, "Juan", "Perez", "78414456", new Usuario("4", "juanp", "password", Rol.ROLE_ORGANIZER));
 
         eventoSinId = new Evento(
                 null,
@@ -104,7 +104,7 @@ public class EventoServiceTest {
 
     @Test
     public void registrarEventoGuardaEnMemoria() {
-        when(organizadorRepository.getOrganizadorPorUsuarioId(idOrganizadorMock)).thenReturn(Optional.of(organizadorMock));
+        when(organizadorRepository.getOrganizador(idOrganizadorMock)).thenReturn(Optional.of(organizadorMock));
         when(generadorIDService.generarID()).thenReturn(idOrganizadorMock);
         doNothing().when(categoriaService).guardarCategoria(null);
 
@@ -117,7 +117,7 @@ public class EventoServiceTest {
 
     @Test
     public void registrarEventoFallaPorqueElIdDelOrganizadorEsInvalido() {
-        when(organizadorRepository.getOrganizadorPorUsuarioId("ORG-INEXISTENTE"))
+        when(organizadorRepository.getOrganizador("ORG-INEXISTENTE"))
                 .thenReturn(Optional.empty());
 
         SolicitudEvento solicitudInvalida = new SolicitudEvento(null,
