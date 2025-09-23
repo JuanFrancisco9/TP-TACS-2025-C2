@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.utn.ba.tptacsg2.dtos.FiltrosDTO;
 import org.utn.ba.tptacsg2.dtos.ParticipanteDTO;
 import org.utn.ba.tptacsg2.dtos.output.ResultadoBusquedaEvento;
+import org.utn.ba.tptacsg2.exceptions.InscripcionNoEncontradaException;
 import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.models.events.SolicitudEvento;
 import org.utn.ba.tptacsg2.models.events.TipoEstadoEvento;
@@ -54,12 +55,12 @@ public class EventoController {
      */
     @PreAuthorize("hasRole('ORGANIZER')")
     @GetMapping("/{eventoId}/participantes")
-    public ResponseEntity<?> getParticipantesFromEvento(@PathVariable("eventoId") String eventoId){
+    public ResponseEntity<List<ParticipanteDTO>> getParticipantesFromEvento(@PathVariable("eventoId") String eventoId){
         List<ParticipanteDTO> participantesDTO;
         try {
             participantesDTO = eventoService.getParticipantes(eventoId).stream().map(p -> new ParticipanteDTO(p.nombre(),p.apellido(),p.dni())).toList();
         } catch(RuntimeException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+           throw new InscripcionNoEncontradaException("No se encontraron participante para el evento",e);
         }
         return ResponseEntity.status(HttpStatus.OK).body(participantesDTO);
     }

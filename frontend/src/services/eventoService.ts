@@ -308,11 +308,11 @@ export class EventoService {
   static async inscribirseAEvento(eventoId: string): Promise<boolean> {
     try {
       const storedUser = localStorage.getItem('currentUser');
-      const user = storedUser ? JSON.parse(storedUser) as { id: number; username: string; rol?: string } : null;
+      const user = storedUser ? JSON.parse(storedUser) as { id: number; username: string; rol?: string; actorId?: string} : null;
 
-      const participante: any = user
+      const participante: any = user //TODO revisar los campos vacios para eliminar
         ? {
-            id: String(user.id),
+            id: String(user.actorId),
             nombre: '',
             apellido: '',
             dni: '',
