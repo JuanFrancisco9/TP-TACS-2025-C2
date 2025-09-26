@@ -1,13 +1,17 @@
 package org.utn.ba.tptacsg2.models.events;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-
+@Document(collation = "eventos")
 public record Evento (
+     @Id
      String id,
      String titulo,
      String descripcion,
@@ -18,8 +22,10 @@ public record Evento (
      Integer cupoMaximo,
      Integer cupoMinimo,
      Precio precio,
+     @DBRef
      Organizador organizador,
      @JsonManagedReference
+     @DBRef
      EstadoEvento estado,
      Categoria categoria,
      List<String> etiquetas
