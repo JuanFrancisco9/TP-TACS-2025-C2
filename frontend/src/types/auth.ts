@@ -10,6 +10,7 @@ export interface Usuario {
     id: string;
     username: string;
     rol: Rol;
+    actorId?: string;
 }
 
 export interface LoginRequest {

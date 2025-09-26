@@ -27,6 +27,12 @@ public class ParticipanteRepository {
                 .findFirst();
     }
 
+    public Optional<Participante> getParticipantePorUsuarioId(String idUsuario) {
+        return this.participantes.stream()
+                .filter(p -> p.usuario() != null && p.usuario().id().equals(idUsuario))
+                .findFirst();
+    }
+
     @PostConstruct
     public void initializeData() {
         this.guardarParticipante(new Participante("1", "Carlos", "López", "11111111",null));

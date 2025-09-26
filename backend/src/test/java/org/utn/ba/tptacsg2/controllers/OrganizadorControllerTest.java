@@ -45,7 +45,7 @@ class OrganizadorControllerTest {
 
         when(organizadorService.getEventosDeOrganizador(idOrganizador)).thenReturn(eventos);
 
-        mockMvc.perform(get("/organizadores/eventos/{id_organizador}", idOrganizador)
+        mockMvc.perform(get("/organizadores/eventos/{idUsuario}", idOrganizador)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
@@ -57,7 +57,7 @@ class OrganizadorControllerTest {
         String idOrganizador = "2";
         when(organizadorService.getEventosDeOrganizador(idOrganizador)).thenReturn(Collections.emptyList());
 
-        mockMvc.perform(get("/organizadores/eventos/{id_organizador}", idOrganizador)
+        mockMvc.perform(get("/organizadores/eventos/{idUsuario}", idOrganizador)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }

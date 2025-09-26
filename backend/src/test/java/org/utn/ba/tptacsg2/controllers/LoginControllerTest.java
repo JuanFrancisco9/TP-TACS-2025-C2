@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.utn.ba.tptacsg2.config.TestSecurityConfig;
 import org.utn.ba.tptacsg2.dtos.InputRegistroDto;
 // IMPORTÁ la clase correcta de tu dominio:
+import org.utn.ba.tptacsg2.dtos.LoginResponseDto;
 import org.utn.ba.tptacsg2.models.users.Usuario; // <-- ajusta el package si difiere
 import org.utn.ba.tptacsg2.services.UsuarioService;
 
@@ -41,7 +42,7 @@ class LoginControllerTest {
         // Arrange
         InputRegistroDto dto = new InputRegistroDto("testuser", "password123", "USER","","","");
         // Crear un usuario mock con propiedades básicas
-        Usuario mockUsuario = Mockito.mock(Usuario.class);
+        LoginResponseDto mockUsuario = Mockito.mock(LoginResponseDto.class);
         when(usuarioService.login(any(InputRegistroDto.class)))
                 .thenReturn(mockUsuario);
 

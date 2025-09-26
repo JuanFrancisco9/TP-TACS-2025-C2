@@ -32,36 +32,36 @@ class OrganizadorServiceTest {
     @DisplayName("Debe devolver lista de eventos cuando el organizador tiene eventos")
     void getEventosDeOrganizador_devuelveListaDeEventos() {
 
-        String idOrganizador = "organizador1";
+        String idUsuario = "organizador1";
         Evento evento1 = mock(Evento.class);
         Evento evento2 = mock(Evento.class);
         List<Evento> eventosEsperados = Arrays.asList(evento1, evento2);
 
-        when(eventoRepository.getEventosDeOrganizador(idOrganizador))
+        when(eventoRepository.getEventosDeOrganizadorPorUsuario(idUsuario))
             .thenReturn(eventosEsperados);
 
 
-        List<Evento> eventos = organizadorService.getEventosDeOrganizador(idOrganizador);
+        List<Evento> eventos = organizadorService.getEventosDeOrganizadorPorUsuario(idUsuario);
 
 
         assertEquals(2, eventos.size());
         assertEquals(eventosEsperados, eventos);
-        verify(eventoRepository).getEventosDeOrganizador(idOrganizador);
+        verify(eventoRepository).getEventosDeOrganizadorPorUsuario(idUsuario);
     }
 
     @Test
     @DisplayName("Debe devolver lista vacía cuando el organizador no tiene eventos")
     void getEventosDeOrganizador_devuelveListaVaciaSiNoHayEventos() {
 
-        String idOrganizador = "organizador2";
-        when(eventoRepository.getEventosDeOrganizador(idOrganizador))
+        String idUsuario = "organizador2";
+        when(eventoRepository.getEventosDeOrganizadorPorUsuario(idUsuario))
             .thenReturn(Collections.emptyList());
 
 
-        List<Evento> eventos = organizadorService.getEventosDeOrganizador(idOrganizador);
+        List<Evento> eventos = organizadorService.getEventosDeOrganizadorPorUsuario(idUsuario);
 
 
         assertTrue(eventos.isEmpty());
-        verify(eventoRepository).getEventosDeOrganizador(idOrganizador);
+        verify(eventoRepository).getEventosDeOrganizadorPorUsuario(idUsuario);
     }
 }

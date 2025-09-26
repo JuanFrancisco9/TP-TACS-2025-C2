@@ -60,7 +60,6 @@ const ESTADOS: TipoEstadoEvento[] = [
 const MONEDAS = ["ARS", "USD", "EUR"];
 
 export default function FormularioCrearEvento() {
-    const [organizadorId, setOrganizadorId] = React.useState("");
     const [titulo, setTitulo] = React.useState("");
     const [descripcion, setDescripcion] = React.useState("");
 
@@ -93,8 +92,8 @@ export default function FormularioCrearEvento() {
         setErrorMsg(null);
         setSuccessMsg(null);
 
-        if (!organizadorId || !titulo || !fecha || !horaInicio) {
-            setErrorMsg("Completá organizador, título, fecha y hora de inicio.");
+        if (!titulo || !fecha || !horaInicio) {
+            setErrorMsg("Completá título, fecha y hora de inicio.");
             return;
         }
         if (!categoriaTipo) {
@@ -104,8 +103,14 @@ export default function FormularioCrearEvento() {
 
         const fechaISO = `${fecha}T${horaInicio}:00`;
 
+        const currentUser = authService.getCurrentUser();
+        if (!currentUser?.id) {
+            setErrorMsg("Usuario no encontrado. Por favor, iniciá sesión.");
+            return;
+        }
+
         const payload: SolicitudEventoDto = {
-            organizadorId: organizadorId.trim(),
+            organizadorId: String(currentUser.actorId),
             titulo: titulo.trim(),
             descripcion: descripcion.trim(),
             fecha: fechaISO,
@@ -179,19 +184,7 @@ export default function FormularioCrearEvento() {
             {successMsg && <Alert severity="success" sx={{ mb: 2 }}>{successMsg}</Alert>}
 
             <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                    <TextField
-                        label="Organizador ID"
-                        placeholder="1"
-                        value={organizadorId}
-                        onChange={(e) => setOrganizadorId(e.target.value)}
-                        fullWidth
-                        required
-                        disabled={submitting}
-                    />
-                </Grid>
-
-                <Grid item xs={12} sm={6}>
+                <Grid  size={{xs:12}}>
                     <TextField
                         label="Título"
                         value={titulo}
@@ -202,7 +195,7 @@ export default function FormularioCrearEvento() {
                     />
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid size={{xs:12}}>
                     <TextField
                         label="Descripción"
                         value={descripcion}
@@ -214,7 +207,7 @@ export default function FormularioCrearEvento() {
                     />
                 </Grid>
 
-                <Grid item xs={12} sm={6}>
+                <Grid size={{xs:12,sm:6}}>
                     <TextField
                         type="date"
                         label="Fecha"
@@ -227,7 +220,7 @@ export default function FormularioCrearEvento() {
                     />
                 </Grid>
 
-                <Grid item xs={12} sm={6}>
+                <Grid size={{xs:12,sm:6}}>
                     <TextField
                         type="time"
                         label="Hora de inicio"
@@ -240,7 +233,7 @@ export default function FormularioCrearEvento() {
                     />
                 </Grid>
 
-                <Grid item xs={12} sm={4}>
+                <Grid size={{xs:12,sm:6}}>
                     <TextField
                         label="Duración (horas)"
                         type="number"
@@ -252,7 +245,7 @@ export default function FormularioCrearEvento() {
                     />
                 </Grid>
 
-                <Grid item xs={12} sm={8}>
+                <Grid size={{xs:12,sm:6}}>
                     <TextField
                         label="Etiquetas (separadas por coma)"
                         placeholder="networking, frontend, free"
@@ -264,7 +257,7 @@ export default function FormularioCrearEvento() {
                 </Grid>
 
                 {/* Estado / Categoría */}
-                <Grid item xs={12} sm={6}>
+                <Grid size={{xs:12,sm:6}}>
                     <TextField
                         select
                         label="Estado"
@@ -281,7 +274,7 @@ export default function FormularioCrearEvento() {
                     </TextField>
                 </Grid>
 
-                <Grid item xs={12} sm={6}>
+                <Grid size={{xs:12,sm:6}}>
                     <TextField
                         label="Categoría (categoria.tipo)"
                         value={categoriaTipo}
@@ -294,7 +287,7 @@ export default function FormularioCrearEvento() {
                 </Grid>
 
                 {/* Cupos */}
-                <Grid item xs={12} sm={6}>
+                <Grid size={{xs:12,sm:6}}>
                     <TextField
                         label="Cupo máximo"
                         type="number"
@@ -306,7 +299,7 @@ export default function FormularioCrearEvento() {
                     />
                 </Grid>
 
-                <Grid item xs={12} sm={6}>
+                <Grid size={{xs:12,sm:6}}>
                     <TextField
                         label="Cupo mínimo"
                         type="number"
@@ -319,7 +312,7 @@ export default function FormularioCrearEvento() {
                 </Grid>
 
                 {/* Ubicación */}
-                <Grid item xs={12} sm={3}>
+                <Grid size={{xs:12,sm:3}}>
                     <TextField
                         label="Latitud"
                         value={latitud}
@@ -329,7 +322,7 @@ export default function FormularioCrearEvento() {
                         placeholder="-34.6037"
                     />
                 </Grid>
-                <Grid item xs={12} sm={3}>
+                <Grid size={{xs:12,sm:3}}>
                     <TextField
                         label="Longitud"
                         value={longitud}
@@ -339,7 +332,7 @@ export default function FormularioCrearEvento() {
                         placeholder="-58.3816"
                     />
                 </Grid>
-                <Grid item xs={12} sm={3}>
+                <Grid size={{xs:12,sm:3}}>
                     <TextField
                         label="Localidad"
                         value={localidad}
@@ -349,7 +342,7 @@ export default function FormularioCrearEvento() {
                         placeholder="CABA"
                     />
                 </Grid>
-                <Grid item xs={12} sm={3}>
+                <Grid size={{xs:12,sm:3}}>
                     <TextField
                         label="Dirección"
                         value={direccion}
@@ -361,7 +354,7 @@ export default function FormularioCrearEvento() {
                 </Grid>
 
                 {/* Precio */}
-                <Grid item xs={12} sm={4}>
+                <Grid size={{xs:12,sm:4}}>
                     <TextField
                         select
                         label="Moneda"
@@ -375,7 +368,7 @@ export default function FormularioCrearEvento() {
                         ))}
                     </TextField>
                 </Grid>
-                <Grid item xs={12} sm={8}>
+                <Grid size={{xs:12,sm:8}}>
                     <TextField
                         label="Precio (cantidad)"
                         type="number"

@@ -71,6 +71,11 @@ class AuthService {
         return null;
     }
 
+    getActorId(): string | null {
+        const user = this.getCurrentUser();
+        return user?.actorId || null;
+    }
+
     getAuthHeaders(): Record<string, string> {
         // Asegurar que las credenciales estén cargadas
         this.getCurrentUser();

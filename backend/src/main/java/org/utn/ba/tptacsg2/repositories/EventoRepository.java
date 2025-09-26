@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.events.*;
+import org.utn.ba.tptacsg2.models.users.Usuario;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -39,16 +40,24 @@ public class EventoRepository {
                 .findFirst();
     }
 
-    public List<Evento> getEventosDeOrganizador(String idOrganizador) {
+    public List<Evento> getEventosDeOrganizadorPorUsuario(String idUsuario) {
         return this.getEventos().stream()
                 .filter(evento -> evento.organizador() != null &&
-                        evento.organizador().id().equals(idOrganizador))
+                        evento.organizador().usuario() != null &&
+                        evento.organizador().usuario().id().equals(idUsuario))
                 .toList();
     }
 
     public void actualizarEvento(Evento evento){
         eventos.removeIf(e -> e.id().equals(evento.id()));
         this.guardarEvento(evento);
+    }
+
+    public List<Evento> getEventosDeOrganizador(String idOrganizador) {
+        return this.getEventos().stream()
+                .filter(evento -> evento.organizador() != null &&
+                        evento.organizador().id().equals(idOrganizador))
+                .toList();
     }
 
     @PostConstruct
@@ -59,12 +68,12 @@ public class EventoRepository {
 
         Evento evento1 = new Evento("0", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
                 "19;00",5F, new Ubicacion("-32.05322857239074", "-58.61824002335356","CABA", "Av. Press. Figueroa Alcorta 2099"), 10, 0,
-                new Precio("Pesos", 100F), new Organizador("3","","","", null),
+                new Precio("Pesos", 100F), new Organizador("1","Juan","Pérez","12345678", new Usuario("organizador1", "organizador1","password3", null)),
                 estadoEvento1 ,new Categoria("Educativo"),new ArrayList<>());
 
         Evento evento2 = new Evento("2", "Workshop de Testing", "Testing", LocalDateTime.now().plusDays(7),
                 "10:00", 3F, new Ubicacion("-32.05322857239074", "-58.61824002335356","CABA", "Av. Press. Figueroa Alcorta 2099"), 20, 0,
-                new Precio("Pesos", 150F), new Organizador("2","María","González","87654321", null),
+                new Precio("Pesos", 150F), new Organizador("2","María","González","87654321",  new Usuario("organizador2", "organizador2","password3", null)),
                 estadoEvento2, new Categoria("Tecnología"), new ArrayList<>());
 
         this.guardarEvento(evento1);

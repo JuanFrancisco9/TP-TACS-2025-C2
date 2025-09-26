@@ -11,6 +11,8 @@ import org.utn.ba.tptacsg2.dtos.FiltrosDTO;
 import org.utn.ba.tptacsg2.dtos.output.ResultadoBusquedaEvento;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.events.*;
+import org.utn.ba.tptacsg2.models.users.Rol;
+import org.utn.ba.tptacsg2.models.users.Usuario;
 import org.utn.ba.tptacsg2.repositories.EstadoEventoRepository;
 import org.utn.ba.tptacsg2.repositories.EventoRepository;
 import org.utn.ba.tptacsg2.repositories.OrganizadorRepository;
@@ -58,7 +60,7 @@ public class EventoServiceTest {
     public void setUp() {
         idOrganizadorMock = "ORG-123";
         idEventoMock = "EV-123";
-        organizadorMock = new Organizador(idOrganizadorMock, "Juan", "Perez", "78414456", null);
+        organizadorMock = new Organizador(idOrganizadorMock, "Juan", "Perez", "78414456", new Usuario("4", "juanp", "password", Rol.ROLE_ORGANIZER));
 
         eventoSinId = new Evento(
                 null,

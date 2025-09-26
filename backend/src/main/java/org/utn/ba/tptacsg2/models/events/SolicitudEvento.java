@@ -1,7 +1,5 @@
 package org.utn.ba.tptacsg2.models.events;
 
-import org.utn.ba.tptacsg2.models.actors.Organizador;
-
 import java.time.LocalDateTime;
 import java.util.List;
 

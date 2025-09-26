@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type {Inscripcion} from "../types/inscripciones.ts";
 import authService from "./authService.ts";
-import type { Evento, ResultadoBusquedaEvento, CategoriaDTO } from "../types/evento.ts";
+import type {Evento, ResultadoBusquedaEvento, CategoriaDTO } from "../types/evento.ts";
 import type {Participante} from "../types/auth.ts";
 
 // Service para manejar eventoss
@@ -237,7 +237,7 @@ export class EventoService {
         }
     }
 
-    static async obtenerEventosParaOrganizador(organizadorId: String): Promise<Evento[]> {
+    static async obtenerEventosParaOrganizador(organizadorId: string | undefined): Promise<Evento[]> {
         try{
             const url = `${this.BASE_URL}/organizadores/eventos/${organizadorId}`
             const response = await axios.get(url,{
@@ -308,11 +308,11 @@ export class EventoService {
   static async inscribirseAEvento(eventoId: string): Promise<boolean> {
     try {
       const storedUser = localStorage.getItem('currentUser');
-      const user = storedUser ? JSON.parse(storedUser) as { id: number; username: string; rol?: string } : null;
+      const user = storedUser ? JSON.parse(storedUser) as { id: number; username: string; rol?: string; actorId?: string} : null;
 
-      const participante: any = user
+      const participante: any = user //TODO revisar los campos vacios para eliminar
         ? {
-            id: String(user.id),
+            id: String(user.actorId),
             nombre: '',
             apellido: '',
             dni: '',

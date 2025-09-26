@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.utn.ba.tptacsg2.dtos.InputRegistroDto;
+import org.utn.ba.tptacsg2.dtos.LoginResponseDto;
 import org.utn.ba.tptacsg2.models.users.Usuario;
 import org.utn.ba.tptacsg2.models.users.Rol;
 import org.utn.ba.tptacsg2.repositories.OrganizadorRepository;
@@ -120,9 +121,9 @@ class UsuarioServiceTest {
             when(passwordEncoder.matches("password123", "HASH")).thenReturn(true);
 
             var dto = new InputRegistroDto("testuser", "password123", "USER", "", "", "");
-            var result = service.login(dto);
-
-            assertSame(stored, result);
+            LoginResponseDto result = service.login(dto);
+            LoginResponseDto expected = new LoginResponseDto("7", "testuser", Rol.ROLE_USER, null);
+            assertEquals(expected, result);
             verify(passwordEncoder).matches("password123", "HASH");
         }
 
