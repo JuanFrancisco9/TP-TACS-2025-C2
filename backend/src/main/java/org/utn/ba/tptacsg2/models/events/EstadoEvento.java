@@ -33,6 +33,10 @@ public class EstadoEvento {
         this.tipoEstado = tipoEstado;
         this.fechaCambio = fechaCambio;
     }
+    public EstadoEvento(TipoEstadoEvento tipoEstado, LocalDateTime fechaCambio) {
+        this.tipoEstado = tipoEstado;
+        this.fechaCambio = fechaCambio;
+    }
 
     public Evento getEvento() {
         return evento;

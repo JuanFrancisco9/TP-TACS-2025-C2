@@ -15,4 +15,7 @@ public record Participante(
         @DBRef
         Usuario usuario
 ) {
+    public Participante (String nombre, String apellido, String dni, Usuario usuario){
+        this(null, nombre, apellido, dni, usuario);
+    }
 }

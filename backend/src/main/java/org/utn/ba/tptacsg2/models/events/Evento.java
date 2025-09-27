@@ -29,4 +29,5 @@ public record Evento (
      EstadoEvento estado,
      Categoria categoria,
      List<String> etiquetas
-) {}
+) {
+}

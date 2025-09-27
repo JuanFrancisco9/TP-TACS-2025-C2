@@ -4,6 +4,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.utn.ba.tptacsg2.models.actors.Participante;
+import org.utn.ba.tptacsg2.models.events.EstadoEvento;
 import org.utn.ba.tptacsg2.models.events.Evento;
 
 import java.time.LocalDateTime;
@@ -20,5 +21,8 @@ public record Inscripcion (
         Evento evento
 ){
 
+    public Inscripcion (Participante participante, LocalDateTime fechaRegistro, EstadoInscripcion estado, Evento evento){
+        this(null,participante,fechaRegistro,estado,evento);
+    }
 
 }

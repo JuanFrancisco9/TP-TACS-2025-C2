@@ -10,5 +10,9 @@ public record Usuario(
         String username,
         String passwordHash,
         Rol rol
-) {}
+) {
+    public Usuario(String username, String passwordHash, Rol rol) {
+        this(null, username, passwordHash, rol);
+    }
+}
 

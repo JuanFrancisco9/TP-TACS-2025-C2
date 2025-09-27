@@ -16,4 +16,8 @@ public record Organizador (
      String dni,
      @DBRef
      Usuario usuario
-){}
+){
+    public Organizador (String nombre, String apellido, String dni, Usuario usuario){
+        this(null, nombre, apellido, dni, usuario);
+    }
+}
