@@ -27,6 +27,8 @@ curl http://localhost:8080/actuator/health
 
 Y viendo que el status devuelto sea UP.
 
+Para incializar la DB con datos: ``` docker compose -f compose.yaml -f compose-init.yaml up ```
+
 ## Entrega 2 - Interfaz de Usuario (UI)
 
 ### Configuración del Frontend
