@@ -8,15 +8,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.utn.ba.tptacsg2.dtos.FiltrosDTO;
+import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.dtos.output.ResultadoBusquedaEvento;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.events.*;
 import org.utn.ba.tptacsg2.models.users.Rol;
 import org.utn.ba.tptacsg2.models.users.Usuario;
-import org.utn.ba.tptacsg2.repositories.EstadoEventoRepository;
-import org.utn.ba.tptacsg2.repositories.EventoRepository;
-import org.utn.ba.tptacsg2.repositories.OrganizadorRepository;
-import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
+import org.utn.ba.tptacsg2.repositories.db.EstadoEventoRepositoryDB;
+import org.utn.ba.tptacsg2.repositories.db.EventoRepositoryDB;
+import org.utn.ba.tptacsg2.repositories.db.InscripcionRepositoryDB;
+import org.utn.ba.tptacsg2.repositories.db.OrganizadorRepositoryDB;
 
 
 import java.time.LocalDate;
@@ -33,13 +34,13 @@ import static org.mockito.Mockito.*;
 public class EventoServiceTest {
 
     @Mock
-    private EventoRepository eventoRepository;
+    private EventoRepositoryDB eventoRepository;
     @Mock
-    private OrganizadorRepository organizadorRepository;
+    private OrganizadorRepositoryDB organizadorRepository;
     @Mock
-    private EstadoEventoRepository estadoEventoRepository;
+    private EstadoEventoRepositoryDB estadoEventoRepository;
     @Mock
-    private InscripcionRepository inscripcionRepository;
+    private InscripcionRepositoryDB inscripcionRepository;
     @Mock
     private GeneradorIDService generadorIDService;
     @Mock
@@ -97,14 +98,14 @@ public class EventoServiceTest {
         eventoValido1 = new Evento("E1", "Concierto de rock vivo", "Musica", LocalDateTime.of(2025, 9, 10, 20, 0), "20:00", 2f, new Ubicacion("", "", "La Plata", "CABA"), 100, 0, new Precio("ARS", 1000f), organizadorMock, new EstadoEvento("2", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria1, new ArrayList<>());
         eventoValido2 = new Evento("E2", "Charla", "Tecnologia", LocalDateTime.of(2025, 10, 10, 18, 0), "18:00", 1.5f, new Ubicacion("", "", "CABA", "CABA"), 50, 0, new Precio("ARS", 500f), organizadorMock, new EstadoEvento("3", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria2, new ArrayList<>());
 
-        lenient().when(eventoRepository.getEventos()).thenReturn(Arrays.asList(eventoValido1, eventoValido2));
+        lenient().when(eventoRepository.findAll()).thenReturn(Arrays.asList(eventoValido1, eventoValido2));
 
         ReflectionTestUtils.setField(eventoService, "tamanioPagina", 20);
     }
 
     @Test
     public void registrarEventoGuardaEnMemoria() {
-        when(organizadorRepository.getOrganizador(idOrganizadorMock)).thenReturn(Optional.of(organizadorMock));
+        when(organizadorRepository.findById(idOrganizadorMock)).thenReturn(Optional.of(organizadorMock));
         when(generadorIDService.generarID()).thenReturn(idOrganizadorMock);
         doNothing().when(categoriaService).guardarCategoria(null);
 
@@ -112,12 +113,12 @@ public class EventoServiceTest {
         assertEquals("Fiesta UTN", resultado.titulo());
         assertEquals(organizadorMock, resultado.organizador());
 
-        verify(eventoRepository).guardarEvento(resultado);
+        verify(eventoRepository).save(resultado);
     }
 
     @Test
     public void registrarEventoFallaPorqueElIdDelOrganizadorEsInvalido() {
-        when(organizadorRepository.getOrganizador("ORG-INEXISTENTE"))
+        when(organizadorRepository.findById("ORG-INEXISTENTE"))
                 .thenReturn(Optional.empty());
 
         SolicitudEvento solicitudInvalida = new SolicitudEvento(null,
@@ -138,12 +139,12 @@ public class EventoServiceTest {
             eventoService.registrarEvento(solicitudInvalida);
         });
 
-        verify(eventoRepository, org.mockito.Mockito.never()).guardarEvento(org.mockito.Mockito.any());
+        verify(eventoRepository, org.mockito.Mockito.never()).save(org.mockito.Mockito.any());
     }
 
     @Test
     public void cambiarEstadoEvento() {
-        when(eventoRepository.getEvento(idEventoMock)).thenReturn(Optional.of(eventoSinId));
+        when(eventoRepository.findById(idEventoMock)).thenReturn(Optional.of(eventoSinId));
 
         TipoEstadoEvento tipoEstadoEvento = TipoEstadoEvento.CANCELADO;
 
@@ -265,17 +266,17 @@ public class EventoServiceTest {
         );
 
         List<Evento> eventos = Arrays.asList(eventoProximo, eventoLejano);
-        when(eventoRepository.getEventos()).thenReturn(eventos);
-        when(eventoRepository.getEvento("E3")).thenReturn(Optional.of(eventoProximo));
+        when(eventoRepository.findAll()).thenReturn(eventos);
+        when(eventoRepository.findById("E3")).thenReturn(Optional.of(eventoProximo));
         when(generadorIDService.generarID()).thenReturn("nuevo-estado-id");
 
         eventoService.cerrarEventosProximos();
 
-        verify(eventoRepository).actualizarEvento(argThat(evento ->
+        verify(eventoRepository).save(argThat(evento ->
                 evento.id().equals("E3") &&
                         evento.estado().getTipoEstado().equals(TipoEstadoEvento.NO_ACEPTA_INSCRIPCIONES)
         ));
-        verify(eventoRepository, never()).actualizarEvento(argThat(evento ->
+        verify(eventoRepository, never()).save(argThat(evento ->
                 evento.id().equals("E4")
         ));
     }
@@ -301,11 +302,11 @@ public class EventoServiceTest {
                 new ArrayList<>()
         );
 
-        when(eventoRepository.getEventos()).thenReturn(Arrays.asList(eventoCerrado));
+        when(eventoRepository.findAll()).thenReturn(Arrays.asList(eventoCerrado));
 
         eventoService.cerrarEventosProximos();
 
-        verify(eventoRepository, never()).actualizarEvento(any());
+        verify(eventoRepository, never()).save(any());
     }
 
     @Test
@@ -330,13 +331,13 @@ public class EventoServiceTest {
                 new ArrayList<>()
         );
 
-        when(eventoRepository.getEventos()).thenReturn(Arrays.asList(eventoHoy));
-        when(eventoRepository.getEvento("E6")).thenReturn(Optional.of(eventoHoy));
+        when(eventoRepository.findAll()).thenReturn(Arrays.asList(eventoHoy));
+        when(eventoRepository.findById("E6")).thenReturn(Optional.of(eventoHoy));
         when(generadorIDService.generarID()).thenReturn("nuevo-estado-id");
 
         eventoService.cerrarEventosProximos();
 
-        verify(eventoRepository).actualizarEvento(argThat(evento ->
+        verify(eventoRepository).save(argThat(evento ->
                 evento.id().equals("E6") &&
                         evento.estado().getTipoEstado().equals(TipoEstadoEvento.NO_ACEPTA_INSCRIPCIONES)
         ));

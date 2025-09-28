@@ -11,10 +11,13 @@ import org.utn.ba.tptacsg2.models.actors.Participante;
 import org.utn.ba.tptacsg2.models.events.EstadoEvento;
 import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.models.events.SolicitudEvento;
-import org.utn.ba.tptacsg2.models.events.TipoEstadoEvento;
+import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
-import org.utn.ba.tptacsg2.repositories.*;
+import org.utn.ba.tptacsg2.repositories.db.EstadoEventoRepositoryDB;
+import org.utn.ba.tptacsg2.repositories.db.EventoRepositoryDB;
+import org.utn.ba.tptacsg2.repositories.db.InscripcionRepositoryDB;
+import org.utn.ba.tptacsg2.repositories.db.OrganizadorRepositoryDB;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -26,17 +29,17 @@ import java.time.LocalTime;
 
 @Service
 public class EventoService {
-    private final EventoRepository eventoRepository;
-    private final InscripcionRepository inscripcionRepository;
-    private final OrganizadorRepository organizadorRepository;
+    private final EventoRepositoryDB eventoRepository;
+    private final InscripcionRepositoryDB inscripcionRepository;
+    private final OrganizadorRepositoryDB organizadorRepository;
     private final GeneradorIDService generadorIDService;
-    private final EstadoEventoRepository estadoEventoRepository;
+    private final EstadoEventoRepositoryDB estadoEventoRepository;
     private final CategoriaService categoriaService;
     @Value("${app.pagination.default-page-size}")
     private Integer tamanioPagina;
 
     @Autowired
-    public EventoService(EventoRepository eventoRepository, InscripcionRepository inscripcionRepository, OrganizadorRepository organizadorRepository, GeneradorIDService generadorIDService,EstadoEventoRepository estadoEventoRepository, CategoriaService categoriaService) {
+    public EventoService(EventoRepositoryDB eventoRepository, InscripcionRepositoryDB inscripcionRepository, OrganizadorRepositoryDB organizadorRepository, GeneradorIDService generadorIDService,EstadoEventoRepositoryDB estadoEventoRepository, CategoriaService categoriaService) {
         this.eventoRepository = eventoRepository;
         this.inscripcionRepository = inscripcionRepository;
         this.organizadorRepository = organizadorRepository;
@@ -46,13 +49,13 @@ public class EventoService {
     }
 
     public Integer cuposDisponibles(Evento evento) {
-        return evento.cupoMaximo() -  inscripcionRepository.getInscripcionesAEvento(evento)
+        return evento.cupoMaximo() -  inscripcionRepository.findByEvento_Id(evento.id())
                 .stream().filter(inscripcion -> inscripcion.estado().getTipoEstado().equals(TipoEstadoInscripcion.ACEPTADA))
                 .toList().size();
     }
 
     public Evento registrarEvento(SolicitudEvento solicitud) {
-        Organizador organizador = organizadorRepository.getOrganizador(solicitud.organizadorId())
+        Organizador organizador = organizadorRepository.findById(solicitud.organizadorId())
                 .orElseThrow(() -> new RuntimeException("Organizador no encontrado"));
 
         EstadoEvento estadoInicial = new EstadoEvento(this.generadorIDService.generarID(), solicitud.estado(), LocalDateTime.now());
@@ -75,8 +78,8 @@ public class EventoService {
         );
 
         estadoInicial.setEvento(evento);
-        this.estadoEventoRepository.guardarEstadoEvento(estadoInicial);
-        eventoRepository.guardarEvento(evento);
+        this.estadoEventoRepository.save(estadoInicial);
+        eventoRepository.save(evento);
 
         this.categoriaService.guardarCategoria(solicitud.categoria());
 
@@ -84,7 +87,7 @@ public class EventoService {
     }
 
     public Evento actualizarEvento(String idEvento, Evento eventoUpdate) {
-        if(eventoRepository.getEvento(idEvento).isPresent()) {
+        if(eventoRepository.findById(idEvento).isPresent()) {
         Evento eventoActualizado = new Evento(
                 eventoUpdate.id(),
                 eventoUpdate.titulo(),
@@ -102,7 +105,7 @@ public class EventoService {
                 eventoUpdate.etiquetas()
         );
 
-        eventoRepository.actualizarEvento(eventoActualizado);
+        eventoRepository.save(eventoActualizado);
 
         return eventoActualizado;
         }else  {
@@ -111,10 +114,10 @@ public class EventoService {
     }
 
     public Evento cambiarEstado(String idEvento,TipoEstadoEvento estado) {
-        Evento evento = eventoRepository.getEvento(idEvento).orElseThrow(() -> new RuntimeException("Evento no encontrado"));
+        Evento evento = eventoRepository.findById(idEvento).orElseThrow(() -> new RuntimeException("Evento no encontrado"));
 
         EstadoEvento estadoEvento = new EstadoEvento(this.generadorIDService.generarID(), estado, LocalDateTime.now());
-        this.estadoEventoRepository.guardarEstadoEvento(estadoEvento);
+        this.estadoEventoRepository.save(estadoEvento);
 
         Evento eventoActualizado = new Evento(
                 evento.id(),
@@ -133,17 +136,17 @@ public class EventoService {
                 evento.etiquetas()
         );
 
-        eventoRepository.actualizarEvento(eventoActualizado);
+        eventoRepository.save(eventoActualizado);
 
         return eventoActualizado;
     }
 
     public Evento getEvento(String eventoId){
-        return eventoRepository.getEvento(eventoId).orElseThrow(()-> new RuntimeException("Evento " + eventoId + " no encontrado"));
+        return eventoRepository.findById(eventoId).orElseThrow(()-> new RuntimeException("Evento " + eventoId + " no encontrado"));
     }
 
     public List<Participante> getParticipantes(String eventoId){
-        List<Inscripcion> inscripciones = inscripcionRepository.getInscripcionesAEvento(this.getEvento(eventoId));
+        List<Inscripcion> inscripciones = inscripcionRepository.findByEvento_Id(eventoId);
 
         List<Participante> participantes = inscripciones.stream().filter(i -> i.estado().getTipoEstado() == TipoEstadoInscripcion.ACEPTADA)
                 .map(i->i.participante()).toList();
@@ -155,7 +158,7 @@ public class EventoService {
         LocalDateTime ahora = LocalDateTime.now();
         LocalDateTime limite = ahora.plusHours(24);
 
-        List<Evento> eventos = eventoRepository.getEventos();
+        List<Evento> eventos = eventoRepository.findAll();
 
         eventos.stream()
                 .filter(evento -> {
@@ -166,8 +169,9 @@ public class EventoService {
                 .forEach(evento -> cambiarEstado(evento.id(), TipoEstadoEvento.NO_ACEPTA_INSCRIPCIONES));
     }
 
+    //TODO refactor para que los predicados los haga desde la BD
     public ResultadoBusquedaEvento buscarEventos(FiltrosDTO filtros) {
-        List<Evento> eventos = eventoRepository.getEventos();
+        List<Evento> eventos = eventoRepository.findAll();
 
         Predicate<Evento> predicadosCombinados = new EventPredicateBuilder()
                 .conRangoDeFecha(filtros.fechaDesde(), filtros.fechaHasta())

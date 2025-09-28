@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.utn.ba.tptacsg2.models.events.Evento;
-import org.utn.ba.tptacsg2.repositories.EventoRepository;
+import org.utn.ba.tptacsg2.repositories.db.EventoRepositoryDB;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,7 +18,7 @@ import static org.mockito.Mockito.*;
 class OrganizadorServiceTest {
 
     @Mock
-    private EventoRepository eventoRepository;
+    private EventoRepositoryDB eventoRepository;
 
     private OrganizadorService organizadorService;
 
@@ -37,7 +37,7 @@ class OrganizadorServiceTest {
         Evento evento2 = mock(Evento.class);
         List<Evento> eventosEsperados = Arrays.asList(evento1, evento2);
 
-        when(eventoRepository.getEventosDeOrganizadorPorUsuario(idUsuario))
+        when(eventoRepository.findByUsuarioIdDelOrganizador(idUsuario))
             .thenReturn(eventosEsperados);
 
 
@@ -46,7 +46,7 @@ class OrganizadorServiceTest {
 
         assertEquals(2, eventos.size());
         assertEquals(eventosEsperados, eventos);
-        verify(eventoRepository).getEventosDeOrganizadorPorUsuario(idUsuario);
+        verify(eventoRepository).findByUsuarioIdDelOrganizador(idUsuario);
     }
 
     @Test
@@ -54,7 +54,7 @@ class OrganizadorServiceTest {
     void getEventosDeOrganizador_devuelveListaVaciaSiNoHayEventos() {
 
         String idUsuario = "organizador2";
-        when(eventoRepository.getEventosDeOrganizadorPorUsuario(idUsuario))
+        when(eventoRepository.findByUsuarioIdDelOrganizador(idUsuario))
             .thenReturn(Collections.emptyList());
 
 
@@ -62,6 +62,6 @@ class OrganizadorServiceTest {
 
 
         assertTrue(eventos.isEmpty());
-        verify(eventoRepository).getEventosDeOrganizadorPorUsuario(idUsuario);
+        verify(eventoRepository).findByUsuarioIdDelOrganizador(idUsuario);
     }
 }

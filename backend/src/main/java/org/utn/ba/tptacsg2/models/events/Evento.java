@@ -9,7 +9,7 @@ import org.utn.ba.tptacsg2.models.actors.Organizador;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Document(collation = "eventos")
+@Document(collection = "eventos")
 public record Evento (
      @Id
      String id,
@@ -27,6 +27,7 @@ public record Evento (
      @JsonManagedReference
      @DBRef
      EstadoEvento estado,
+     @DBRef
      Categoria categoria,
      List<String> etiquetas
 ) {

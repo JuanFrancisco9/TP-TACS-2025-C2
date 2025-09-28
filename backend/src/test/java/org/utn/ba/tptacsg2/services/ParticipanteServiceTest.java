@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
-import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
+import org.utn.ba.tptacsg2.repositories.db.InscripcionRepositoryDB;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,7 +18,7 @@ import static org.mockito.Mockito.*;
 class ParticipanteServiceTest {
 
     @Mock
-    private InscripcionRepository inscripcionRepository;
+    private InscripcionRepositoryDB inscripcionRepository;
 
     private ParticipanteService participanteService;
 
@@ -37,7 +37,7 @@ class ParticipanteServiceTest {
         Inscripcion inscripcion2 = mock(Inscripcion.class);
         List<Inscripcion> inscripcionesEsperadas = Arrays.asList(inscripcion1, inscripcion2);
 
-        when(inscripcionRepository.getInscripcionesDeParticipante(idParticipante))
+        when(inscripcionRepository.findByParticipante_Id(idParticipante))
             .thenReturn(inscripcionesEsperadas);
 
 
@@ -46,7 +46,7 @@ class ParticipanteServiceTest {
 
         assertEquals(2, inscripciones.size());
         assertEquals(inscripcionesEsperadas, inscripciones);
-        verify(inscripcionRepository).getInscripcionesDeParticipante(idParticipante);
+        verify(inscripcionRepository).findByParticipante_Id(idParticipante);
     }
 
     @Test
@@ -54,7 +54,7 @@ class ParticipanteServiceTest {
     void getInscripcionesDeParticipante_devuelveListaVaciaSiNoHayInscripciones() {
 
         String idParticipante = "2";
-        when(inscripcionRepository.getInscripcionesDeParticipante(idParticipante))
+        when(inscripcionRepository.findByParticipante_Id(idParticipante))
             .thenReturn(Collections.emptyList());
 
 
@@ -62,6 +62,6 @@ class ParticipanteServiceTest {
 
 
         assertTrue(inscripciones.isEmpty());
-        verify(inscripcionRepository).getInscripcionesDeParticipante(idParticipante);
+        verify(inscripcionRepository).findByParticipante_Id(idParticipante);
     }
 }

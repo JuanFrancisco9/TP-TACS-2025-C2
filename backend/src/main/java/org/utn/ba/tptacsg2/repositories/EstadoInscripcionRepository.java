@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Repository
 public class EstadoInscripcionRepository {
     private final List<EstadoInscripcion> estadosDeInscripcion = new ArrayList<>();
 

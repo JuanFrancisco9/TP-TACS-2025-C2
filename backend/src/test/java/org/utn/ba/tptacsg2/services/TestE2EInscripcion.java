@@ -9,14 +9,13 @@ import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.actors.Participante;
 import org.utn.ba.tptacsg2.models.events.EstadoEvento;
 import org.utn.ba.tptacsg2.models.events.Evento;
-import org.utn.ba.tptacsg2.models.events.TipoEstadoEvento;
+import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.events.Ubicacion;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
 import org.utn.ba.tptacsg2.models.users.Usuario;
-import org.utn.ba.tptacsg2.repositories.EventoRepository;
-import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
-import org.utn.ba.tptacsg2.services.InscripcionService;
+import org.utn.ba.tptacsg2.repositories.db.EventoRepositoryDB;
+import org.utn.ba.tptacsg2.repositories.db.InscripcionRepositoryDB;
 
 import java.time.LocalDateTime;
 
@@ -29,9 +28,9 @@ public class TestE2EInscripcion {
     @Autowired
     InscripcionService inscripcionService;
     @Autowired
-    EventoRepository eventoRepository;
+    EventoRepositoryDB eventoRepository;
     @Autowired
-    InscripcionRepository inscripcionRepository;
+    InscripcionRepositoryDB inscripcionRepository;
 
 
     @BeforeEach
@@ -43,7 +42,7 @@ public class TestE2EInscripcion {
     void promueveWaitlist_alCancelarPrimeraInscripcion() {
         // 1) evento CONFIRMADO con cupo=1
         Evento evento = eventoConfirmado("EVT-1", 1);
-        eventoRepository.guardarEvento(evento);
+        eventoRepository.save(evento);
 
         // 2) se inscribe A -> ACEPTADA
         Inscripcion a = inscripcionService.inscribir(new SolicitudInscripcion(
@@ -63,11 +62,11 @@ public class TestE2EInscripcion {
         inscripcionService.cancelarInscripcion(a.id());
 
         // 5) B debe haberse promovido a ACEPTADA
-        Inscripcion bReload = inscripcionRepository.getInscripcionById(b.id()).orElseThrow();
+        Inscripcion bReload = inscripcionRepository.findById(b.id()).orElseThrow();
         assertEquals(TipoEstadoInscripcion.ACEPTADA, bReload.estado().getTipoEstado(), "B debería haberse promovido a ACEPTADA");
 
         // 6) la waitlist del evento debe quedar vacía
-        assertTrue(inscripcionRepository.getWailist(evento).isEmpty(), "La waitlist debería quedar vacía");
+        assertTrue(inscripcionRepository.findWaitlistByEventoOrderByFechaAsc(evento.id(), TipoEstadoInscripcion.PENDIENTE).isEmpty(), "La waitlist debería quedar vacía");
     }
 
 
