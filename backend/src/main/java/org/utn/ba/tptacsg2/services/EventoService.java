@@ -146,12 +146,8 @@ public class EventoService {
     }
 
     public List<Participante> getParticipantes(String eventoId){
-        List<Inscripcion> inscripciones = inscripcionRepository.findByEvento_Id(eventoId);
 
-        List<Participante> participantes = inscripciones.stream().filter(i -> i.estado().getTipoEstado() == TipoEstadoInscripcion.ACEPTADA)
-                .map(i->i.participante()).toList();
-
-        return participantes;
+        return inscripcionRepository.findParticipantesAceptadosPorEvento(eventoId);
     }
 
     public void cerrarEventosProximos() {

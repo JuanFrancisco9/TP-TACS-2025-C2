@@ -323,12 +323,11 @@ export class EventoService {
             apellido: '',
             dni: '',
           };
-
+      
       const body = {
         participante,
         evento_id: String(eventoId),
       };
-
       await this.api.post('/inscripciones', body);
       return true;
     } catch (error) {

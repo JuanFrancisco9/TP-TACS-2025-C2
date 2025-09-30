@@ -12,14 +12,12 @@ function UserLanding() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [currentUser] = useState(authService.getCurrentUser());
-    const [participanteId, setParticipanteId] = useState<string>(authService.getCurrentUser()?.id?.toString() || '');
+    const [participanteId, setParticipanteId] = useState<string>(authService.getActorId()?.toString() || '');
 
 
 
     const fetchInscripciones = async () => {
         try {
-
-            console.log(participanteId); 
 
             setLoading(true);
 

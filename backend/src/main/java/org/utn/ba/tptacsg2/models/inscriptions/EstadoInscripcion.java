@@ -10,12 +10,15 @@ import java.time.LocalDateTime;
 public class EstadoInscripcion {
 
     @Id
-    private final String id;
+    private String id;
     private TipoEstadoInscripcion tipoEstado;
     @DBRef
     @JsonBackReference
     private Inscripcion inscripcion;
     private LocalDateTime fechaDeCambio;
+
+    public EstadoInscripcion() {
+    }
 
     public EstadoInscripcion(String id, TipoEstadoInscripcion tipo, LocalDateTime fechaDeCambio) {
         this.id = id;

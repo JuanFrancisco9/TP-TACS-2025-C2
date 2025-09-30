@@ -3,6 +3,7 @@ package org.utn.ba.tptacsg2.repositories.db;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
+import org.utn.ba.tptacsg2.models.actors.Participante;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
 
@@ -12,7 +13,7 @@ import java.util.Optional;
 @Repository
 public interface InscripcionRepositoryDB extends MongoRepository<Inscripcion, String> {
 
-    List<Inscripcion> findByEvento_Id(String idEvento);
+    List<Inscripcion> findByEvento_Id(String eventoId);
 
     List<Inscripcion> findByParticipante_Id(String participanteId);
 
@@ -43,4 +44,15 @@ public interface InscripcionRepositoryDB extends MongoRepository<Inscripcion, St
     })
     Optional<Inscripcion> findFirstInWaitlistByEventoAndTipoEstado(String eventoId,
                                                                    TipoEstadoInscripcion tipo);
+
+    @Aggregation(pipeline = {
+            "{ $match: { 'evento.$id': ?0 } }",
+            "{ $lookup: { from: 'estadoinscripciones', localField: 'estado.$id', foreignField: '_id', as: 'estadoDoc' } }",
+            "{ $unwind: '$estadoDoc' }",
+            "{ $match: { 'estadoDoc.tipoEstado': 'ACEPTADA' } }",
+            "{ $lookup: { from: 'participantes', localField: 'participante.$id', foreignField: '_id', as: 'part' } }",
+            "{ $unwind: '$part' }",
+            "{ $replaceWith: '$part' }"
+    })
+    List<Participante> findParticipantesAceptadosPorEvento(String eventoId);
 }

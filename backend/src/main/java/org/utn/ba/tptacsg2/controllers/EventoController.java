@@ -60,7 +60,7 @@ public class EventoController {
         try {
             participantesDTO = eventoService.getParticipantes(eventoId).stream().map(p -> new ParticipanteDTO(p.nombre(),p.apellido(),p.dni())).toList();
         } catch(RuntimeException e){
-           throw new InscripcionNoEncontradaException("No se encontraron participante para el evento",e);
+           throw new InscripcionNoEncontradaException("No se encontraron participantes para el evento",e);
         }
         return ResponseEntity.status(HttpStatus.OK).body(participantesDTO);
     }
