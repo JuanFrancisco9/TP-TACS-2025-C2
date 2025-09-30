@@ -64,8 +64,8 @@ function UserLanding() {
         }
 
         // Actualizar participanteId cuando cambie el usuario
-        if (currentUser?.id) {
-            setParticipanteId(currentUser.id.toString());
+        if (currentUser?.actorId) {
+            setParticipanteId(currentUser.actorId.toString());
         }
     }, [currentUser, navigate]);
 
