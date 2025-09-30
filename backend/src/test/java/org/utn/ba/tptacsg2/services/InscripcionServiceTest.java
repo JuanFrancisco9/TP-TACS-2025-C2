@@ -11,6 +11,7 @@ import org.utn.ba.tptacsg2.dtos.SolicitudInscripcion;
 import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.dtos.output.Waitlist;
 import org.utn.ba.tptacsg2.exceptions.InscripcionNoEncontradaException;
+import org.utn.ba.tptacsg2.exceptions.InscripcionDuplicadaException;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.actors.Participante;
 import org.utn.ba.tptacsg2.models.events.*;
@@ -23,6 +24,7 @@ import org.utn.ba.tptacsg2.repositories.db.InscripcionRepositoryDB;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -80,6 +82,18 @@ public class InscripcionServiceTest {
     }
 
     @Test
+    void inscribirParticipanteYaInscripto_deberiaFallar() {
+        EstadoInscripcion estadoActual = new EstadoInscripcion("estado-aceptada", TipoEstadoInscripcion.ACEPTADA, LocalDateTime.now());
+        Inscripcion inscripcionExistente = new Inscripcion("insc-existente", participante, LocalDateTime.now(), estadoActual, evento);
+        when(inscripcionRepository.findByParticipante_Id(participante.id())).thenReturn(List.of(inscripcionExistente));
+
+        SolicitudInscripcion solicitud = new SolicitudInscripcion(participante, ID_EVENTO_VALIDO);
+
+        assertThrows(InscripcionDuplicadaException.class, () -> inscripcionService.inscribir(solicitud));
+        verify(inscripcionRepository, never()).save(any());
+    }
+
+    @Test
     void cancelarInscripcion_deberiaCancelarYLiberarCupoDeWaitlist() {
         // Arrange
         String inscripcionId = "insc-1";
@@ -106,8 +120,8 @@ public class InscripcionServiceTest {
 
         // Verifica que se haya actualizado el estado de la inscripción en waitlist a ACEPTADA
         ArgumentCaptor<Inscripcion> inscripcionActualizadaCaptor = ArgumentCaptor.forClass(Inscripcion.class);
-        verify(inscripcionRepository).save(inscripcionActualizadaCaptor.capture());
-        Inscripcion actualizada = inscripcionActualizadaCaptor.getValue();
+        verify(inscripcionRepository, times(2)).save(inscripcionActualizadaCaptor.capture());
+        Inscripcion actualizada = inscripcionActualizadaCaptor.getAllValues().get(1);
         assertEquals("waitlist-1", actualizada.id());
         assertEquals(TipoEstadoInscripcion.ACEPTADA, actualizada.estado().getTipoEstado());
 

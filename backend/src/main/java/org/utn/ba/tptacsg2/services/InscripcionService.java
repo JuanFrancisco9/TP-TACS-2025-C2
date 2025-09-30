@@ -6,20 +6,20 @@ import org.utn.ba.tptacsg2.dtos.output.Waitlist;
 import org.utn.ba.tptacsg2.exceptions.EventoNoEncontradoException;
 import org.utn.ba.tptacsg2.exceptions.EventoSinConfirmarException;
 import org.utn.ba.tptacsg2.exceptions.InscripcionNoEncontradaException;
+import org.utn.ba.tptacsg2.exceptions.InscripcionDuplicadaException;
 import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.inscriptions.EstadoInscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.dtos.SolicitudInscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
-import org.utn.ba.tptacsg2.repositories.EstadoInscripcionRepository;
-import org.utn.ba.tptacsg2.repositories.EventoRepository;
-import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
 import org.utn.ba.tptacsg2.repositories.db.EstadoInscripcionRepositoryDB;
 import org.utn.ba.tptacsg2.repositories.db.EventoRepositoryDB;
 import org.utn.ba.tptacsg2.repositories.db.InscripcionRepositoryDB;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -56,6 +56,7 @@ public class InscripcionService {
             ReentrantLock lock = eventoLockService.getLock(evento.id());
             try {
                 lock.lock();
+                this.validarParticipanteNoInscripto(solicitud, evento);
                 if (eventoService.cuposDisponibles(evento) <= 0) {
                     Inscripcion inscripcionPendiente = this.waitlistService.inscribirAWaitlist(solicitud);
                     this.inscripcionRepository.save(inscripcionPendiente);
@@ -121,6 +122,40 @@ public class InscripcionService {
         this.moverInscripcionEnWaitlistAConfirmada(inscripcion.evento());
 
         return inscripcionCancelada;
+    }
+
+    private void validarParticipanteNoInscripto(SolicitudInscripcion solicitud, Evento evento) {
+        if (solicitud.participante() == null || solicitud.participante().id() == null) {
+            return;
+        }
+        List<Inscripcion> inscripcionesDelParticipante = Optional.ofNullable(this.inscripcionRepository.findByParticipante_Id(solicitud.participante().id()))
+                .orElseGet(Collections::emptyList);
+
+        boolean yaInscripto = inscripcionesDelParticipante.stream()
+                .filter(inscripcion -> inscripcion.evento() != null && evento.id().equals(inscripcion.evento().id()))
+                .anyMatch(inscripcion -> inscripcion.estado() != null && inscripcion.estado().getTipoEstado() != TipoEstadoInscripcion.CANCELADA);
+        if (yaInscripto) {
+            String participanteDescripcion = Optional.ofNullable(solicitud.participante())
+                    .map(participante -> {
+                        if (participante.usuario() != null && participante.usuario().username() != null && !participante.usuario().username().isBlank()) {
+                            return participante.usuario().username();
+                        }
+                        String nombre = participante.nombre() != null ? participante.nombre().trim() : "";
+                        String apellido = participante.apellido() != null ? participante.apellido().trim() : "";
+                        String nombreCompleto = (nombre + " " + apellido).trim();
+                        if (!nombreCompleto.isBlank()) {
+                            return nombreCompleto;
+                        }
+                        return Optional.ofNullable(participante.id()).orElse("desconocido");
+                    })
+                    .orElse("desconocido");
+
+            String eventoDescripcion = Optional.ofNullable(evento.titulo())
+                    .filter(titulo -> !titulo.isBlank())
+                    .orElse(Optional.ofNullable(evento.id()).orElse("desconocido"));
+
+            throw new InscripcionDuplicadaException("El participante " + participanteDescripcion + " ya se encuentra inscripto en el evento " + eventoDescripcion);
+        }
     }
 
     private void moverInscripcionEnWaitlistAConfirmada(Evento evento) {

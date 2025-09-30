@@ -54,8 +54,11 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
     try {
       await EventoService.inscribirseAEvento(evento.id);
       setSnackbarMsg(`Inscripción confirmada a: ${evento.titulo}`);
-    } catch (e) {
-      setSnackbarMsg('Error al inscribirse. Intenta nuevamente.');
+    } catch (error) {
+      const message = error instanceof Error && error.message
+        ? error.message
+        : 'Error al inscribirse. Intenta nuevamente.';
+      setSnackbarMsg(message);
     }
     setShowSnackbar(true);
     setShowDialog(false);

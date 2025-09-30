@@ -123,17 +123,6 @@ function UserLanding() {
                                 </>
                             )}
                         </button>
-
-                        <button
-                            className="btn btn-outline-danger px-3 py-2"
-                            onClick={() => {
-                                authService.logout();
-                                navigate('/login');
-                            }}
-                            style={{ borderRadius: '12px' }}
-                        >
-                            🚪 Salir
-                        </button>
                     </div>
                 </div>
 
