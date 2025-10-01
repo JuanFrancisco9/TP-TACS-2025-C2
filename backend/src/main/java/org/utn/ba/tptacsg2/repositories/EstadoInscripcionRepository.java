@@ -1,32 +1,28 @@
 package org.utn.ba.tptacsg2.repositories;
 
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.utn.ba.tptacsg2.models.inscriptions.EstadoInscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
+import org.utn.ba.tptacsg2.repositories.db.EstadoInscripcionRepositoryDB;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Repository
 public class EstadoInscripcionRepository {
-    private final List<EstadoInscripcion> estadosDeInscripcion = new ArrayList<>();
+    private final EstadoInscripcionRepositoryDB repository;
+
+    @Autowired
+    public EstadoInscripcionRepository(EstadoInscripcionRepositoryDB repository) {
+        this.repository = repository;
+    }
 
     public void guardarEstadoInscripcion(EstadoInscripcion estadoInscripcion) {
-        this.estadosDeInscripcion.add(estadoInscripcion);
+        repository.save(estadoInscripcion);
     }
 
     public EstadoInscripcion getEstadoInscripcionById(String id) {
-        return this.estadosDeInscripcion.stream()
-                .filter(estado -> estado.getId().equals(id))
-                .findFirst()
-                .orElse(null);
-    }
-
-    @PostConstruct
-    public void init() {
-       guardarEstadoInscripcion(new EstadoInscripcion("1", TipoEstadoInscripcion.ACEPTADA, null, LocalDateTime.now()));
-       guardarEstadoInscripcion(new EstadoInscripcion("2", TipoEstadoInscripcion.PENDIENTE, null, LocalDateTime.now()));
+        return repository.findById(id).orElse(null);
     }
 }
