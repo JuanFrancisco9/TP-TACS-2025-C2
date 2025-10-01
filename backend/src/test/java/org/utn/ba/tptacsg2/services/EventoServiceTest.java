@@ -172,7 +172,7 @@ public class EventoServiceTest {
         ResultadoBusquedaEvento resultado = eventoService.buscarEventos(filtros);
 
         assertEquals(1, resultado.totalElementos());
-        assertEquals("MUSICA", resultado.eventos().get(0).categoria().getTipo());
+        assertEquals("MUSICA", resultado.eventos().get(0).categoria().tipo());
     }
 
     @Test

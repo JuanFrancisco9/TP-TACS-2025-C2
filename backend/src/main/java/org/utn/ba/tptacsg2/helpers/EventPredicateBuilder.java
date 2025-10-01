@@ -39,7 +39,7 @@ public class EventPredicateBuilder {
 
     public EventPredicateBuilder conCategoria(String categoria) {
         if(categoria != null && !categoria.isEmpty()) {
-            predicados.add(evento -> evento.categoria() != null && evento.categoria().getTipo().equalsIgnoreCase(categoria));
+            predicados.add(evento -> evento.categoria() != null && evento.categoria().tipo().equalsIgnoreCase(categoria));
         }
 
         return this;
