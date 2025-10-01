@@ -11,25 +11,24 @@ import java.util.List;
 
 @Repository
 public class CategoriaRepository {
-    private final CategoriaRepositoryDB categoriaDB;
+    private final CategoriaRepositoryDB repository;
 
     @Autowired
-    public CategoriaRepository(CategoriaRepositoryDB categoriaRepositoryDB) {
-        this.categoriaDB = categoriaRepositoryDB;
+    public CategoriaRepository(CategoriaRepositoryDB repository) {
+        this.repository= repository;
     }
 
     public List<Categoria> getCategorias() {
-        return categoriaDB.findAll();
+        return repository.findAll();
     }
 
     public void guardarCategoria(Categoria categoria){
         if(!this.existeCategoria(categoria))
-            categoriaDB.save(new Categoria(categoria.tipo().toLowerCase()));
+            repository.save(new Categoria(categoria.tipo().toLowerCase()));
     }
 
     private boolean existeCategoria(Categoria categoria){
-        return categoriaDB.existsByTipoIsIgnoreCase(categoria.tipo().toLowerCase());
-        //return this.getCategorias().stream().map(c -> c.tipo().toLowerCase()).toList().contains(categoria.tipo().toLowerCase());
+        return repository.existsByTipoIsIgnoreCase(categoria.tipo().toLowerCase());
     }
 
     @PostConstruct
