@@ -15,7 +15,7 @@ import java.util.List;
 
 @Repository
 public class EstadoEventoRepository {
-    private EstadoEventoRepositoryDB repository;
+    private final EstadoEventoRepositoryDB repository;
 
     @Autowired
     public EstadoEventoRepository (EstadoEventoRepositoryDB repository) {
