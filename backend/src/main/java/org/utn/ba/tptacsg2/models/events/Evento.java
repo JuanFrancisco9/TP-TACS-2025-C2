@@ -25,7 +25,6 @@ public record Evento (
      @DBRef
      Organizador organizador,
      @JsonManagedReference
-     @DBRef
      EstadoEvento estado,
      Categoria categoria,
      List<String> etiquetas

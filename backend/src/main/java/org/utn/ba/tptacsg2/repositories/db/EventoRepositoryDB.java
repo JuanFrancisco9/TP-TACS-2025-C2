@@ -7,7 +7,5 @@ import org.utn.ba.tptacsg2.models.events.Evento;
 import java.util.List;
 
 public interface EventoRepositoryDB extends MongoRepository<Evento, String> {
-    List<Evento> findByOrganizador_Id(String idOrganizador);
-
     List<Evento> findByOrganizador(Organizador organizador);
 }
