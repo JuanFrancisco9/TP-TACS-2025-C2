@@ -1,10 +1,13 @@
 package org.utn.ba.tptacsg2.repositories;
 
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.users.Rol;
 import org.utn.ba.tptacsg2.models.users.Usuario;
+import org.utn.ba.tptacsg2.repositories.db.OrganizadorRepositoryDB;
+import org.utn.ba.tptacsg2.repositories.db.UsuarioRepositoryDB;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,26 +15,33 @@ import java.util.Optional;
 
 @Repository
 public class OrganizadorRepository {
-    private final List<Organizador> organizadores = new ArrayList<>();
+    private final OrganizadorRepositoryDB organizadorDB;
+    private final UsuarioRepositoryDB usuarioDB;
+
+    @Autowired
+    public OrganizadorRepository(OrganizadorRepositoryDB repository,  UsuarioRepositoryDB usuarioDB) {
+        this.organizadorDB = repository;
+        this.usuarioDB = usuarioDB;
+    }
 
     public List<Organizador> getOrganizadores() {
-        return organizadores;
+        return organizadorDB.findAll();
     }
 
     public void guardarOrganizadro(Organizador organizador) {
-        organizadores.add(organizador);
+        organizadorDB.save(organizador);
     }
 
     public Optional<Organizador> getOrganizador(String id) {
-        return this.organizadores.stream()
-                .filter(o -> o.id().equals(id))
-                .findFirst();
+        return organizadorDB.findById(id);
     }
 
     public Optional<Organizador> getOrganizadorPorUsuarioId(String idUsuario) {
-        return this.organizadores.stream()
-                .filter(o -> o.usuario() != null && o.usuario().id().equals(idUsuario))
-                .findFirst();
+        Usuario usuario = usuarioDB.findById(idUsuario).orElse(null);
+        if (usuario == null)
+            return Optional.empty();
+
+        return organizadorDB.findByUsuario(usuario);
     }
 
     @PostConstruct

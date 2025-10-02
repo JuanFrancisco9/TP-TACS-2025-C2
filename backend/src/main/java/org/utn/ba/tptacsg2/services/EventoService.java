@@ -188,4 +188,8 @@ public class EventoService {
 
         return new ResultadoBusquedaEvento(eventosFiltradosYPaginados, filtros.nroPagina() + 1, totalElementos, totalPaginas);
     }
+
+    public List<Evento> getEventos(){
+        return eventoRepository.getEventos();
+    }
 }
