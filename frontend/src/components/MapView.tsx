@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -17,32 +17,31 @@ type Props = {
 };
 
 const MapView: React.FC<Props> = ({ center, zoom = 12, points = [], style }) => {
-  const onCreated = useCallback(
-    (map: L.Map) => {
-      console.debug('[MapView] Map created', { center, zoom, pointsCount: points.length });
+  const mapRef = useRef<L.Map | null>(null);
 
-      // Forzar redibujado inicial
-      setTimeout(() => {
-        map.invalidateSize();
-      }, 0);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) {
+      return;
+    }
 
-      map.on('tileerror', (e) => {
-        console.error('[MapView] Tile load error', e);
-      });
-      map.on('load', () => {
-        console.debug('[MapView] Map load complete');
-      });
+    console.debug('[MapView] Map ready', { center, zoom, pointsCount: points.length });
 
-      // recalcular tamaño en cada resize de ventana
-      const handleResize = () => map.invalidateSize();
-      window.addEventListener('resize', handleResize);
+    const refreshSize = () => map.invalidateSize();
+    const handleTileError = (e: L.LeafletEvent) => console.error('[MapView] Tile load error', e);
+    const handleLoad = () => console.debug('[MapView] Map load complete');
 
-      return () => {
-        window.removeEventListener('resize', handleResize);
-      };
-    },
-    [center, zoom, points.length]
-  );
+    setTimeout(refreshSize, 0);
+    map.on('tileerror', handleTileError);
+    map.on('load', handleLoad);
+    window.addEventListener('resize', refreshSize);
+
+    return () => {
+      map.off('tileerror', handleTileError);
+      map.off('load', handleLoad);
+      window.removeEventListener('resize', refreshSize);
+    };
+  }, [center, zoom, points.length]);
 
   return (
     <div
@@ -54,7 +53,7 @@ const MapView: React.FC<Props> = ({ center, zoom = 12, points = [], style }) => 
       }}
     >
       <MapContainer
-        whenCreated={onCreated}
+        ref={mapRef}
         center={center}
         zoom={zoom}
         style={{ flex: 1 }} // 👈 se adapta al padre

@@ -25,7 +25,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
-import type { Evento } from '../services/eventoService';
+import type { Evento } from '../types/evento.ts';
 import { formatFecha } from '../utils/formatFecha';
 
 interface DetallesEventoProps {
@@ -46,6 +46,7 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
   const [showSnackbar, setShowSnackbar] = React.useState(false);
   const [snackbarMsg, setSnackbarMsg] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+  const imageSrc = evento.imagenUrl ?? evento.imagen ?? `https://picsum.photos/seed/${encodeURIComponent(evento.id)}/1200/600`;
 
   const handleInscribirse = () => (onInscribirse ? onInscribirse() : setShowDialog(true));
 
@@ -94,11 +95,11 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
       <Grid container spacing={3}>
         {/* Imagen principal */}
         <Grid size={{ xs: 12, lg: 6 }}>
-          {evento.imagen && (
+          {imageSrc && (
             <Card>
               <CardMedia
                 component="img"
-                image={evento.imagen}
+                image={imageSrc}
                 alt={evento.titulo}
                 sx={{ height: 400, objectFit: 'cover' }}
               />
@@ -223,8 +224,8 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
                   </Typography>
                 </Stack>
                 <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-                  {evento.etiquetas.map((etiqueta, i) => (
-                    <Chip key={`${etiqueta}-${i}`} label={etiqueta} variant="outlined" />
+                  {evento.etiquetas?.map((etiqueta: string, index: number) => (
+                    <Chip key={`${etiqueta}-${index}`} label={etiqueta} variant="outlined" />
                   ))}
                 </Stack>
               </CardContent>

@@ -44,6 +44,8 @@ public class EventoServiceTest {
     private GeneradorIDService generadorIDService;
     @Mock
     private CategoriaService categoriaService;
+    @Mock
+    private R2StorageService r2StorageService;
 
     @InjectMocks
     private EventoService eventoService;
@@ -75,7 +77,7 @@ public class EventoServiceTest {
                 new Precio("ARS", 5000f),
                 null,
                 new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.of(2025, 9, 1, 12, 0))
-                , null, new ArrayList<>());
+                , null, new ArrayList<>(), null);
 
         solicitudEvento = new SolicitudEvento(idOrganizadorMock,
                 "Fiesta UTN",
@@ -94,8 +96,8 @@ public class EventoServiceTest {
         Categoria categoria1 = new Categoria("MUSICA");
         Categoria categoria2 = new Categoria("TECNOLOGIA");
 
-        eventoValido1 = new Evento("E1", "Concierto de rock vivo", "Musica", LocalDateTime.of(2025, 9, 10, 20, 0), "20:00", 2f, new Ubicacion("", "", "La Plata", "CABA"), 100, 0, new Precio("ARS", 1000f), organizadorMock, new EstadoEvento("2", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria1, new ArrayList<>());
-        eventoValido2 = new Evento("E2", "Charla", "Tecnologia", LocalDateTime.of(2025, 10, 10, 18, 0), "18:00", 1.5f, new Ubicacion("", "", "CABA", "CABA"), 50, 0, new Precio("ARS", 500f), organizadorMock, new EstadoEvento("3", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria2, new ArrayList<>());
+        eventoValido1 = new Evento("E1", "Concierto de rock vivo", "Musica", LocalDateTime.of(2025, 9, 10, 20, 0), "20:00", 2f, new Ubicacion("", "", "La Plata", "CABA"), 100, 0, new Precio("ARS", 1000f), organizadorMock, new EstadoEvento("2", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria1, new ArrayList<>(), null);
+        eventoValido2 = new Evento("E2", "Charla", "Tecnologia", LocalDateTime.of(2025, 10, 10, 18, 0), "18:00", 1.5f, new Ubicacion("", "", "CABA", "CABA"), 50, 0, new Precio("ARS", 500f), organizadorMock, new EstadoEvento("3", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria2, new ArrayList<>(), null);
 
         lenient().when(eventoRepository.getEventos()).thenReturn(Arrays.asList(eventoValido1, eventoValido2));
 
@@ -160,8 +162,8 @@ public class EventoServiceTest {
         ResultadoBusquedaEvento resultado = eventoService.buscarEventos(filtros);
 
         assertEquals(2, resultado.totalElementos());
-        assertTrue(resultado.eventos().contains(eventoValido1));
-        assertTrue(resultado.eventos().contains(eventoValido2));
+        assertTrue(resultado.eventos().stream().anyMatch(e -> e.id().equals(eventoValido1.id())));
+        assertTrue(resultado.eventos().stream().anyMatch(e -> e.id().equals(eventoValido2.id())));
     }
 
     @Test
@@ -244,7 +246,8 @@ public class EventoServiceTest {
                 organizadorMock,
                 new EstadoEvento("4", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
                 new Categoria("TEST"),
-                new ArrayList<>()
+                new ArrayList<>(),
+                null
         );
 
         Evento eventoLejano = new Evento(
@@ -261,7 +264,8 @@ public class EventoServiceTest {
                 organizadorMock,
                 new EstadoEvento("5", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
                 new Categoria("TEST"),
-                new ArrayList<>()
+                new ArrayList<>(),
+                null
         );
 
         List<Evento> eventos = Arrays.asList(eventoProximo, eventoLejano);
@@ -298,7 +302,8 @@ public class EventoServiceTest {
                 organizadorMock,
                 new EstadoEvento("6", TipoEstadoEvento.NO_ACEPTA_INSCRIPCIONES, LocalDateTime.now()),
                 new Categoria("TEST"),
-                new ArrayList<>()
+                new ArrayList<>(),
+                null
         );
 
         when(eventoRepository.getEventos()).thenReturn(Arrays.asList(eventoCerrado));
@@ -327,7 +332,8 @@ public class EventoServiceTest {
                 organizadorMock,
                 new EstadoEvento("7", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
                 new Categoria("TEST"),
-                new ArrayList<>()
+                new ArrayList<>(),
+                null
         );
 
         when(eventoRepository.getEventos()).thenReturn(Arrays.asList(eventoHoy));

@@ -17,7 +17,8 @@ import MapView from '../components/MapView';
 import EventCard from '../components/EventCard';
 import DetallesEvento from '../components/EventDetails';
 import { useLocation } from 'react-router-dom';
-import { EventoService, type Evento } from '../services/eventoService';
+import { EventoService } from '../services/eventoService';
+import type { Evento } from '../types/evento.ts';
 
 
 // Helper para convertir eventos -> puntos del mapa
@@ -57,11 +58,7 @@ const EventOverview: React.FC = () => {
     EventoService
       .buscarEventos(palabrasClave, pagina, ubicacion)
       .then((res) => {
-        const withImages = res.eventos.map((ev) => ({
-          ...ev,
-          imagen: ev.imagen || `https://picsum.photos/seed/${encodeURIComponent(ev.id)}/800/400`,
-        }));
-        setEventos(withImages);
+        setEventos(res.eventos);
       })
       .catch(() => setEventos([]))
       .finally(() => setLoading(false));
@@ -99,11 +96,7 @@ const EventOverview: React.FC = () => {
     EventoService
       .buscarEventosConFiltros({ palabrasClave, ubicacion, categoria, pagina })
       .then((res) => {
-        const withImages = res.eventos.map((ev) => ({
-          ...ev,
-          imagen: ev.imagen || `https://picsum.photos/seed/${encodeURIComponent(ev.id)}/800/400`,
-        }));
-        setEventos(withImages);
+        setEventos(res.eventos);
       })
       .catch(() => setEventos([]))
       .finally(() => setLoading(false));

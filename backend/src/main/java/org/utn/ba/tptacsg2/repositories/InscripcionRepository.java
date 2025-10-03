@@ -89,7 +89,7 @@ public class InscripcionRepository {
         Evento evento = new Evento("0", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
                 "19:00", 5F, new Ubicacion("", "", "", ""), 10,0,
                 new Precio("Pesos", 100F), organizador,
-                new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), new Categoria("Educativo"), new ArrayList<>());
+                new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), new Categoria("Educativo"), new ArrayList<String>(), null);
 
         EstadoInscripcion estadoAceptada = estadoInscripcionRepository.getEstadoInscripcionById("1");
         EstadoInscripcion estadoPendiente = estadoInscripcionRepository.getEstadoInscripcionById("2");

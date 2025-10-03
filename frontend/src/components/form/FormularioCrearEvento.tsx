@@ -82,10 +82,16 @@ export default function FormularioCrearEvento() {
     const [categoriaTipo, setCategoriaTipo] = React.useState("");
 
     const [etiquetasCSV, setEtiquetasCSV] = React.useState("");
+    const [imagen, setImagen] = React.useState<File | null>(null);
 
     const [submitting, setSubmitting] = React.useState(false);
     const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
     const [successMsg, setSuccessMsg] = React.useState<string | null>(null);
+
+    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        setImagen(file ?? null);
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -135,10 +141,20 @@ export default function FormularioCrearEvento() {
         try {
             setSubmitting(true);
 
+            const formData = new FormData();
+            formData.append(
+                "evento",
+                new Blob([JSON.stringify(payload)], { type: "application/json" })
+            );
+
+            if (imagen) {
+                formData.append("imagen", imagen);
+            }
+
             const res = await fetch(`${API_BASE_URL}/eventos`, {
                 method: "POST",
-                headers: authService.getAuthHeaders(),
-                body: JSON.stringify(payload),
+                headers: authService.getAuthHeaders({ contentType: null }),
+                body: formData,
             });
 
             if (!res.ok) {
@@ -169,6 +185,7 @@ export default function FormularioCrearEvento() {
             setEstado("PENDIENTE");
             setCategoriaTipo("");
             setEtiquetasCSV("");
+            setImagen(null);
         } catch (err: any) {
             setErrorMsg(err?.message ?? "No se pudo conectar con el servidor.");
         } finally {
@@ -378,6 +395,27 @@ export default function FormularioCrearEvento() {
                         fullWidth
                         disabled={submitting}
                     />
+                </Grid>
+
+                <Grid size={{xs:12}}>
+                    <Button
+                        variant="outlined"
+                        component="label"
+                        disabled={submitting}
+                    >
+                        {imagen ? "Cambiar imagen" : "Subir imagen"}
+                        <input
+                            type="file"
+                            accept="image/*"
+                            hidden
+                            onChange={handleImageChange}
+                        />
+                    </Button>
+                    {imagen && (
+                        <Typography variant="body2" sx={{ mt: 1 }}>
+                            {imagen.name}
+                        </Typography>
+                    )}
                 </Grid>
             </Grid>
 

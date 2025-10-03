@@ -24,7 +24,9 @@ export interface Evento {
     cupoMaximo: number;
     precio: Precio;
     etiquetas: string[];
-    imagen: string;
+    imagen?: string;
+    imagenUrl?: string;
+    imagenKey?: string;
 }
 
 export interface Precio {

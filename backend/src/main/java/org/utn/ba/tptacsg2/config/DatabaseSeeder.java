@@ -115,7 +115,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                 organizador, // 👈 organizador tiene ID gracias a la Corrección 1
                 estadoEvento, // 👈 estadoEvento tiene ID
                 categoria,
-                Arrays.asList("Java", "Spring", "Microservicios")
+                Arrays.asList("Java", "Spring", "Microservicios"),
+                null
         );
 
         // ✅ CORRECCIÓN 3: Capturar el ID de Evento. (Esto ya lo tenías bien)

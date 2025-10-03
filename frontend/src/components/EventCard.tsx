@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
-import type { Evento } from '../services/eventoService';
+import type { Evento } from '../types/evento.ts';
 
 
 interface EventCardProps {
@@ -26,6 +26,7 @@ const EventCard: React.FC<EventCardProps> = ({ item, onVerDetalle }) => {
   const [showSnackbar, setShowSnackbar] = React.useState(false);
   const [snackbarMsg, setSnackbarMsg] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+  const imageSrc = item.imagenUrl ?? item.imagen ?? `https://picsum.photos/seed/${encodeURIComponent(item.id)}/800/400`;
 
   const handleInscribirme = () => setShowDialog(true);
 
@@ -60,7 +61,7 @@ const EventCard: React.FC<EventCardProps> = ({ item, onVerDetalle }) => {
       >
         <Box
           component="img"
-          src={item.imagen}
+          src={imageSrc}
           alt={item.titulo}
           sx={{ width: '100%', height: 160, objectFit: 'cover', transition: 'filter 0.3s', cursor: 'pointer', ':hover': { filter: 'brightness(0.95)' } }}
           onError={(e: any) => { e.currentTarget.src = `/logo.PNG`; }}
@@ -71,8 +72,8 @@ const EventCard: React.FC<EventCardProps> = ({ item, onVerDetalle }) => {
         />
         <Box sx={{ p: 1.5 }}>
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
-            {item.etiquetas?.map((b) => (
-              <Chip key={b} size="small" color="error" label={b} />
+            {item.etiquetas?.map((etiqueta: string) => (
+              <Chip key={etiqueta} size="small" color="error" label={etiqueta} />
             ))}
           </Stack>
           <Typography
