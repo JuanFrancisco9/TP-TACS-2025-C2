@@ -4,14 +4,15 @@ import org.springframework.stereotype.Service;
 import org.utn.ba.tptacsg2.dtos.EstadisticasUsoDTO;
 import org.utn.ba.tptacsg2.enums.TipoEstadistica;
 import org.utn.ba.tptacsg2.models.events.Evento;
-import org.utn.ba.tptacsg2.models.events.TipoEstadoEvento;
+import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
 import org.utn.ba.tptacsg2.repositories.EventoRepository;
 import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
+import org.utn.ba.tptacsg2.repositories.db.EventoRepositoryDB;
+import org.utn.ba.tptacsg2.repositories.db.InscripcionRepositoryDB;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,10 +21,10 @@ import java.util.stream.Collectors;
 @Service
 public class EstadisticasService {
 
-    private final EventoRepository eventoRepository;
-    private final InscripcionRepository inscripcionRepository;
+    private final EventoRepositoryDB eventoRepository;
+    private final InscripcionRepositoryDB inscripcionRepository;
 
-    public EstadisticasService(EventoRepository eventoRepository, InscripcionRepository inscripcionRepository) {
+    public EstadisticasService(EventoRepositoryDB eventoRepository, InscripcionRepositoryDB inscripcionRepository) {
         this.eventoRepository = eventoRepository;
         this.inscripcionRepository = inscripcionRepository;
     }
@@ -85,32 +86,32 @@ public class EstadisticasService {
     }
 
     public Integer obtenerCantidadEventos(LocalDate fechaDesde, LocalDate fechaHasta) {
-        List<Evento> eventos = eventoRepository.getEventos();
+        List<Evento> eventos = eventoRepository.findAll();
         return filtrarEventosPorFecha(eventos, fechaDesde, fechaHasta).size();
     }
 
 
     public Integer obtenerCantidadEventosActivos(LocalDate fechaDesde, LocalDate fechaHasta) {
-        List<Evento> eventos = eventoRepository.getEventos();
+        List<Evento> eventos = eventoRepository.findAll();
         return filtrarEventosPorFecha(eventos, fechaDesde, fechaHasta).stream()
                 .filter(evento -> evento.estado().getTipoEstado() == TipoEstadoEvento.CONFIRMADO)
                 .toList().size();
     }
 
     public Integer obtenerCantidadInscripcionesTotales(LocalDate fechaDesde, LocalDate fechaHasta) {
-        List<Inscripcion> inscripciones = inscripcionRepository.getInscripciones();
+        List<Inscripcion> inscripciones = inscripcionRepository.findAll();
         return filtrarInscripcionesPorFecha(inscripciones, fechaDesde, fechaHasta).size();
     }
 
     public Integer obtenerCantidadInscripcionesConfirmadas(LocalDate fechaDesde, LocalDate fechaHasta) {
-        List<Inscripcion> inscripciones = inscripcionRepository.getInscripciones();
+        List<Inscripcion> inscripciones = inscripcionRepository.findAll();
         return filtrarInscripcionesPorFecha(inscripciones, fechaDesde, fechaHasta).stream()
                 .filter(inscripcion -> inscripcion.estado().getTipoEstado() == TipoEstadoInscripcion.ACEPTADA)
                 .toList().size();
     }
 
     public Integer obtenerCantidadInscripcionesWaitlist(LocalDate fechaDesde, LocalDate fechaHasta) {
-        List<Inscripcion> inscripciones = inscripcionRepository.getInscripciones();
+        List<Inscripcion> inscripciones = inscripcionRepository.findAll();
         return filtrarInscripcionesPorFecha(inscripciones, fechaDesde, fechaHasta).stream()
                 .filter(inscripcion -> inscripcion.estado().getTipoEstado() == TipoEstadoInscripcion.PENDIENTE)
                 .toList().size();
@@ -123,8 +124,8 @@ public class EstadisticasService {
     }
 
     public String obtenerEventoMasPopular(LocalDate fechaDesde, LocalDate fechaHasta) {
-        List<Evento> eventos = eventoRepository.getEventos();
-        List<Inscripcion> inscripciones = inscripcionRepository.getInscripciones();
+        List<Evento> eventos = eventoRepository.findAll();
+        List<Inscripcion> inscripciones = inscripcionRepository.findAll();
         
         List<Evento> eventosFiltrados = filtrarEventosPorFecha(eventos, fechaDesde, fechaHasta);
         List<Inscripcion> inscripcionesFiltradas = filtrarInscripcionesPorFecha(inscripciones, fechaDesde, fechaHasta);

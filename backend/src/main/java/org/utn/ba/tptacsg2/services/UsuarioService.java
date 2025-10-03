@@ -12,19 +12,22 @@ import org.utn.ba.tptacsg2.models.users.Usuario;
 import org.utn.ba.tptacsg2.repositories.OrganizadorRepository;
 import org.utn.ba.tptacsg2.repositories.ParticipanteRepository;
 import org.utn.ba.tptacsg2.repositories.UsuarioRepository;
+import org.utn.ba.tptacsg2.repositories.db.OrganizadorRepositoryDB;
+import org.utn.ba.tptacsg2.repositories.db.ParticipanteRepositoryDB;
+import org.utn.ba.tptacsg2.repositories.db.UsuarioRepositoryDB;
 
 import java.util.List;
 
 @Service
 public class UsuarioService {
-    private UsuarioRepository usuarioRepository;
+    private UsuarioRepositoryDB usuarioRepository;
     private PasswordEncoder passwordEncoder;
-    private ParticipanteRepository participanteRepository;
-    private OrganizadorRepository organizadorRepository;
+    private ParticipanteRepositoryDB participanteRepository;
+    private OrganizadorRepositoryDB organizadorRepository;
     private GeneradorIDService generadorIDService;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder,
-                          ParticipanteRepository participanteRepository, OrganizadorRepository organizadorRepository,
+    public UsuarioService(UsuarioRepositoryDB usuarioRepository, PasswordEncoder passwordEncoder,
+                          ParticipanteRepositoryDB participanteRepository, OrganizadorRepositoryDB organizadorRepository,
                           GeneradorIDService generadorIDService) {
         this.participanteRepository = participanteRepository;
         this.organizadorRepository = organizadorRepository;
@@ -87,13 +90,13 @@ public class UsuarioService {
         String actorId = null;
         switch (user.rol()) {
             case ROLE_ORGANIZER -> {
-                Organizador organizador = organizadorRepository.getOrganizadorPorUsuarioId(user.id()).orElse(null);
+                Organizador organizador = organizadorRepository.findOneByUsuario_Id(user.id()).orElse(null);
                 if (organizador != null) {
                     actorId = organizador.id();
                 }
             }
             case ROLE_USER -> {
-                Participante participante = participanteRepository.getParticipantePorUsuarioId(user.id()).orElse(null);
+                Participante participante = participanteRepository.findOneByUsuario_Id(user.id()).orElse(null);
                 if (participante != null) {
                     actorId = participante.id();
                 }
@@ -111,7 +114,7 @@ public class UsuarioService {
                 usuarioDto.getDni(),
                 usuario
         );
-        participanteRepository.guardarParticipante(participante);
+        participanteRepository.save(participante);
     }
 
     private void crearOrganizador(Usuario usuario, InputRegistroDto usuarioDto) {
@@ -122,6 +125,6 @@ public class UsuarioService {
                 usuarioDto.getDni(),
                 usuario
         );
-        organizadorRepository.guardarOrganizadro(organizador);
+        organizadorRepository.save(organizador);
     }
 }

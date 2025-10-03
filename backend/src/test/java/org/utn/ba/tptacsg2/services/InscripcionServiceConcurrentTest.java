@@ -6,12 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.utn.ba.tptacsg2.dtos.SolicitudInscripcion;
+import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.actors.Participante;
 import org.utn.ba.tptacsg2.models.events.*;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
-import org.utn.ba.tptacsg2.repositories.EventoRepository;
-import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
+import org.utn.ba.tptacsg2.repositories.db.EventoRepositoryDB;
+import org.utn.ba.tptacsg2.repositories.db.InscripcionRepositoryDB;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -29,9 +30,9 @@ class InscripcionServiceConcurrentTest {
     @Autowired
     InscripcionService inscripcionService;
     @Autowired
-    EventoRepository eventoRepository;
+    EventoRepositoryDB eventoRepository;
     @Autowired
-    InscripcionRepository inscripcionRepository;
+    InscripcionRepositoryDB inscripcionRepository;
 
     private Evento eventoCon1Cupo;
     private final String ID_EVENTO_1_CUPO = "EVENTO_1_CUPO";
@@ -59,7 +60,7 @@ class InscripcionServiceConcurrentTest {
     @RepeatedTest(10)
     void sobreInscripcion_oErroresConcurrencia_conCupoUno() throws Exception {
 
-        eventoRepository.guardarEvento(eventoCon1Cupo);
+        eventoRepository.save(eventoCon1Cupo);
 
         int threads = Math.max(32, Runtime.getRuntime().availableProcessors() * 4);
         ExecutorService pool = Executors.newFixedThreadPool(threads);
@@ -86,10 +87,10 @@ class InscripcionServiceConcurrentTest {
         pool.shutdownNow();
 
 
-        var aceptadas = inscripcionRepository.getInscripcionesAEvento(eventoCon1Cupo).stream()
+        var aceptadas = inscripcionRepository.findByEvento_Id(eventoCon1Cupo.id()).stream()
                 .filter(i -> i.estado().getTipoEstado() == TipoEstadoInscripcion.ACEPTADA)
                 .count();
-        var enWaitlist = inscripcionRepository.getInscripcionesAEvento(eventoCon1Cupo).stream()
+        var enWaitlist = inscripcionRepository.findByEvento_Id(eventoCon1Cupo.id()).stream()
                 .filter(i -> i.estado().getTipoEstado() == TipoEstadoInscripcion.PENDIENTE)
                 .count();
 

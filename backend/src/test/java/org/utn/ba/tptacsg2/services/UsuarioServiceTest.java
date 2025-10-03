@@ -14,9 +14,9 @@ import org.utn.ba.tptacsg2.dtos.InputRegistroDto;
 import org.utn.ba.tptacsg2.dtos.LoginResponseDto;
 import org.utn.ba.tptacsg2.models.users.Usuario;
 import org.utn.ba.tptacsg2.models.users.Rol;
-import org.utn.ba.tptacsg2.repositories.OrganizadorRepository;
-import org.utn.ba.tptacsg2.repositories.ParticipanteRepository;
-import org.utn.ba.tptacsg2.repositories.UsuarioRepository;
+import org.utn.ba.tptacsg2.repositories.db.OrganizadorRepositoryDB;
+import org.utn.ba.tptacsg2.repositories.db.ParticipanteRepositoryDB;
+import org.utn.ba.tptacsg2.repositories.db.UsuarioRepositoryDB;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,10 +27,13 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UsuarioServiceTest {
 
-    @Mock UsuarioRepository usuarioRepository;
+    @Mock
+    UsuarioRepositoryDB usuarioRepository;
     @Mock PasswordEncoder passwordEncoder;
-    @Mock ParticipanteRepository participanteRepository;
-    @Mock OrganizadorRepository organizadorRepository;
+    @Mock
+    ParticipanteRepositoryDB participanteRepository;
+    @Mock
+    OrganizadorRepositoryDB organizadorRepository;
     @Mock GeneradorIDService generadorIDService;
     @InjectMocks UsuarioService service;
 

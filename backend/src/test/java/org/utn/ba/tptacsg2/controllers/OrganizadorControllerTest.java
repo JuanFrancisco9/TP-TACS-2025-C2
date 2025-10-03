@@ -10,7 +10,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.models.events.EstadoEvento;
-import org.utn.ba.tptacsg2.models.events.TipoEstadoEvento;
+import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.events.Ubicacion;
 import org.utn.ba.tptacsg2.models.events.Precio;
 import org.utn.ba.tptacsg2.services.OrganizadorService;

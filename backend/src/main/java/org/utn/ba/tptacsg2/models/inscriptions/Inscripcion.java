@@ -8,7 +8,7 @@ import org.utn.ba.tptacsg2.models.events.EstadoEvento;
 import org.utn.ba.tptacsg2.models.events.Evento;
 
 import java.time.LocalDateTime;
-@Document(collation = "inscripciones")
+@Document(collection = "inscripciones")
 public record Inscripcion (
         @Id
         String id,

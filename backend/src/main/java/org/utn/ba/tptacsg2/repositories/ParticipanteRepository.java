@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
 public class ParticipanteRepository {
     private final List<Participante> participantes = new ArrayList<>();
 

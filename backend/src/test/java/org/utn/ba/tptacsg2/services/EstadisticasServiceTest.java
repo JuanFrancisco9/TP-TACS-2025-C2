@@ -10,7 +10,7 @@ import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.actors.Participante;
 import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.models.events.EstadoEvento;
-import org.utn.ba.tptacsg2.models.events.TipoEstadoEvento;
+import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.events.Ubicacion;
 import org.utn.ba.tptacsg2.models.events.Precio;
 import org.utn.ba.tptacsg2.models.inscriptions.EstadoInscripcion;
@@ -18,6 +18,8 @@ import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
 import org.utn.ba.tptacsg2.repositories.EventoRepository;
 import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
+import org.utn.ba.tptacsg2.repositories.db.EventoRepositoryDB;
+import org.utn.ba.tptacsg2.repositories.db.InscripcionRepositoryDB;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,10 +33,10 @@ import static org.mockito.Mockito.when;
 class EstadisticasServiceTest {
 
     @Mock
-    private EventoRepository eventoRepository;
+    private EventoRepositoryDB eventoRepository;
 
     @Mock
-    private InscripcionRepository inscripcionRepository;
+    private InscripcionRepositoryDB inscripcionRepository;
 
     private EstadisticasService estadisticasService;
 
@@ -51,8 +53,8 @@ class EstadisticasServiceTest {
         List<Evento> eventos = crearEventosDePrueba();
         List<Inscripcion> inscripciones = crearInscripcionesDePrueba();
 
-        when(eventoRepository.getEventos()).thenReturn(eventos);
-        when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
+        when(eventoRepository.findAll()).thenReturn(eventos);
+        when(inscripcionRepository.findAll()).thenReturn(inscripciones);
 
         EstadisticasUsoDTO resultado = estadisticasService.obtenerEstadisticasUso();
 
@@ -71,8 +73,8 @@ class EstadisticasServiceTest {
         List<Evento> eventos = crearEventosDePrueba();
         List<Inscripcion> inscripciones = crearInscripcionesDePrueba();
 
-        when(eventoRepository.getEventos()).thenReturn(eventos);
-        when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
+        when(eventoRepository.findAll()).thenReturn(eventos);
+        when(inscripcionRepository.findAll()).thenReturn(inscripciones);
 
         EstadisticasUsoDTO resultado = estadisticasService.obtenerEstadisticasUso();
 
@@ -86,8 +88,8 @@ class EstadisticasServiceTest {
         List<Evento> eventos = crearEventosDePrueba();
         List<Inscripcion> inscripciones = crearInscripcionesDePrueba();
 
-        when(eventoRepository.getEventos()).thenReturn(eventos);
-        when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
+        when(eventoRepository.findAll()).thenReturn(eventos);
+        when(inscripcionRepository.findAll()).thenReturn(inscripciones);
 
         EstadisticasUsoDTO resultado = estadisticasService.obtenerEstadisticasUso();
 
@@ -101,8 +103,8 @@ class EstadisticasServiceTest {
         List<Evento> eventos = crearEventosDePrueba();
         List<Inscripcion> inscripciones = crearInscripcionesDePrueba();
 
-        when(eventoRepository.getEventos()).thenReturn(eventos);
-        when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
+        when(eventoRepository.findAll()).thenReturn(eventos);
+        when(inscripcionRepository.findAll()).thenReturn(inscripciones);
 
         EstadisticasUsoDTO resultado = estadisticasService.obtenerEstadisticasUso();
 
@@ -124,8 +126,8 @@ class EstadisticasServiceTest {
         List<Evento> eventos = crearEventosDePrueba();
         List<Inscripcion> inscripciones = crearInscripcionesDePrueba();
 
-        when(eventoRepository.getEventos()).thenReturn(eventos);
-        when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
+        when(eventoRepository.findAll()).thenReturn(eventos);
+        when(inscripcionRepository.findAll()).thenReturn(inscripciones);
 
         EstadisticasUsoDTO resultado = estadisticasService.obtenerEstadisticasUso();
 
@@ -146,8 +148,8 @@ class EstadisticasServiceTest {
         List<Evento> eventos = crearEventosDePrueba();
         List<Inscripcion> inscripciones = crearInscripcionesDePrueba();
 
-        when(eventoRepository.getEventos()).thenReturn(eventos);
-        when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
+        when(eventoRepository.findAll()).thenReturn(eventos);
+        when(inscripcionRepository.findAll()).thenReturn(inscripciones);
 
         EstadisticasUsoDTO resultado = estadisticasService.obtenerEstadisticasUso();
 
@@ -158,8 +160,8 @@ class EstadisticasServiceTest {
     @Test
     @DisplayName("Debe manejar correctamente cuando no hay eventos")
     void obtenerEstadisticasUso_SinEventos() {
-        when(eventoRepository.getEventos()).thenReturn(List.of());
-        when(inscripcionRepository.getInscripciones()).thenReturn(List.of());
+        when(eventoRepository.findAll()).thenReturn(List.of());
+        when(inscripcionRepository.findAll()).thenReturn(List.of());
 
         EstadisticasUsoDTO resultado = estadisticasService.obtenerEstadisticasUso();
 
@@ -190,7 +192,7 @@ class EstadisticasServiceTest {
     @DisplayName("Debe obtener correctamente la cantidad de eventos")
     void obtenerCantidadEventos_DebeRetornarCantidadCorrecta() {
         List<Evento> eventos = crearEventosDePrueba();
-        when(eventoRepository.getEventos()).thenReturn(eventos);
+        when(eventoRepository.findAll()).thenReturn(eventos);
 
         Integer resultado = estadisticasService.obtenerCantidadEventos(null, null);
 
@@ -201,7 +203,7 @@ class EstadisticasServiceTest {
     @DisplayName("Debe obtener correctamente la cantidad de eventos activos")
     void obtenerCantidadEventosActivos_DebeRetornarCantidadCorrecta() {
         List<Evento> eventos = crearEventosDePrueba();
-        when(eventoRepository.getEventos()).thenReturn(eventos);
+        when(eventoRepository.findAll()).thenReturn(eventos);
 
         Integer resultado = estadisticasService.obtenerCantidadEventosActivos(null, null);
 
@@ -212,7 +214,7 @@ class EstadisticasServiceTest {
     @DisplayName("Debe obtener correctamente la cantidad total de inscripciones")
     void obtenerCantidadInscripcionesTotales_DebeRetornarCantidadCorrecta() {
         List<Inscripcion> inscripciones = crearInscripcionesDePrueba();
-        when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
+        when(inscripcionRepository.findAll()).thenReturn(inscripciones);
 
         Integer resultado = estadisticasService.obtenerCantidadInscripcionesTotales(null, null);
 
@@ -223,7 +225,7 @@ class EstadisticasServiceTest {
     @DisplayName("Debe obtener correctamente la cantidad de inscripciones confirmadas")
     void obtenerCantidadInscripcionesConfirmadas_DebeRetornarCantidadCorrecta() {
         List<Inscripcion> inscripciones = crearInscripcionesDePrueba();
-        when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
+        when(inscripcionRepository.findAll()).thenReturn(inscripciones);
 
         Integer resultado = estadisticasService.obtenerCantidadInscripcionesConfirmadas(null, null);
 
@@ -234,7 +236,7 @@ class EstadisticasServiceTest {
     @DisplayName("Debe obtener correctamente la cantidad de inscripciones en waitlist")
     void obtenerCantidadInscripcionesWaitlist_DebeRetornarCantidadCorrecta() {
         List<Inscripcion> inscripciones = crearInscripcionesDePrueba();
-        when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
+        when(inscripcionRepository.findAll()).thenReturn(inscripciones);
 
         Integer resultado = estadisticasService.obtenerCantidadInscripcionesWaitlist(null, null);
 
@@ -245,7 +247,7 @@ class EstadisticasServiceTest {
     @DisplayName("Debe obtener correctamente la tasa de conversión waitlist")
     void obtenerTasaConversionWaitlist_DebeRetornarTasaCorrecta() {
         List<Inscripcion> inscripciones = crearInscripcionesDePrueba();
-        when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
+        when(inscripcionRepository.findAll()).thenReturn(inscripciones);
 
         Double resultado = estadisticasService.obtenerTasaConversionWaitlist(null, null);
 
@@ -257,8 +259,8 @@ class EstadisticasServiceTest {
     void obtenerEventoMasPopular_DebeRetornarEventoCorrecto() {
         List<Evento> eventos = crearEventosDePrueba();
         List<Inscripcion> inscripciones = crearInscripcionesDePrueba();
-        when(eventoRepository.getEventos()).thenReturn(eventos);
-        when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
+        when(eventoRepository.findAll()).thenReturn(eventos);
+        when(inscripcionRepository.findAll()).thenReturn(inscripciones);
 
         String resultado = estadisticasService.obtenerEventoMasPopular(null, null);
 
@@ -270,8 +272,8 @@ class EstadisticasServiceTest {
     void obtenerPromedioInscripcionesPorEvento_DebeRetornarPromedioCorecto() {
         List<Evento> eventos = crearEventosDePrueba();
         List<Inscripcion> inscripciones = crearInscripcionesDePrueba();
-        when(eventoRepository.getEventos()).thenReturn(eventos);
-        when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
+        when(eventoRepository.findAll()).thenReturn(eventos);
+        when(inscripcionRepository.findAll()).thenReturn(inscripciones);
 
         Double resultado = estadisticasService.obtenerPromedioInscripcionesPorEvento(null, null);
 
@@ -312,7 +314,7 @@ class EstadisticasServiceTest {
     @DisplayName("Debe filtrar eventos por fecha correctamente")
     void obtenerCantidadEventos_ConFiltroFechas_DebeRetornarCantidadFiltrada() {
         List<Evento> eventos = crearEventosDePrueba();
-        when(eventoRepository.getEventos()).thenReturn(eventos);
+        when(eventoRepository.findAll()).thenReturn(eventos);
 
         LocalDate fechaDesde = LocalDate.now().minusDays(1);
         LocalDate fechaHasta = LocalDate.now().plusDays(1);
@@ -326,7 +328,7 @@ class EstadisticasServiceTest {
     @DisplayName("Debe filtrar inscripciones por fecha correctamente")
     void obtenerCantidadInscripcionesTotales_ConFiltroFechas_DebeRetornarCantidadFiltrada() {
         List<Inscripcion> inscripciones = crearInscripcionesDePrueba();
-        when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
+        when(inscripcionRepository.findAll()).thenReturn(inscripciones);
 
         LocalDate fechaDesde = LocalDate.now().minusDays(1);
         LocalDate fechaHasta = LocalDate.now().plusDays(1);
@@ -342,8 +344,8 @@ class EstadisticasServiceTest {
         List<Evento> eventos = crearEventosDePrueba();
         List<Inscripcion> inscripciones = crearInscripcionesDePrueba();
 
-        when(eventoRepository.getEventos()).thenReturn(eventos);
-        when(inscripcionRepository.getInscripciones()).thenReturn(inscripciones);
+        when(eventoRepository.findAll()).thenReturn(eventos);
+        when(inscripcionRepository.findAll()).thenReturn(inscripciones);
 
         LocalDate fechaDesde = LocalDate.now().minusDays(1);
         LocalDate fechaHasta = LocalDate.now().plusDays(1);

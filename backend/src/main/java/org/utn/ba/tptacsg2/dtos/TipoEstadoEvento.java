@@ -1,4 +1,4 @@
-package org.utn.ba.tptacsg2.models.events;
+package org.utn.ba.tptacsg2.dtos;
 
 public enum TipoEstadoEvento {
     CONFIRMADO,

@@ -2,6 +2,7 @@ package org.utn.ba.tptacsg2.repositories;
 
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Repository;
+import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.actors.Participante;
 import org.utn.ba.tptacsg2.models.events.*;
@@ -10,12 +11,10 @@ import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
 public class InscripcionRepository {
 
     private final List<Inscripcion> inscripciones;
