@@ -8,11 +8,11 @@ import org.utn.ba.tptacsg2.dtos.output.ResultadoBusquedaEvento;
 import org.utn.ba.tptacsg2.helpers.EventPredicateBuilder;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.actors.Participante;
+import org.utn.ba.tptacsg2.models.events.Categoria;
 import org.utn.ba.tptacsg2.models.events.EstadoEvento;
 import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.models.events.SolicitudEvento;
 import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
-import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
 import org.utn.ba.tptacsg2.repositories.db.EstadoEventoRepositoryDB;
 import org.utn.ba.tptacsg2.repositories.db.EventoRepositoryDB;
@@ -60,6 +60,9 @@ public class EventoService {
 
         EstadoEvento estadoInicial = new EstadoEvento(this.generadorIDService.generarID(), solicitud.estado(), LocalDateTime.now());
 
+        // Obtener o crear la categoría basándose en el nombre que viene del frontend
+        Categoria categoria = this.categoriaService.obtenerOCrearCategoria(solicitud.categoria().getTipo());
+
         Evento evento = new Evento(
                 generadorIDService.generarID(),
                 solicitud.titulo(),
@@ -73,7 +76,7 @@ public class EventoService {
                 solicitud.precio(),
                 organizador,
                 estadoInicial,
-                solicitud.categoria(),
+                categoria,
                 solicitud.etiquetas()
         );
 
@@ -81,7 +84,6 @@ public class EventoService {
         this.estadoEventoRepository.save(estadoInicial);
         eventoRepository.save(evento);
 
-        this.categoriaService.guardarCategoria(solicitud.categoria());
 
         return evento;
     }
