@@ -25,7 +25,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
-import type { Evento } from '../services/eventoService';
+import type { Evento } from '../types/evento';
 import { formatFecha } from '../utils/formatFecha';
 
 interface DetallesEventoProps {
