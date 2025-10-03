@@ -17,8 +17,8 @@ import MapView from '../components/MapView';
 import EventCard from '../components/EventCard';
 import DetallesEvento from '../components/EventDetails';
 import { useLocation } from 'react-router-dom';
-import { EventoService, type Evento } from '../services/eventoService';
-
+import { EventoService } from '../services/eventoService';
+import type { Evento } from '../types/evento';
 
 // Helper para convertir eventos -> puntos del mapa
 const eventosToPoints = (eventos: Evento[]): MapPoint[] => {
