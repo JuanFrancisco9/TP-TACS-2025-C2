@@ -8,7 +8,6 @@ import type {Participante} from "../types/auth.ts";
 export class EventoService {
   // URL base del backend
   private static readonly BASE_URL = import.meta.env.VITE_API_BASE_URL;
-  private static readonly IMAGE_BASE_URL = (import.meta.env.VITE_R2_IMAGE_BASE_URL ?? '').trim();
 
   private static getAuthHeaders() {
       return authService.getAuthHeaders();
@@ -26,56 +25,6 @@ export class EventoService {
     }
   });
 
-  private static normalizeEvento(raw: any): Evento {
-    if (!raw) {
-      throw new Error('Evento inválido');
-    }
-
-    const imagenKey = typeof raw.imagenKey === 'string' && raw.imagenKey.length > 0
-      ? raw.imagenKey
-      : undefined;
-
-    const explicitUrl = typeof raw.imagenUrl === 'string' && raw.imagenUrl.trim().length > 0
-      ? raw.imagenUrl.trim()
-      : undefined;
-
-    const legacyUrl = typeof raw.imagen === 'string' && raw.imagen.trim().length > 0
-      ? raw.imagen.trim()
-      : undefined;
-
-    const computedUrl = explicitUrl
-      ?? legacyUrl
-      ?? this.buildImageUrl(imagenKey);
-
-    return {
-      ...raw,
-      etiquetas: Array.isArray(raw.etiquetas) ? raw.etiquetas : [],
-      imagenKey,
-      imagenUrl: computedUrl,
-      imagen: legacyUrl ?? computedUrl ?? undefined
-    } as Evento;
-  }
-
-  private static normalizeEventos(eventos: unknown): Evento[] {
-    if (!Array.isArray(eventos)) {
-      return [];
-    }
-    return eventos.map((evento) => this.normalizeEvento(evento));
-  }
-
-  private static buildImageUrl(imagenKey?: string): string | undefined {
-    if (!imagenKey || !this.IMAGE_BASE_URL) {
-      return undefined;
-    }
-
-    const normalizedKey = imagenKey.startsWith('/') ? imagenKey.slice(1) : imagenKey;
-    const base = this.IMAGE_BASE_URL.endsWith('/')
-      ? this.IMAGE_BASE_URL.slice(0, -1)
-      : this.IMAGE_BASE_URL;
-
-    return `${base}/${normalizedKey}`;
-  }
-
   // Método para obtener todos los eventos (usando buscarEventos)
   static async obtenerEventos(pagina: number = 0): Promise<{eventos: Evento[], totalPaginas: number, totalElementos: number}> {
     try {
@@ -85,9 +34,8 @@ export class EventoService {
       const response = await this.api.get<ResultadoBusquedaEvento>(url);
       
       console.log('�� Data completa:', response.data);
-      const eventos = this.normalizeEventos(response.data.eventos);
       return {
-        eventos,
+        eventos: response.data.eventos,
         totalPaginas: response.data.totalPaginas,
         totalElementos: response.data.totalElementos
       };
@@ -109,7 +57,7 @@ export class EventoService {
       console.log('🔍 EventoService.obtenerEventoPorId - Buscando evento ID:', id);
       const response = await this.api.get<Evento>(`/eventos/${id}`);
       console.log('✅ Evento encontrado:', response.data);
-      return this.normalizeEvento(response.data);
+      return response.data;
     } catch (error) {
       console.error('❌ Error obteniendo evento:', error);
       return null;
@@ -130,9 +78,8 @@ export class EventoService {
       const response = await this.api.get<ResultadoBusquedaEvento>(url);
       console.log('✅ Búsqueda exitosa:', response.data);
       
-      const eventos = this.normalizeEventos(response.data.eventos);
       return {
-        eventos,
+        eventos: response.data.eventos,
         totalPaginas: response.data.totalPaginas,
         totalElementos: response.data.totalElementos
       };
@@ -152,9 +99,8 @@ export class EventoService {
       const response = await this.api.get<ResultadoBusquedaEvento>(url);
       console.log('✅ Filtro exitoso:', response.data);
       
-      const eventos = this.normalizeEventos(response.data.eventos);
       return {
-        eventos,
+        eventos: response.data.eventos,
         totalPaginas: response.data.totalPaginas,
         totalElementos: response.data.totalElementos
       };
@@ -171,7 +117,7 @@ export class EventoService {
       console.log('�� EventoService.crearEvento - Creando evento:', evento);
       const response = await this.api.post<Evento>('/eventos', evento);
       console.log('✅ Evento creado:', response.data);
-      return this.normalizeEvento(response.data);
+      return response.data;
     } catch (error) {
       console.error('❌ Error creando evento:', error);
       throw new Error('Error al crear el evento');
@@ -183,15 +129,11 @@ export class EventoService {
     try {
       console.log('🔍 EventoService.actualizarEvento - Actualizando evento ID:', id);
       console.log(evento)
-      const payload = { ...evento } as Record<string, unknown>;
-      delete payload.imagenUrl;
-      delete payload.imagen;
-
-      const response = await axios.put<Evento>(`${this.BASE_URL}/eventos/${id}`, payload, {
+      const response = await axios.put<Evento>(`${this.BASE_URL}/eventos/${id}`, evento, {
           headers: this.getAuthHeaders()
       })
       console.log('✅ Evento actualizado:', response.data);
-      return this.normalizeEvento(response.data);
+      return response.data;
     } catch (error) {
       console.error('❌ Error actualizando evento:', error);
       throw new Error('Error al actualizar el evento');
@@ -221,10 +163,9 @@ export class EventoService {
       
       const response = await this.api.get<ResultadoBusquedaEvento>(url);
       console.log('✅ Búsqueda por etiquetas exitosa:', response.data);
-      const eventos = this.normalizeEventos(response.data.eventos);
       
       return {
-        eventos,
+        eventos: response.data.eventos,
         totalPaginas: response.data.totalPaginas,
         totalElementos: response.data.totalElementos
       };
@@ -243,10 +184,9 @@ export class EventoService {
       
       const response = await this.api.get<ResultadoBusquedaEvento>(url);
       console.log('✅ Búsqueda por estado exitosa:', response.data);
-      const eventos = this.normalizeEventos(response.data.eventos);
       
       return {
-        eventos,
+        eventos: response.data.eventos,
         totalPaginas: response.data.totalPaginas,
         totalElementos: response.data.totalElementos
       };
@@ -288,7 +228,7 @@ export class EventoService {
             const response = await axios.patch(url, null, {
                 headers: this.getAuthHeaders()
             });
-            return this.normalizeEvento(response.data);
+            return response.data
         }catch (error){
             console.log(error)
             throw new Error('Error al actualizar el estado del evento');
@@ -301,7 +241,7 @@ export class EventoService {
             const response = await axios.get(url,{
                 headers: this.getAuthHeaders()
             })
-            return this.normalizeEventos(response.data);
+            return response.data
         }catch (error){
             console.log(error)
             throw new Error('Error al obtener eventos para organizador');
@@ -338,10 +278,9 @@ export class EventoService {
       
       const response = await this.api.get<ResultadoBusquedaEvento>(url);
       console.log('✅ Búsqueda con filtros exitosa:', response.data);
-      const eventos = this.normalizeEventos(response.data.eventos);
       
       return {
-        eventos,
+        eventos: response.data.eventos,
         totalPaginas: response.data.totalPaginas,
         totalElementos: response.data.totalElementos
       };
