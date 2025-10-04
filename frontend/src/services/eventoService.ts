@@ -29,11 +29,9 @@ export class EventoService {
   static async obtenerEventos(pagina: number = 0): Promise<{eventos: Evento[], totalPaginas: number, totalElementos: number}> {
     try {
       const url = `/eventos?palabrasClave=&nroPagina=${pagina}`;
-      console.log('URL completa:', `${this.BASE_URL}${url}`);
       
       const response = await this.api.get<ResultadoBusquedaEvento>(url);
       
-      console.log('�� Data completa:', response.data);
       response.data.eventos[0].imagen = "https://www.clarin.com/img/2023/11/01/EsW43ik1T_1256x620__1.jpg";
       response.data.eventos[1].imagen = "https://www.clarin.com/img/2023/11/01/EsW43ik1T_2000x1500__1.jpg";
       return {
@@ -56,9 +54,7 @@ export class EventoService {
   // Método para obtener un evento por ID
   static async obtenerEventoPorId(id: string): Promise<Evento | null> {
     try {
-      console.log('🔍 EventoService.obtenerEventoPorId - Buscando evento ID:', id);
       const response = await this.api.get<Evento>(`/eventos/${id}`);
-      console.log('✅ Evento encontrado:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Error obteniendo evento:', error);
@@ -74,11 +70,8 @@ export class EventoService {
       params.set("nroPagina", String(pagina));
       if (ubicacion && ubicacion.trim()) params.set("ubicacion", ubicacion.trim());
       const url = `/eventos?${params.toString()}`;
-      console.log('🔍 EventoService.buscarEventos - Buscando:', termino);
-      console.log('📍 URL:', `${this.BASE_URL}${url}`);
       
       const response = await this.api.get<ResultadoBusquedaEvento>(url);
-      console.log('✅ Búsqueda exitosa:', response.data);
       
       return {
         eventos: response.data.eventos,
@@ -95,11 +88,8 @@ export class EventoService {
   static async filtrarPorCategoria(categoria: string, pagina: number = 0): Promise<{eventos: Evento[], totalPaginas: number, totalElementos: number}> {
     try {
       const url = `/eventos?categoria=${encodeURIComponent(categoria)}&palabrasClave=&nroPagina=${pagina}`;
-      console.log('🔍 EventoService.filtrarPorCategoria - Categoría:', categoria);
-      console.log('📍 URL:', `${this.BASE_URL}${url}`);
       
       const response = await this.api.get<ResultadoBusquedaEvento>(url);
-      console.log('✅ Filtro exitoso:', response.data);
       
       return {
         eventos: response.data.eventos,
@@ -116,9 +106,7 @@ export class EventoService {
   // Método para crear un evento (para administradores)
   static async crearEvento(evento: Omit<Evento, 'id'>): Promise<Evento> {
     try {
-      console.log('�� EventoService.crearEvento - Creando evento:', evento);
       const response = await this.api.post<Evento>('/eventos', evento);
-      console.log('✅ Evento creado:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Error creando evento:', error);
@@ -129,12 +117,9 @@ export class EventoService {
   // Método para actualizar un evento (para administradores)
   static async actualizarEvento(id: string, evento: Partial<Evento>): Promise<Evento> {
     try {
-      console.log('🔍 EventoService.actualizarEvento - Actualizando evento ID:', id);
-      console.log(evento)
       const response = await axios.put<Evento>(`${this.BASE_URL}/eventos/${id}`, evento, {
           headers: this.getAuthHeaders()
       })
-      console.log('✅ Evento actualizado:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Error actualizando evento:', error);
@@ -145,9 +130,7 @@ export class EventoService {
   // Método para eliminar un evento (para administradores)
   static async eliminarEvento(id: string): Promise<boolean> {
     try {
-      console.log('�� EventoService.eliminarEvento - Eliminando evento ID:', id);
       await this.api.delete(`/eventos/${id}`);
-      console.log('✅ Evento eliminado');
       return true;
     } catch (error) {
       console.error('❌ Error eliminando evento:', error);
@@ -160,11 +143,8 @@ export class EventoService {
     try {
       const terminoBusqueda = etiquetas.join(' ');
       const url = `/eventos?palabrasClave=${encodeURIComponent(terminoBusqueda)}&nroPagina=${pagina}`;
-      console.log('🔍 EventoService.obtenerEventosPorEtiquetas - Etiquetas:', etiquetas);
-      console.log('📍 URL:', `${this.BASE_URL}${url}`);
       
       const response = await this.api.get<ResultadoBusquedaEvento>(url);
-      console.log('✅ Búsqueda por etiquetas exitosa:', response.data);
       
       return {
         eventos: response.data.eventos,
@@ -181,11 +161,8 @@ export class EventoService {
   static async obtenerEventosPorEstado(estado: string, pagina: number = 0): Promise<{eventos: Evento[], totalPaginas: number, totalElementos: number}> {
     try {
       const url = `/eventos?palabrasClave=${encodeURIComponent(estado)}&nroPagina=${pagina}`;
-      console.log('🔍 EventoService.obtenerEventosPorEstado - Estado:', estado);
-      console.log('📍 URL:', `${this.BASE_URL}${url}`);
       
       const response = await this.api.get<ResultadoBusquedaEvento>(url);
-      console.log('✅ Búsqueda por estado exitosa:', response.data);
       
       return {
         eventos: response.data.eventos,
@@ -206,7 +183,6 @@ export class EventoService {
           })
           return response.data.inscripcionesSinConfirmar
       }catch (error){
-          console.log(error)
           throw new Error('Error al obtener waitlist');
       }
   }
@@ -219,7 +195,6 @@ export class EventoService {
             })
             return response.data
         }catch (error){
-            console.log(error)
             throw new Error('Error al obtener participantes del evento');
         }
     }
@@ -232,7 +207,6 @@ export class EventoService {
             });
             return response.data
         }catch (error){
-            console.log(error)
             throw new Error('Error al actualizar el estado del evento');
         }
     }
@@ -245,7 +219,6 @@ export class EventoService {
             })
             return response.data
         }catch (error){
-            console.log(error)
             throw new Error('Error al obtener eventos para organizador');
         }
     }
@@ -275,11 +248,8 @@ export class EventoService {
       params.append('nroPagina', (filtros.pagina || 0).toString());
 
       const url = `/eventos?${params.toString()}`;
-      console.log('🔍 EventoService.buscarEventosConFiltros - Filtros:', filtros);
-      console.log('📍 URL:', `${this.BASE_URL}${url}`);
       
       const response = await this.api.get<ResultadoBusquedaEvento>(url);
-      console.log('✅ Búsqueda con filtros exitosa:', response.data);
       
       return {
         eventos: response.data.eventos,

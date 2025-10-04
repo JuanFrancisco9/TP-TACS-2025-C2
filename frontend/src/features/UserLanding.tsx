@@ -5,6 +5,8 @@ import inscripcionesService from '../services/inscripcionesParticipanteService.t
 import authService from '../services/authService.ts';
 import type { Inscripcion } from '../types/inscripciones';
 import { Rol } from '../types/auth';
+import type { Evento } from '../types/evento.ts';
+import DetallesEvento from '../components/EventDetails.tsx';
 
 function UserLanding() {
     const navigate = useNavigate();
@@ -13,8 +15,7 @@ function UserLanding() {
     const [error, setError] = useState<string | null>(null);
     const [currentUser] = useState(authService.getCurrentUser());
     const [participanteId, setParticipanteId] = useState<string>(authService.getActorId()?.toString() || '');
-
-
+    const [eventoSeleccionado, setEventoSeleccionado] = useState<Evento | null>(null);
 
     const fetchInscripciones = async () => {
         try {
@@ -37,7 +38,6 @@ function UserLanding() {
                     const existing = acc[existingIndex];
                     const currentDate = new Date(current.estado.fechaDeCambio);
                     const existingDate = new Date(existing.estado.fechaDeCambio);
-                    console.log("Comparando fechas:", currentDate, existingDate,current.estado.tipoEstado, existing.estado.tipoEstado);
 
                     if (currentDate > existingDate) {
                         acc[existingIndex] = current;
@@ -76,10 +76,16 @@ function UserLanding() {
     }, [participanteId]);
 
     const inscripcionesActivas = inscripciones.filter(i =>
-        i.estado.tipoEstado === 'ACEPTADA' || i.estado.tipoEstado === 'WAITLIST'
+        i.estado.tipoEstado === 'ACEPTADA' || i.estado.tipoEstado === 'PENDIENTE'
     );
 
-    return (
+     return eventoSeleccionado ? (
+        <DetallesEvento
+          evento={eventoSeleccionado}
+          onVolver={() => setEventoSeleccionado(null)}
+          onInscribirse={undefined}
+        />
+      ) : (
         <div className="min-vh-100">
             <div className="container py-5">
 
@@ -172,7 +178,7 @@ function UserLanding() {
                         <div className="card border-0 bg-warning text-dark" style={{ borderRadius: '12px' }}>
                             <div className="card-body text-center">
                                 <h3 className="fw-bold mb-1">
-                                    {inscripciones.filter(i => i.estado.tipoEstado === 'WAITLIST').length}
+                                    {inscripciones.filter(i => i.estado.tipoEstado === 'PENDIENTE').length}
                                 </h3>
                                 <p className="mb-0">En Espera</p>
                             </div>
@@ -214,7 +220,7 @@ function UserLanding() {
                             <div key={inscripcion.id} className="col-lg-6 col-xl-4">
                                 <InscripcionCard
                                     inscripcion={inscripcion}
-                                    onVerDetalle={() => console.log('Ver detalle:', inscripcion.evento.id)}
+                                    onVerDetalle={() => setEventoSeleccionado(inscripcion.evento)}
                                     onInscripcionCancelada={fetchInscripciones}
                                 />
                             </div>

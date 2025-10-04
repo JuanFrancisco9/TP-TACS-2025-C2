@@ -57,7 +57,7 @@ const InscripcionCard: React.FC<InscripcionCardProps> = ({
   const getEstadoColor = (estado: string) => {
     switch (estado) {
       case 'ACEPTADA': return 'success';
-      case 'WAITLIST': return 'warning';
+      case 'PENDIENTE': return 'warning';
       case 'CANCELADA': return 'error';
       default: return 'default';
     }
@@ -66,7 +66,7 @@ const InscripcionCard: React.FC<InscripcionCardProps> = ({
   const getEstadoLabel = (estado: string) => {
     switch (estado) {
       case 'ACEPTADA': return 'Confirmada';
-      case 'WAITLIST': return 'En espera';
+      case 'PENDIENTE': return 'En espera';
       case 'CANCELADA': return 'Cancelada';
       default: return estado;
     }
@@ -172,7 +172,7 @@ const InscripcionCard: React.FC<InscripcionCardProps> = ({
               Ver más
             </Button>
 
-            {(inscripcion.estado.tipoEstado === 'ACEPTADA' || inscripcion.estado.tipoEstado === 'WAITLIST') && (
+            {(inscripcion.estado.tipoEstado === 'ACEPTADA' || inscripcion.estado.tipoEstado === 'PENDIENTE') && (
               <Button
                 size="small"
                 variant="outlined"

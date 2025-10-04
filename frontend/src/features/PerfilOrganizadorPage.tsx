@@ -183,7 +183,6 @@ const EditEvent = ({ event, onClose, onSave }: EditEvent) => {
             if(localEvent.estado.tipoEstado === event?.estado.tipoEstado){
                 onSave(localEvent);
             }else{
-                console.log("Se cambio el estado del evento")
                 const eventWithNewState = {
                     ...localEvent,
                     estado:{
@@ -353,7 +352,7 @@ const VerInscriptos = ({event, onClose}:ViewModal) => {
                 const partcipantes = await EventoService.obtenerParticipantesDeEvento(event)
                 setParticipantes(partcipantes)
             }catch (e){
-                console.log(e)
+                console.error(e)
             }
         }
         if(event){
@@ -397,7 +396,7 @@ const WaitList = ({event, onClose}:ViewModal) =>{
                 const inscripciones = await EventoService.obtenerWaitlistDeEvento(event)
                 setInscripciones(inscripciones)
             }catch (e){
-                console.log(e)
+                console.error(e)
             }
         }
         if(event){
