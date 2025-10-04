@@ -11,6 +11,9 @@ import org.utn.ba.tptacsg2.dtos.FiltrosDTO;
 import org.utn.ba.tptacsg2.dtos.ParticipanteDTO;
 import org.utn.ba.tptacsg2.dtos.output.ResultadoBusquedaEvento;
 import org.utn.ba.tptacsg2.exceptions.InscripcionNoEncontradaException;
+import org.utn.ba.tptacsg2.models.events.Evento;
+import org.utn.ba.tptacsg2.models.events.SolicitudEvento;
+import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.events.*;
 import org.utn.ba.tptacsg2.services.EventoService;
 
@@ -63,7 +66,7 @@ public class EventoController {
         try {
             participantesDTO = eventoService.getParticipantes(eventoId).stream().map(p -> new ParticipanteDTO(p.nombre(),p.apellido(),p.dni())).toList();
         } catch(RuntimeException e){
-           throw new InscripcionNoEncontradaException("No se encontraron participante para el evento",e);
+           throw new InscripcionNoEncontradaException("No se encontraron participantes para el evento",e);
         }
         return ResponseEntity.status(HttpStatus.OK).body(participantesDTO);
     }

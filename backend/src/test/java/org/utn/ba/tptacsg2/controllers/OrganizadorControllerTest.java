@@ -1,18 +1,19 @@
 package org.utn.ba.tptacsg2.controllers;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.utn.ba.tptacsg2.models.events.Evento;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.events.EstadoEvento;
-import org.utn.ba.tptacsg2.models.events.TipoEstadoEvento;
-import org.utn.ba.tptacsg2.models.events.Ubicacion;
+import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.models.events.Precio;
+import org.utn.ba.tptacsg2.models.events.Ubicacion;
 import org.utn.ba.tptacsg2.services.OrganizadorService;
 
 import java.time.LocalDateTime;
@@ -23,17 +24,21 @@ import java.util.List;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(OrganizadorController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@ExtendWith(MockitoExtension.class)
 class OrganizadorControllerTest {
 
-    @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean
+    @Mock
     private OrganizadorService organizadorService;
+
+    @BeforeEach
+    void setUp() {
+        mockMvc = MockMvcBuilders.standaloneSetup(new OrganizadorController(organizadorService)).build();
+    }
 
     @Test
     @DisplayName("GET /organizadores/eventos/{id} devuelve 200 y lista cuando hay eventos")

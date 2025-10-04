@@ -1,16 +1,20 @@
 package org.utn.ba.tptacsg2.controllers;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.utn.ba.tptacsg2.dtos.EstadisticasUsoDTO;
 import org.utn.ba.tptacsg2.enums.TipoEstadistica;
 import org.utn.ba.tptacsg2.services.EstadisticasService;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -21,15 +25,22 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(EstadisticasController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@ExtendWith(MockitoExtension.class)
 class EstadisticasControllerTest {
 
-    @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean
+    @Mock
     private EstadisticasService estadisticasService;
+
+    @BeforeEach
+    void setUp() {
+        mockMvc = MockMvcBuilders.standaloneSetup(new EstadisticasController(estadisticasService))
+                .setMessageConverters(
+                        new StringHttpMessageConverter(),
+                        new MappingJackson2HttpMessageConverter(JsonMapper.builder().findAndAddModules().build()))
+                .build();
+    }
 
     @Test
     @DisplayName("GET /estadisticas/uso debe retornar 200 con estadísticas")

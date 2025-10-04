@@ -27,6 +27,7 @@ public record Evento (
      @JsonManagedReference
      @DBRef
      EstadoEvento estado,
+     @DBRef
      Categoria categoria,
      List<String> etiquetas,
      String imagenKey

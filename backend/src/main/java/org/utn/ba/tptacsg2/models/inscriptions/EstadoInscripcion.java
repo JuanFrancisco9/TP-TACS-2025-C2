@@ -1,19 +1,24 @@
 package org.utn.ba.tptacsg2.models.inscriptions;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
-@Document(collation = "estadoinscripciones")
+@Document(collection = "estadoinscripciones")
 public class EstadoInscripcion {
 
     @Id
-    private final String id;
+    private String id;
     private TipoEstadoInscripcion tipoEstado;
     @DBRef
-    private Inscripcion inscripcion; //TODO hacer un DTO sin la inscripcion para evitar referencias circulares en JSON
+    @JsonBackReference
+    private Inscripcion inscripcion;
     private LocalDateTime fechaDeCambio;
+
+    public EstadoInscripcion() {
+    }
 
     public EstadoInscripcion(String id, TipoEstadoInscripcion tipo, LocalDateTime fechaDeCambio) {
         this.id = id;

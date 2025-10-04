@@ -14,9 +14,9 @@ import org.utn.ba.tptacsg2.dtos.InputRegistroDto;
 import org.utn.ba.tptacsg2.dtos.LoginResponseDto;
 import org.utn.ba.tptacsg2.models.users.Usuario;
 import org.utn.ba.tptacsg2.models.users.Rol;
-import org.utn.ba.tptacsg2.repositories.OrganizadorRepository;
-import org.utn.ba.tptacsg2.repositories.ParticipanteRepository;
-import org.utn.ba.tptacsg2.repositories.UsuarioRepository;
+import org.utn.ba.tptacsg2.repositories.db.OrganizadorRepositoryDB;
+import org.utn.ba.tptacsg2.repositories.db.ParticipanteRepositoryDB;
+import org.utn.ba.tptacsg2.repositories.db.UsuarioRepositoryDB;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,10 +27,13 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UsuarioServiceTest {
 
-    @Mock UsuarioRepository usuarioRepository;
+    @Mock
+    UsuarioRepositoryDB usuarioRepository;
     @Mock PasswordEncoder passwordEncoder;
-    @Mock ParticipanteRepository participanteRepository;
-    @Mock OrganizadorRepository organizadorRepository;
+    @Mock
+    ParticipanteRepositoryDB participanteRepository;
+    @Mock
+    OrganizadorRepositoryDB organizadorRepository;
     @Mock GeneradorIDService generadorIDService;
     @InjectMocks UsuarioService service;
 
@@ -41,11 +44,11 @@ class UsuarioServiceTest {
         @Test
         @DisplayName("Lanza RuntimeException si el username ya existe")
         void registrar_usuarioExiste() {
-            var dto = new InputRegistroDto("testuser", "pass", "ADMIN", "","","");
+            InputRegistroDto dto = new InputRegistroDto("testuser", "pass", "ADMIN", "","","");
             when(usuarioRepository.findByUsername("testuser"))
                     .thenReturn(Optional.of(mock(Usuario.class)));
 
-            var ex = assertThrows(RuntimeException.class, () -> service.registrar(dto));
+            RuntimeException ex = assertThrows(RuntimeException.class, () -> service.registrar(dto));
             assertEquals("El usuario ya existe", ex.getMessage());
             verify(usuarioRepository, never()).save(any());
         }
@@ -56,12 +59,12 @@ class UsuarioServiceTest {
             when(usuarioRepository.findByUsername("admin")).thenReturn(Optional.empty());
             when(passwordEncoder.encode("secret")).thenReturn("ENCODED");
 
-            var dto = new InputRegistroDto("admin", "secret", "ROLE_ADMIN", "", "", ""); // prueba strip + upper
+            InputRegistroDto dto = new InputRegistroDto("admin", "secret", "ROLE_ADMIN", "", "", ""); // prueba strip + upper
             service.registrar(dto);
 
-            var captor = ArgumentCaptor.forClass(Usuario.class);
+            ArgumentCaptor<Usuario> captor = ArgumentCaptor.forClass(Usuario.class);
             verify(usuarioRepository).save(captor.capture());
-            var saved = captor.getValue();
+            Usuario saved = captor.getValue();
 
             assertEquals("admin", saved.username());
             assertEquals("ENCODED", saved.passwordHash());
@@ -73,10 +76,10 @@ class UsuarioServiceTest {
         void registrar_ok_organizador() {
             when(usuarioRepository.findByUsername("orga")).thenReturn(Optional.empty());
             when(passwordEncoder.encode("s")).thenReturn("E");
-            var dto = new InputRegistroDto("orga", "s", "ROLE_ORGANIZER", "", "", "");
+            InputRegistroDto dto = new InputRegistroDto("orga", "s", "ROLE_ORGANIZER", "", "", "");
             service.registrar(dto);
 
-            var captor = ArgumentCaptor.forClass(Usuario.class);
+            ArgumentCaptor<Usuario> captor = ArgumentCaptor.forClass(Usuario.class);
             verify(usuarioRepository).save(captor.capture());
             assertEquals(Rol.ROLE_ORGANIZER, captor.getValue().rol());
         }
@@ -89,11 +92,11 @@ class UsuarioServiceTest {
         @Test
         @DisplayName("Devuelve lista mapeada correctamente a UsuarioDto")
         void getUsuarios_ok() {
-            var u1 = new Usuario("1", "user1", "HASH1", Rol.ROLE_USER);
-            var u2 = new Usuario("2", "user2", "HASH2", Rol.ROLE_ADMIN);
+            Usuario u1 = new Usuario("1", "user1", "HASH1", Rol.ROLE_USER);
+            Usuario u2 = new Usuario("2", "user2", "HASH2", Rol.ROLE_ADMIN);
             when(usuarioRepository.findAll()).thenReturn(List.of(u1, u2));
 
-            var res = service.getUsuarios();
+            List<Usuario> res = service.getUsuarios();
 
             assertEquals(2, res.size());
             assertEquals("1", res.get(0).id());
@@ -116,11 +119,11 @@ class UsuarioServiceTest {
         @Test
         @DisplayName("Devuelve Usuario cuando username existe y el password coincide")
         void login_ok() {
-            var stored = new Usuario("7", "testuser", "HASH", Rol.ROLE_USER);
+            Usuario stored = new Usuario("7", "testuser", "HASH", Rol.ROLE_USER);
             when(usuarioRepository.findAll()).thenReturn(List.of(stored));
             when(passwordEncoder.matches("password123", "HASH")).thenReturn(true);
 
-            var dto = new InputRegistroDto("testuser", "password123", "USER", "", "", "");
+            InputRegistroDto dto = new InputRegistroDto("testuser", "password123", "USER", "", "", "");
             LoginResponseDto result = service.login(dto);
             LoginResponseDto expected = new LoginResponseDto("7", "testuser", Rol.ROLE_USER, null);
             assertEquals(expected, result);
@@ -132,7 +135,7 @@ class UsuarioServiceTest {
         void login_usuarioNoExiste() {
             when(usuarioRepository.findAll()).thenReturn(List.of()); // no hay usuarios
 
-            var dto = new InputRegistroDto("nouser", "x", "USER", "", "", "");
+            InputRegistroDto dto = new InputRegistroDto("nouser", "x", "USER", "", "", "");
             assertThrows(UsernameNotFoundException.class, () -> service.login(dto));
             verify(passwordEncoder, never()).matches(any(), any());
         }
@@ -140,12 +143,12 @@ class UsuarioServiceTest {
         @Test
         @DisplayName("Lanza RuntimeException si el password es incorrecto")
         void login_passwordIncorrecta() {
-            var stored = new Usuario("8", "testuser", "HASH", Rol.ROLE_USER);
+            Usuario stored = new Usuario("8", "testuser", "HASH", Rol.ROLE_USER);
             when(usuarioRepository.findAll()).thenReturn(List.of(stored));
             when(passwordEncoder.matches("bad", "HASH")).thenReturn(false);
 
-            var dto = new InputRegistroDto("testuser", "bad", "USER", "", "", "");
-            var ex = assertThrows(RuntimeException.class, () -> service.login(dto));
+            InputRegistroDto dto = new InputRegistroDto("testuser", "bad", "USER", "", "", "");
+            RuntimeException ex = assertThrows(RuntimeException.class, () -> service.login(dto));
             assertEquals("Contraseña incorrecta", ex.getMessage());
         }
     }

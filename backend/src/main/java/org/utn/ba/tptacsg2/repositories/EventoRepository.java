@@ -2,10 +2,8 @@ package org.utn.ba.tptacsg2.repositories;
 
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.events.*;
 import org.utn.ba.tptacsg2.models.users.Usuario;
@@ -15,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
 public class EventoRepository {
 
     private final List<Evento> eventos = new ArrayList<>();
@@ -63,7 +60,7 @@ public class EventoRepository {
     @PostConstruct
     public void initializeData() {
         // Primer evento de prueba
-        EstadoEvento estadoEvento1 = new EstadoEvento("1",TipoEstadoEvento.CONFIRMADO, LocalDateTime.now().minusDays(7));
+        EstadoEvento estadoEvento1 = new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now().minusDays(7));
         EstadoEvento estadoEvento2 = new EstadoEvento("2",TipoEstadoEvento.CONFIRMADO, LocalDateTime.now().minusDays(7));
 
         Evento evento1 = new Evento("0", "Seminario de Mocks", "Mocks", LocalDateTime.now(),

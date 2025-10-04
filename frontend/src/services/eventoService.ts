@@ -321,17 +321,30 @@ export class EventoService {
             apellido: '',
             dni: '',
           };
-
+      
       const body = {
         participante,
         evento_id: String(eventoId),
       };
-
       await this.api.post('/inscripciones', body);
       return true;
     } catch (error) {
       console.error('Error inscribi�ndose al evento:', error);
-      throw new Error('Error al inscribirse al evento');
+      let message = 'Error al inscribirse al evento';
+      if (axios.isAxiosError(error)) {
+        const data = error.response?.data as unknown;
+        if (typeof data === 'string' && data.trim().length > 0) {
+          message = data;
+        } else if (data && typeof data === 'object') {
+          const maybeMessage = (data as { message?: string; error?: string }).message ?? (data as { message?: string; error?: string }).error;
+          if (typeof maybeMessage === 'string' && maybeMessage.trim().length > 0) {
+            message = maybeMessage;
+          }
+        }
+      } else if (error instanceof Error && error.message.trim().length > 0) {
+        message = error.message;
+      }
+      throw new Error(message);
     }
   }
 }

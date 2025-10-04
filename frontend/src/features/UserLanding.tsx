@@ -12,14 +12,12 @@ function UserLanding() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [currentUser] = useState(authService.getCurrentUser());
-    const [participanteId, setParticipanteId] = useState<string>(authService.getCurrentUser()?.id?.toString() || '');
+    const [participanteId, setParticipanteId] = useState<string>(authService.getActorId()?.toString() || '');
 
 
 
     const fetchInscripciones = async () => {
         try {
-
-            console.log(participanteId); 
 
             setLoading(true);
 
@@ -66,8 +64,8 @@ function UserLanding() {
         }
 
         // Actualizar participanteId cuando cambie el usuario
-        if (currentUser?.id) {
-            setParticipanteId(currentUser.id.toString());
+        if (currentUser?.actorId) {
+            setParticipanteId(currentUser.actorId.toString());
         }
     }, [currentUser, navigate]);
 
@@ -124,17 +122,6 @@ function UserLanding() {
                                     🔄 Actualizar
                                 </>
                             )}
-                        </button>
-
-                        <button
-                            className="btn btn-outline-danger px-3 py-2"
-                            onClick={() => {
-                                authService.logout();
-                                navigate('/login');
-                            }}
-                            style={{ borderRadius: '12px' }}
-                        >
-                            🚪 Salir
                         </button>
                     </div>
                 </div>

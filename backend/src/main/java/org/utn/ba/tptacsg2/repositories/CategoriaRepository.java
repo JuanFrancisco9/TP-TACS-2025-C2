@@ -7,7 +7,6 @@ import org.utn.ba.tptacsg2.models.events.Categoria;
 import java.util.ArrayList;
 import java.util.List;
 
-@Repository
 public class CategoriaRepository {
     static private final List<Categoria> categorias =  new ArrayList<>();
     static private CategoriaRepository categoriaRepository;

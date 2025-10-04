@@ -1,5 +1,7 @@
 package org.utn.ba.tptacsg2.models.events;
 
+import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
+
 import java.time.LocalDateTime;
 import java.util.List;
 

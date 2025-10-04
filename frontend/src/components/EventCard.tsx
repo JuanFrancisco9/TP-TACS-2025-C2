@@ -1,6 +1,7 @@
 import * as React from 'react';
 import InscripcionDialog from './InscripcionDialog';
 import { EventoService } from '../services/eventoService';
+import type { Evento } from '../types/evento';
 import {
   Typography,
   Button,
@@ -35,8 +36,11 @@ const EventCard: React.FC<EventCardProps> = ({ item, onVerDetalle }) => {
     try {
       await EventoService.inscribirseAEvento(item.id);
       setSnackbarMsg(`Inscripción confirmada a: ${item.titulo}`);
-    } catch (e) {
-      setSnackbarMsg('Error al inscribirse. Intenta nuevamente.');
+    } catch (error) {
+      const message = error instanceof Error && error.message
+        ? error.message
+        : 'Error al inscribirse. Intenta nuevamente.';
+      setSnackbarMsg(message);
     }
     setShowSnackbar(true);
     setShowDialog(false);

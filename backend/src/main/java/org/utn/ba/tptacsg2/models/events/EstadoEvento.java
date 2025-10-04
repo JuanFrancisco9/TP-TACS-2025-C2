@@ -2,13 +2,13 @@ package org.utn.ba.tptacsg2.models.events;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import jdk.jfr.Event;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 
 import java.time.LocalDateTime;
-@Document(collation = "estadoeventos")
+@Document(collection = "estadoeventos")
 public class EstadoEvento {
     @Id
     private String id;

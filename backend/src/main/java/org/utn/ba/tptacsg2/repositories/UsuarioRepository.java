@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
 public class UsuarioRepository {
     private final List<Usuario> usuarios = new ArrayList<>();
 
