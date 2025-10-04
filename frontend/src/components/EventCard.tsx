@@ -1,6 +1,7 @@
 import * as React from 'react';
 import InscripcionDialog from './InscripcionDialog';
 import { EventoService } from '../services/eventoService';
+import type { Evento } from '../types/evento';
 import {
   Typography,
   Button,
@@ -11,7 +12,6 @@ import {
 } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
-import type { Evento } from '../services/eventoService';
 
 
 interface EventCardProps {

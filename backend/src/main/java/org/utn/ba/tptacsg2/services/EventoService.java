@@ -8,11 +8,11 @@ import org.utn.ba.tptacsg2.dtos.output.ResultadoBusquedaEvento;
 import org.utn.ba.tptacsg2.helpers.EventPredicateBuilder;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.actors.Participante;
+import org.utn.ba.tptacsg2.models.events.Categoria;
 import org.utn.ba.tptacsg2.models.events.EstadoEvento;
 import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.models.events.SolicitudEvento;
 import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
-import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
 import org.utn.ba.tptacsg2.repositories.db.EstadoEventoRepositoryDB;
 import org.utn.ba.tptacsg2.repositories.db.EventoRepositoryDB;
@@ -60,6 +60,9 @@ public class EventoService {
 
         EstadoEvento estadoInicial = new EstadoEvento(this.generadorIDService.generarID(), solicitud.estado(), LocalDateTime.now());
 
+        // Obtener o crear la categoría basándose en el nombre que viene del frontend
+        Categoria categoria = this.categoriaService.obtenerOCrearCategoria(solicitud.categoria().getTipo());
+
         Evento evento = new Evento(
                 generadorIDService.generarID(),
                 solicitud.titulo(),
@@ -73,7 +76,7 @@ public class EventoService {
                 solicitud.precio(),
                 organizador,
                 estadoInicial,
-                solicitud.categoria(),
+                categoria,
                 solicitud.etiquetas()
         );
 
@@ -81,13 +84,38 @@ public class EventoService {
         this.estadoEventoRepository.save(estadoInicial);
         eventoRepository.save(evento);
 
-        this.categoriaService.guardarCategoria(solicitud.categoria());
 
         return evento;
     }
 
     public Evento actualizarEvento(String idEvento, Evento eventoUpdate) {
-        if(eventoRepository.findById(idEvento).isPresent()) {
+        Evento eventoExistente = eventoRepository.findById(idEvento)
+                .orElseThrow(() -> new RuntimeException("No existe el evento con el id: " + idEvento));
+
+        // Verificar si el estado cambió
+        EstadoEvento estadoFinal;
+        if (eventoExistente.estado().getTipoEstado().equals(eventoUpdate.estado().getTipoEstado())) {
+            // El estado no cambió, reutilizar el estado existente
+            estadoFinal = eventoExistente.estado();
+        } else {
+            // El estado cambió, crear un nuevo EstadoEvento
+            estadoFinal = new EstadoEvento(
+                    this.generadorIDService.generarID(),
+                    eventoUpdate.estado().getTipoEstado(),
+                    LocalDateTime.now()
+            );
+            // Guardar el nuevo estado antes de asociarlo
+            this.estadoEventoRepository.save(estadoFinal);
+        }
+
+        // Manejar la categoría de la misma forma que en registrarEvento
+        Categoria categoriaFinal;
+        if (eventoUpdate.categoria() != null && eventoUpdate.categoria().getTipo() != null) {
+            categoriaFinal = this.categoriaService.obtenerOCrearCategoria(eventoUpdate.categoria().getTipo());
+        } else {
+            categoriaFinal = eventoExistente.categoria();
+        }
+
         Evento eventoActualizado = new Evento(
                 eventoUpdate.id(),
                 eventoUpdate.titulo(),
@@ -100,17 +128,20 @@ public class EventoService {
                 eventoUpdate.cupoMinimo(),
                 eventoUpdate.precio(),
                 eventoUpdate.organizador(),
-                eventoUpdate.estado(),
-                eventoUpdate.categoria(),
+                estadoFinal,
+                categoriaFinal,
                 eventoUpdate.etiquetas()
         );
+
+        // Si se creó un nuevo estado, asociarlo con el evento
+        if (!eventoExistente.estado().getTipoEstado().equals(eventoUpdate.estado().getTipoEstado())) {
+            estadoFinal.setEvento(eventoActualizado);
+            this.estadoEventoRepository.save(estadoFinal);
+        }
 
         eventoRepository.save(eventoActualizado);
 
         return eventoActualizado;
-        }else  {
-            throw new RuntimeException("No existe el evento con el id: " + idEvento);
-        }
     }
 
     public Evento cambiarEstado(String idEvento,TipoEstadoEvento estado) {

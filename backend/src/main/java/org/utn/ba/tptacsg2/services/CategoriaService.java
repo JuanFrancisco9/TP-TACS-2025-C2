@@ -10,10 +10,12 @@ import java.util.List;
 @Service
 public class CategoriaService {
     private final CategoriaRepositoryDB categoriaRepository;
+    private final GeneradorIDService generadorIDService;
 
     @Autowired
-    public CategoriaService(CategoriaRepositoryDB categoriaRepository) {
+    public CategoriaService(CategoriaRepositoryDB categoriaRepository, GeneradorIDService generadorIDService) {
         this.categoriaRepository = categoriaRepository;
+        this.generadorIDService = generadorIDService;
     }
 
     public List<Categoria> getCategorias() {
@@ -22,5 +24,31 @@ public class CategoriaService {
 
     public void guardarCategoria(Categoria categoria) {
         this.categoriaRepository.save(categoria);
+    }
+
+    /**
+     * Busca una categoría por su tipo (nombre). Si no existe, la crea y persiste.
+     * @param nombreCategoria El nombre/tipo de la categoría
+     * @return La categoría existente o recién creada
+     */
+    public Categoria obtenerOCrearCategoria(String nombreCategoria) {
+        if (nombreCategoria == null || nombreCategoria.trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre de la categoría no puede estar vacío");
+        }
+
+        String nombreNormalizado = nombreCategoria.trim();
+
+        // Verificar si existe primero
+        if (categoriaRepository.existsByTipo(nombreNormalizado)) {
+            // Si existe, buscarla y devolverla
+            List<Categoria> categoriasEncontradas = categoriaRepository.findByTipo(nombreNormalizado);
+            return categoriasEncontradas.getFirst();
+        }
+
+        // Si no existe, crear nueva categoría
+        Categoria nuevaCategoria = new Categoria(nombreNormalizado);
+        nuevaCategoria.setId(generadorIDService.generarID());
+        categoriaRepository.save(nuevaCategoria);
+        return nuevaCategoria;
     }
 }

@@ -62,6 +62,7 @@ public class EventoServiceTest {
         idOrganizadorMock = "ORG-123";
         idEventoMock = "EV-123";
         organizadorMock = new Organizador(idOrganizadorMock, "Juan", "Perez", "78414456", new Usuario("4", "juanp", "password", Rol.ROLE_ORGANIZER));
+        Categoria categoriaMock = new Categoria("MUSICA");
 
         eventoSinId = new Evento(
                 null,
@@ -76,7 +77,7 @@ public class EventoServiceTest {
                 new Precio("ARS", 5000f),
                 null,
                 new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.of(2025, 9, 1, 12, 0))
-                , null, new ArrayList<>());
+                , categoriaMock, new ArrayList<>());
 
         solicitudEvento = new SolicitudEvento(idOrganizadorMock,
                 "Fiesta UTN",
@@ -89,7 +90,7 @@ public class EventoServiceTest {
                 0,
                 new Precio("ARS", 5000f),
                 TipoEstadoEvento.CONFIRMADO,
-                null,
+                categoriaMock,
                 new ArrayList<>());
 
         Categoria categoria1 = new Categoria("MUSICA");
@@ -107,7 +108,7 @@ public class EventoServiceTest {
     public void registrarEventoGuardaEnMemoria() {
         when(organizadorRepository.findById(idOrganizadorMock)).thenReturn(Optional.of(organizadorMock));
         when(generadorIDService.generarID()).thenReturn(idOrganizadorMock);
-        doNothing().when(categoriaService).guardarCategoria(null);
+
 
         Evento resultado = eventoService.registrarEvento(solicitudEvento);
         assertEquals("Fiesta UTN", resultado.titulo());
