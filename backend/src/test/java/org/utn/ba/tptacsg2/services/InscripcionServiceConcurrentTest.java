@@ -84,7 +84,8 @@ class InscripcionServiceConcurrentTest {
                 new Organizador("ORG1", "Org", "Uno", "30111222", null),
                 new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
                 new Categoria("Test"),
-                new ArrayList<>()
+                new ArrayList<>(),
+                null
         );
 
         inscripciones = new ConcurrentHashMap<>();

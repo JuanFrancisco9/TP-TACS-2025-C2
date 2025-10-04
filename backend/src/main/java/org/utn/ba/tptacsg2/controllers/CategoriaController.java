@@ -1,6 +1,7 @@
 package org.utn.ba.tptacsg2.controllers;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,6 +11,7 @@ import org.utn.ba.tptacsg2.services.CategoriaService;
 
 import java.util.List;
 
+@PreAuthorize("hasAnyRole('USER','ADMIN','ORGANIZER')")
 @RestController
 @RequestMapping("/categorias")
 public class CategoriaController {

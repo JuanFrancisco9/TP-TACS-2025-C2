@@ -46,8 +46,7 @@ public class CategoriaService {
         }
 
         // Si no existe, crear nueva categoría
-        Categoria nuevaCategoria = new Categoria(nombreNormalizado);
-        nuevaCategoria.setId(generadorIDService.generarID());
+        Categoria nuevaCategoria = new Categoria(generadorIDService.generarID(), nombreNormalizado);
         categoriaRepository.save(nuevaCategoria);
         return nuevaCategoria;
     }

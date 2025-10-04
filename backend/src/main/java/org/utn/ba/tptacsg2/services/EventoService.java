@@ -3,6 +3,8 @@ package org.utn.ba.tptacsg2.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.utn.ba.tptacsg2.dtos.EventoDTO;
 import org.utn.ba.tptacsg2.dtos.FiltrosDTO;
 import org.utn.ba.tptacsg2.dtos.output.ResultadoBusquedaEvento;
 import org.utn.ba.tptacsg2.helpers.EventPredicateBuilder;
@@ -11,6 +13,7 @@ import org.utn.ba.tptacsg2.models.actors.Participante;
 import org.utn.ba.tptacsg2.models.events.Categoria;
 import org.utn.ba.tptacsg2.models.events.EstadoEvento;
 import org.utn.ba.tptacsg2.models.events.Evento;
+import org.utn.ba.tptacsg2.models.events.Imagen;
 import org.utn.ba.tptacsg2.models.events.SolicitudEvento;
 import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
@@ -35,17 +38,25 @@ public class EventoService {
     private final GeneradorIDService generadorIDService;
     private final EstadoEventoRepositoryDB estadoEventoRepository;
     private final CategoriaService categoriaService;
+    private final R2StorageService r2StorageService;
     @Value("${app.pagination.default-page-size}")
     private Integer tamanioPagina;
 
     @Autowired
-    public EventoService(EventoRepositoryDB eventoRepository, InscripcionRepositoryDB inscripcionRepository, OrganizadorRepositoryDB organizadorRepository, GeneradorIDService generadorIDService,EstadoEventoRepositoryDB estadoEventoRepository, CategoriaService categoriaService) {
+    public EventoService(EventoRepositoryDB eventoRepository,
+                         InscripcionRepositoryDB inscripcionRepository,
+                         OrganizadorRepositoryDB organizadorRepository,
+                         GeneradorIDService generadorIDService,
+                         EstadoEventoRepositoryDB estadoEventoRepository,
+                         CategoriaService categoriaService,
+                         R2StorageService r2StorageService) {
         this.eventoRepository = eventoRepository;
         this.inscripcionRepository = inscripcionRepository;
         this.organizadorRepository = organizadorRepository;
         this.generadorIDService = generadorIDService;
         this.estadoEventoRepository = estadoEventoRepository;
         this.categoriaService = categoriaService;
+        this.r2StorageService = r2StorageService;
     }
 
     public Integer cuposDisponibles(Evento evento) {
@@ -77,7 +88,8 @@ public class EventoService {
                 organizador,
                 estadoInicial,
                 categoria,
-                solicitud.etiquetas()
+                solicitud.etiquetas(),
+                null
         );
 
         estadoInicial.setEvento(evento);
@@ -86,6 +98,75 @@ public class EventoService {
 
 
         return evento;
+    }
+
+    public EventoDTO registrarEventoConImagen(SolicitudEvento solicitud, MultipartFile imagen) {
+        Organizador organizador = organizadorRepository.findById(solicitud.organizadorId())
+                .orElseThrow(() -> new RuntimeException("Organizador no encontrado"));
+
+        EstadoEvento estadoInicial = new EstadoEvento(this.generadorIDService.generarID(), solicitud.estado(), LocalDateTime.now());
+
+        String imagenKey = null;
+
+        // Procesar imagen si está presente
+        if (imagen != null && !imagen.isEmpty()) {
+            try {
+                // Validar tipo de archivo
+                String contentType = imagen.getContentType();
+                if (contentType == null || !contentType.startsWith("image/")) {
+                    throw new RuntimeException("El archivo debe ser una imagen");
+                }
+
+                // Validar tamaño (máximo 5MB)
+                if (imagen.getSize() > 5 * 1024 * 1024) {
+                    throw new RuntimeException("El archivo no puede ser mayor a 5MB");
+                }
+
+                // Subir imagen a R2
+                Long ownerUserId = null;
+                if (solicitud.organizadorId() != null) {
+                    try {
+                        ownerUserId = Long.valueOf(solicitud.organizadorId());
+                    } catch (NumberFormatException ignored) {
+                        ownerUserId = null; // owner opcional cuando el ID no es numérico
+                    }
+                }
+
+                Imagen imagenSubida = r2StorageService.upload(imagen, ownerUserId);
+                imagenKey = imagenSubida.key();
+            } catch (Exception e) {
+                throw new RuntimeException("Error al procesar la imagen: " + e.getMessage());
+            }
+        }
+
+        if (solicitud.categoria() == null || solicitud.categoria().getTipo() == null) {
+            throw new IllegalArgumentException("La categoría es obligatoria");
+        }
+        Categoria categoria = this.categoriaService.obtenerOCrearCategoria(solicitud.categoria().getTipo());
+
+        Evento evento = new Evento(
+                generadorIDService.generarID(),
+                solicitud.titulo(),
+                solicitud.descripcion(),
+                solicitud.fecha(),
+                solicitud.horaInicio(),
+                solicitud.duracion(),
+                solicitud.ubicacion(),
+                solicitud.cupoMaximo(),
+                solicitud.cupoMinimo(),
+                solicitud.precio(),
+                organizador,
+                estadoInicial,
+                categoria,
+                solicitud.etiquetas(),
+                imagenKey
+        );
+
+        estadoInicial.setEvento(evento);
+        this.estadoEventoRepository.save(estadoInicial);
+        eventoRepository.save(evento);
+
+        return convertirAEventoDTO(evento);
     }
 
     public Evento actualizarEvento(String idEvento, Evento eventoUpdate) {
@@ -130,7 +211,8 @@ public class EventoService {
                 eventoUpdate.organizador(),
                 estadoFinal,
                 categoriaFinal,
-                eventoUpdate.etiquetas()
+                eventoUpdate.etiquetas(),
+                eventoUpdate.imagenKey()
         );
 
         // Si se creó un nuevo estado, asociarlo con el evento
@@ -164,7 +246,8 @@ public class EventoService {
                 evento.organizador(),
                 estadoEvento,
                 evento.categoria(),
-                evento.etiquetas()
+                evento.etiquetas(),
+                evento.imagenKey()
         );
 
         eventoRepository.save(eventoActualizado);
@@ -217,6 +300,36 @@ public class EventoService {
 
         List<Evento> eventosFiltradosYPaginados = inicioEventos >= eventosFiltrados.size() ? new ArrayList<>() : eventosFiltrados.subList(inicioEventos, finalEventos);
 
-        return new ResultadoBusquedaEvento(eventosFiltradosYPaginados, filtros.nroPagina() + 1, totalElementos, totalPaginas);
+        // Convertir eventos a DTOs con URLs de imagen
+        List<EventoDTO> eventosDTO = eventosFiltradosYPaginados.stream()
+                .map(this::convertirAEventoDTO)
+                .toList();
+
+        return new ResultadoBusquedaEvento(eventosDTO, filtros.nroPagina() + 1, totalElementos, totalPaginas);
+    }
+
+    private EventoDTO convertirAEventoDTO(Evento evento) {
+        String imagenUrl = null;
+        if (evento.imagenKey() != null) {
+            imagenUrl = r2StorageService.getImageUrl(evento.imagenKey());
+        }
+
+        return new EventoDTO(
+                evento.id(),
+                evento.titulo(),
+                evento.descripcion(),
+                evento.fecha(),
+                evento.horaInicio(),
+                evento.duracion(),
+                evento.ubicacion(),
+                evento.cupoMaximo(),
+                evento.cupoMinimo(),
+                evento.precio(),
+                evento.organizador(),
+                evento.estado(),
+                evento.categoria(),
+                imagenUrl,
+                evento.imagenKey()
+        );
     }
 }

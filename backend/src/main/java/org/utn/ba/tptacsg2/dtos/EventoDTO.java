@@ -2,6 +2,7 @@ package org.utn.ba.tptacsg2.dtos;
 
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.events.EstadoEvento;
+import org.utn.ba.tptacsg2.models.events.Categoria;
 import org.utn.ba.tptacsg2.models.events.Precio;
 import org.utn.ba.tptacsg2.models.events.Ubicacion;
 
@@ -16,7 +17,11 @@ public record EventoDTO(
     Float duracion,
     Ubicacion ubicacion,
     Integer cupoMaximo,
+    Integer cupoMinimo,
     Precio precio,
     Organizador organizador,
-    EstadoEvento estado
+    EstadoEvento estado,
+    Categoria categoria,
+    String imagenUrl,
+    String imagenKey
 ){}

@@ -29,6 +29,7 @@ public record Evento (
      EstadoEvento estado,
      @DBRef
      Categoria categoria,
-     List<String> etiquetas
+     List<String> etiquetas,
+     String imagenKey
 ) {
 }
