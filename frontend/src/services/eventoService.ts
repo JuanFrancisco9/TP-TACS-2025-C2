@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosHeaders } from 'axios';
 import type {Inscripcion} from "../types/inscripciones.ts";
 import authService from "./authService.ts";
 import type {Evento, ResultadoBusquedaEvento, CategoriaDTO } from "../types/evento.ts";
@@ -9,21 +9,34 @@ export class EventoService {
   // URL base del backend
   private static readonly BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-  private static getAuthHeaders() {
-      return authService.getAuthHeaders();
-  }
   // Configuración de axios
   private static readonly api = axios.create({
     baseURL: this.BASE_URL,
     timeout: 10000,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    auth: {
-        username: "usuario",
-        password: "usuario"
-    }
   });
+
+  static {
+    this.api.interceptors.request.use((config) => {
+      const headers = AxiosHeaders.from(config.headers ?? {});
+
+      const rawContentType = headers.get('Content-Type') ?? headers.get('content-type');
+      const currentContentType = typeof rawContentType === 'string' ? rawContentType : null;
+
+      const authHeaders = authService.getAuthHeaders({ contentType: currentContentType });
+      Object.entries(authHeaders).forEach(([key, value]) => {
+        if (value !== undefined) {
+          headers.set(key, String(value));
+        }
+      });
+
+      if (!headers.has('Content-Type') && !(config.data instanceof FormData)) {
+        headers.set('Content-Type', 'application/json');
+      }
+
+      config.headers = headers;
+      return config;
+    });
+  }
 
   // Método para obtener todos los eventos (usando buscarEventos)
   static async obtenerEventos(pagina: number = 0): Promise<{eventos: Evento[], totalPaginas: number, totalElementos: number}> {
@@ -129,9 +142,7 @@ export class EventoService {
     try {
       console.log('🔍 EventoService.actualizarEvento - Actualizando evento ID:', id);
       console.log(evento)
-      const response = await axios.put<Evento>(`${this.BASE_URL}/eventos/${id}`, evento, {
-          headers: this.getAuthHeaders()
-      })
+      const response = await this.api.put<Evento>(`/eventos/${id}`, evento);
       console.log('✅ Evento actualizado:', response.data);
       return response.data;
     } catch (error) {
@@ -198,10 +209,7 @@ export class EventoService {
 
   static async obtenerWaitlistDeEvento(evento: Evento | null): Promise<Inscripcion[]> {
       try{
-          const url = `${this.BASE_URL}/waitlist/${evento?.id}`
-          const response = await axios.get(url, {
-              headers: this.getAuthHeaders()
-          })
+          const response = await this.api.get(`/waitlist/${evento?.id}`);
           return response.data.inscripcionesSinConfirmar
       }catch (error){
           console.log(error)
@@ -211,10 +219,7 @@ export class EventoService {
 
     static async obtenerParticipantesDeEvento(evento: Evento | null): Promise<Participante[]> {
         try{
-            const url = `${this.BASE_URL}/eventos/${evento?.id}/participantes`
-            const response = await axios.get(url,{
-                headers: this.getAuthHeaders()
-            })
+            const response = await this.api.get(`/eventos/${evento?.id}/participantes`)
             return response.data
         }catch (error){
             console.log(error)
@@ -224,10 +229,7 @@ export class EventoService {
 
     static async actualizarEstadoEvento(evento: Evento, estado: String): Promise<Evento> {
         try{
-            const url = `${this.BASE_URL}/eventos/${evento?.id}?estado=${estado}`
-            const response = await axios.patch(url, null, {
-                headers: this.getAuthHeaders()
-            });
+            const response = await this.api.patch(`/eventos/${evento?.id}?estado=${estado}`, null);
             return response.data
         }catch (error){
             console.log(error)
@@ -237,10 +239,7 @@ export class EventoService {
 
     static async obtenerEventosParaOrganizador(organizadorId: string | undefined): Promise<Evento[]> {
         try{
-            const url = `${this.BASE_URL}/organizadores/eventos/${organizadorId}`
-            const response = await axios.get(url,{
-                headers: this.getAuthHeaders()
-            })
+            const response = await this.api.get(`/organizadores/eventos/${organizadorId}`)
             return response.data
         }catch (error){
             console.log(error)
@@ -294,7 +293,9 @@ export class EventoService {
   static async obtenerCategorias(): Promise<string[]> {
     try {
       const url = `/categorias`;
-      const response = await this.api.get<CategoriaDTO[]>(url);
+      const response = await this.api.get<CategoriaDTO[]>(url, {
+        headers: authService.getAuthHeaders({ contentType: 'application/json' }),
+      });
       return (response.data || []).map(c => c.tipo);
     } catch (error) {
       console.error('Error obteniendo categorías:', error);

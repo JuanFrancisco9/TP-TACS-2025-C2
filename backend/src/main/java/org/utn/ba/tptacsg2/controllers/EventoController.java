@@ -31,8 +31,15 @@ public class EventoController {
     }
 
     @PreAuthorize("hasRole('ORGANIZER')")
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<EventoDTO> crearEvento(@RequestBody SolicitudEvento solicitudEvento) {
+        EventoDTO eventoResponse = eventoService.registrarEventoConImagen(solicitudEvento, null);
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventoResponse);
+    }
+
+    @PreAuthorize("hasRole('ORGANIZER')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<EventoDTO> crearEvento(
+    public ResponseEntity<EventoDTO> crearEventoConImagen(
             @RequestPart("evento") SolicitudEvento solicitudEvento,
             @RequestPart(value = "imagen", required = false) MultipartFile imagen) {
         EventoDTO eventoResponse = eventoService.registrarEventoConImagen(solicitudEvento, imagen);

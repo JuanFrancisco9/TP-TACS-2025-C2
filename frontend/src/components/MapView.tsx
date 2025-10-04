@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-import React, { useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
-=======
 import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet';
->>>>>>> origin/main
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -21,7 +16,6 @@ type Props = {
   style?: React.CSSProperties;
 };
 
-// Componente interno para acceder al mapa
 const MapEventHandler: React.FC = () => {
   const map = useMap();
 
@@ -40,7 +34,7 @@ const MapEventHandler: React.FC = () => {
       console.debug('[MapView] Map load complete');
     });
 
-    // recalcular tamaño en cada resize de ventana
+    // Recalcular tamaño en cada resize de ventana
     const handleResize = () => map.invalidateSize();
     window.addEventListener('resize', handleResize);
 
@@ -55,35 +49,6 @@ const MapEventHandler: React.FC = () => {
 };
 
 const MapView: React.FC<Props> = ({ center, zoom = 12, points = [], style }) => {
-<<<<<<< HEAD
-  const mapRef = useRef<L.Map | null>(null);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) {
-      return;
-    }
-
-    console.debug('[MapView] Map ready', { center, zoom, pointsCount: points.length });
-
-    const refreshSize = () => map.invalidateSize();
-    const handleTileError = (e: L.LeafletEvent) => console.error('[MapView] Tile load error', e);
-    const handleLoad = () => console.debug('[MapView] Map load complete');
-
-    setTimeout(refreshSize, 0);
-    map.on('tileerror', handleTileError);
-    map.on('load', handleLoad);
-    window.addEventListener('resize', refreshSize);
-
-    return () => {
-      map.off('tileerror', handleTileError);
-      map.off('load', handleLoad);
-      window.removeEventListener('resize', refreshSize);
-    };
-  }, [center, zoom, points.length]);
-
-=======
->>>>>>> origin/main
   return (
     <div
       style={{
@@ -94,19 +59,13 @@ const MapView: React.FC<Props> = ({ center, zoom = 12, points = [], style }) => 
       }}
     >
       <MapContainer
-<<<<<<< HEAD
-        ref={mapRef}
-=======
->>>>>>> origin/main
         center={center}
         zoom={zoom}
         style={{ flex: 1 }}
-        scrollWheelZoom={true}
+        scrollWheelZoom
       >
         <MapEventHandler />
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         {points.map((p) => (
           <CircleMarker
             key={p.id}
@@ -115,7 +74,7 @@ const MapView: React.FC<Props> = ({ center, zoom = 12, points = [], style }) => 
             pathOptions={{
               color: '#2F1D4A',
               fillColor: '#7d6ae2',
-              fillOpacity: 0.9
+              fillOpacity: 0.9,
             }}
           >
             <Popup>{p.title}</Popup>

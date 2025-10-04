@@ -12,7 +12,6 @@ import {
 } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
-import type { Evento } from '../types/evento.ts';
 
 
 interface EventCardProps {

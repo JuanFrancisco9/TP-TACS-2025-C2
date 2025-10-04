@@ -1,4 +1,4 @@
-package org.utn.ba.tptacsg2.repositories;
+package org.utn.ba.tptacsg2.repositories.db;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;

@@ -4,7 +4,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.utn.ba.tptacsg2.models.events.Imagen;
-import org.utn.ba.tptacsg2.repositories.ImagenRepository;
+import org.utn.ba.tptacsg2.repositories.db.ImagenRepository;
+
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
