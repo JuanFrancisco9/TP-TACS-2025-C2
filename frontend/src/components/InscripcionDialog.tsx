@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert, Button } from '@mui/material';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import CloseIcon from '@mui/icons-material/Close';
+import type { AlertColor } from '@mui/material/Alert';
 
 interface InscripcionDialogProps {
   open: boolean;
@@ -12,6 +13,7 @@ interface InscripcionDialogProps {
   showSnackbar: boolean;
   onSnackbarClose: () => void;
   titulo: string;
+  snackbarSeverity?: AlertColor;
 }
 
 const InscripcionDialog: React.FC<InscripcionDialogProps> = ({
@@ -23,6 +25,7 @@ const InscripcionDialog: React.FC<InscripcionDialogProps> = ({
   showSnackbar,
   onSnackbarClose,
   titulo,
+  snackbarSeverity = 'success',
 }) => (
   <>
     <Dialog open={open} onClose={onClose}>
@@ -74,7 +77,7 @@ const InscripcionDialog: React.FC<InscripcionDialogProps> = ({
     </Dialog>
     {showSnackbar && (
       <Snackbar open={showSnackbar} autoHideDuration={4000} onClose={onSnackbarClose} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-        <Alert onClose={onSnackbarClose} severity={snackbarMsg.startsWith('Error') ? 'error' : 'success'} sx={{ width: '100%' }}>
+        <Alert onClose={onSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
           {snackbarMsg}
         </Alert>
       </Snackbar>
