@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.utn.ba.tptacsg2.dtos.FiltrosDTO;
 import org.utn.ba.tptacsg2.dtos.output.ResultadoBusquedaEvento;
+import org.utn.ba.tptacsg2.exceptions.EventoUpdateInvalidoException;
 import org.utn.ba.tptacsg2.helpers.EventPredicateBuilder;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.actors.Participante;
@@ -18,6 +19,7 @@ import org.utn.ba.tptacsg2.repositories.db.EstadoEventoRepositoryDB;
 import org.utn.ba.tptacsg2.repositories.db.EventoRepositoryDB;
 import org.utn.ba.tptacsg2.repositories.db.InscripcionRepositoryDB;
 import org.utn.ba.tptacsg2.repositories.db.OrganizadorRepositoryDB;
+import org.w3c.dom.events.EventException;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -88,21 +90,23 @@ public class EventoService {
 
     public Evento actualizarEvento(String idEvento, Evento eventoUpdate) {
         if(eventoRepository.findById(idEvento).isPresent()) {
-        Evento eventoActualizado = new Evento(
-                eventoUpdate.id(),
-                eventoUpdate.titulo(),
-                eventoUpdate.descripcion(),
-                eventoUpdate.fecha(),
-                eventoUpdate.horaInicio(),
-                eventoUpdate.duracion(),
-                eventoUpdate.ubicacion(),
-                eventoUpdate.cupoMaximo(),
-                eventoUpdate.cupoMinimo(),
-                eventoUpdate.precio(),
-                eventoUpdate.organizador(),
-                eventoUpdate.estado(),
-                eventoUpdate.categoria(),
-                eventoUpdate.etiquetas()
+            isUpdateValido(idEvento, eventoUpdate);
+
+            Evento eventoActualizado = new Evento(
+                    eventoUpdate.id(),
+                    eventoUpdate.titulo(),
+                    eventoUpdate.descripcion(),
+                    eventoUpdate.fecha(),
+                    eventoUpdate.horaInicio(),
+                    eventoUpdate.duracion(),
+                    eventoUpdate.ubicacion(),
+                    eventoUpdate.cupoMaximo(),
+                    eventoUpdate.cupoMinimo(),
+                    eventoUpdate.precio(),
+                    eventoUpdate.organizador(),
+                    eventoUpdate.estado(),
+                    eventoUpdate.categoria(),
+                    eventoUpdate.etiquetas()
         );
 
         eventoRepository.save(eventoActualizado);
@@ -110,6 +114,16 @@ public class EventoService {
         return eventoActualizado;
         }else  {
             throw new RuntimeException("No existe el evento con el id: " + idEvento);
+        }
+    }
+
+    private void isUpdateValido(String idEvent, Evento eventoUpdate) {
+        Evento eventoActual = eventoRepository.findById(idEvent).orElse(null);
+
+        int cantidadInscriptos = inscripcionRepository.findByEvento_Id(idEvent).size();
+
+        if (eventoUpdate.cupoMaximo() < cantidadInscriptos) {
+            throw new EventoUpdateInvalidoException("Evento tiene una cantidad de inscriptos mayor al cupo maximo que se desea setear");
         }
     }
 
