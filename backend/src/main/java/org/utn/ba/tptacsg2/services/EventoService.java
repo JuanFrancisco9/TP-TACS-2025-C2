@@ -19,13 +19,11 @@ import org.utn.ba.tptacsg2.repositories.db.EventoRepositoryDB;
 import org.utn.ba.tptacsg2.repositories.db.InscripcionRepositoryDB;
 import org.utn.ba.tptacsg2.repositories.db.OrganizadorRepositoryDB;
 
-import java.time.LocalDate;
+import java.time.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Predicate;
-
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 @Service
 public class EventoService {
@@ -35,17 +33,21 @@ public class EventoService {
     private final GeneradorIDService generadorIDService;
     private final EstadoEventoRepositoryDB estadoEventoRepository;
     private final CategoriaService categoriaService;
+    private final RedisCacheService redisCacheService;
     @Value("${app.pagination.default-page-size}")
     private Integer tamanioPagina;
+    private final Duration tiempoDeGracia;
 
     @Autowired
-    public EventoService(EventoRepositoryDB eventoRepository, InscripcionRepositoryDB inscripcionRepository, OrganizadorRepositoryDB organizadorRepository, GeneradorIDService generadorIDService,EstadoEventoRepositoryDB estadoEventoRepository, CategoriaService categoriaService) {
+    public EventoService(EventoRepositoryDB eventoRepository, InscripcionRepositoryDB inscripcionRepository, OrganizadorRepositoryDB organizadorRepository, GeneradorIDService generadorIDService,EstadoEventoRepositoryDB estadoEventoRepository, CategoriaService categoriaService, RedisCacheService redisCacheService) {
         this.eventoRepository = eventoRepository;
         this.inscripcionRepository = inscripcionRepository;
         this.organizadorRepository = organizadorRepository;
         this.generadorIDService = generadorIDService;
         this.estadoEventoRepository = estadoEventoRepository;
         this.categoriaService = categoriaService;
+        this.redisCacheService = redisCacheService;
+        this.tiempoDeGracia = Duration.ofHours(36);
     }
 
     public Integer cuposDisponibles(Evento evento) {
@@ -82,10 +84,18 @@ public class EventoService {
 
         estadoInicial.setEvento(evento);
         this.estadoEventoRepository.save(estadoInicial);
+        this.redisCacheService.crearEventoConCupos(evento.id(), evento.cupoMaximo(), this.fechaExpiracionDeCache(evento));
         eventoRepository.save(evento);
 
 
         return evento;
+    }
+
+    public Instant fechaExpiracionDeCache(Evento evento) {
+        return evento.fecha()
+                .plus(tiempoDeGracia)
+                .atZone(ZoneId.from(evento.fecha()))
+                .toInstant();
     }
 
     public Evento actualizarEvento(String idEvento, Evento eventoUpdate) {

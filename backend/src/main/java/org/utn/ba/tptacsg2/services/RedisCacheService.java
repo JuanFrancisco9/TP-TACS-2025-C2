@@ -6,6 +6,8 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,16 +21,11 @@ public class RedisCacheService {
         this.reservarCupoScript = reservarCupoScript;
     }
 
-    public void put(String key, String value, Duration ttl) {
-        if (ttl != null) {
-            redisTemplate.opsForValue().set(key, value, ttl);
-        } else {
-            redisTemplate.opsForValue().set(key, value);
-        }
-    }
 
-    public void crearEventoConCupos(String id, Integer cupoMaximo) {
-        redisTemplate.opsForValue().set(eventoKey(id), Integer.toString(cupoMaximo));
+    public void crearEventoConCupos(String id, Integer cupoMaximo, Instant expiracion) {
+        String key = eventoKey(id);
+        redisTemplate.opsForValue().set(key, Integer.toString(cupoMaximo));
+        redisTemplate.expireAt(key, Date.from(expiracion));
     }
 
     public boolean reservarCupo(String eventoId) {
