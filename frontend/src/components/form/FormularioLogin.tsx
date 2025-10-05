@@ -6,6 +6,9 @@ import type { LoginRequest } from '../../types/auth';
 import { Rol } from '../../types/auth';
 
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+
 type InputRegistroDto = {
     id?: number | null
     username: string
@@ -107,7 +110,7 @@ export default function FormularioLogin() {
 
         try {
             setSubmitting(true);
-            const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/user`, {
+            const res = await fetch(`${API_BASE_URL}/user`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
