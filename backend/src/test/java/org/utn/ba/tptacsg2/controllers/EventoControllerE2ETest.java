@@ -5,14 +5,14 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.mock.web.MockMultipartFile;
+import org.utn.ba.tptacsg2.dtos.EventoDTO;
 import org.utn.ba.tptacsg2.dtos.FiltrosDTO;
 import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.dtos.output.ResultadoBusquedaEvento;
@@ -33,8 +33,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -78,15 +78,39 @@ public class EventoControllerE2ETest {
                 new Organizador("ORG-1", "Juan", "Perez", "123", null),
                 new EstadoEvento("EST-1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
                 solicitud.categoria(),
-                solicitud.etiquetas()
+                solicitud.etiquetas(),
+                null
         );
 
-        when(eventoService.registrarEvento(any(SolicitudEvento.class)))
-                .thenReturn(eventoCreado);
+        EventoDTO eventoRespuesta = new EventoDTO(
+                eventoCreado.id(),
+                eventoCreado.titulo(),
+                eventoCreado.descripcion(),
+                eventoCreado.fecha(),
+                eventoCreado.horaInicio(),
+                eventoCreado.duracion(),
+                eventoCreado.ubicacion(),
+                eventoCreado.cupoMaximo(),
+                eventoCreado.cupoMinimo(),
+                eventoCreado.precio(),
+                eventoCreado.organizador(),
+                eventoCreado.estado(),
+                eventoCreado.categoria(),
+                null,
+                eventoCreado.imagenKey()
+        );
 
-        mockMvc.perform(post("/eventos")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(solicitud)))
+        when(eventoService.registrarEventoConImagen(any(SolicitudEvento.class), any()))
+                .thenReturn(eventoRespuesta);
+
+        MockMultipartFile eventoPart = new MockMultipartFile(
+                "evento",
+                "evento.json",
+                "application/json",
+                objectMapper.writeValueAsBytes(solicitud)
+        );
+
+        mockMvc.perform(multipart("/eventos").file(eventoPart))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value("EV-001"));
     }
@@ -110,11 +134,30 @@ public class EventoControllerE2ETest {
                 new Organizador("ORG-10", "Ana", "Gomez", "222", null),
                 new EstadoEvento("EST-10", TipoEstadoEvento.PENDIENTE, LocalDateTime.now()),
                 solicitud.categoria(),
-                solicitud.etiquetas()
+                solicitud.etiquetas(),
+                null
         );
 
-        when(eventoService.registrarEvento(any(SolicitudEvento.class)))
-                .thenReturn(eventoCreado);
+        EventoDTO eventoCreadoDTO = new EventoDTO(
+                eventoCreado.id(),
+                eventoCreado.titulo(),
+                eventoCreado.descripcion(),
+                eventoCreado.fecha(),
+                eventoCreado.horaInicio(),
+                eventoCreado.duracion(),
+                eventoCreado.ubicacion(),
+                eventoCreado.cupoMaximo(),
+                eventoCreado.cupoMinimo(),
+                eventoCreado.precio(),
+                eventoCreado.organizador(),
+                eventoCreado.estado(),
+                eventoCreado.categoria(),
+                null,
+                eventoCreado.imagenKey()
+        );
+
+        when(eventoService.registrarEventoConImagen(any(SolicitudEvento.class), any()))
+                .thenReturn(eventoCreadoDTO);
 
         Evento eventoActualizado = new Evento(
                 eventoCreado.id(),
@@ -130,15 +173,21 @@ public class EventoControllerE2ETest {
                 eventoCreado.organizador(),
                 new EstadoEvento("EST-11", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
                 eventoCreado.categoria(),
-                eventoCreado.etiquetas()
+                eventoCreado.etiquetas(),
+                null
         );
 
         when(eventoService.cambiarEstado(eq(eventoCreado.id()), eq(TipoEstadoEvento.CONFIRMADO)))
                 .thenReturn(eventoActualizado);
 
-        mockMvc.perform(post("/eventos")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(solicitud)))
+        MockMultipartFile eventoPart = new MockMultipartFile(
+                "evento",
+                "evento.json",
+                "application/json",
+                objectMapper.writeValueAsBytes(solicitud)
+        );
+
+        mockMvc.perform(multipart("/eventos").file(eventoPart))
                 .andExpect(status().isCreated());
 
         mockMvc.perform(patch("/eventos/" + eventoCreado.id() + "?estado=CONFIRMADO"))
@@ -162,11 +211,30 @@ public class EventoControllerE2ETest {
                 new Organizador("ORG-100", "Carlos", "Lopez", "333", null),
                 new EstadoEvento("EST-100", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
                 new Categoria("TECNOLOGIA"),
-                new ArrayList<>()
+                new ArrayList<>(),
+                null
+        );
+
+        EventoDTO eventoDto = new EventoDTO(
+                evento.id(),
+                evento.titulo(),
+                evento.descripcion(),
+                evento.fecha(),
+                evento.horaInicio(),
+                evento.duracion(),
+                evento.ubicacion(),
+                evento.cupoMaximo(),
+                evento.cupoMinimo(),
+                evento.precio(),
+                evento.organizador(),
+                evento.estado(),
+                evento.categoria(),
+                null,
+                evento.imagenKey()
         );
 
         when(eventoService.buscarEventos(any(FiltrosDTO.class)))
-                .thenReturn(new ResultadoBusquedaEvento(List.of(evento), 1, 1, 1));
+                .thenReturn(new ResultadoBusquedaEvento(List.of(eventoDto), 1, 1, 1));
 
         mockMvc.perform(get("/eventos")
                 .param("palabrasClave", "Musica"))

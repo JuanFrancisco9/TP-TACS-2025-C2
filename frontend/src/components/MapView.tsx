@@ -16,7 +16,6 @@ type Props = {
   style?: React.CSSProperties;
 };
 
-// Componente interno para acceder al mapa
 const MapEventHandler: React.FC = () => {
   const map = useMap();
 
@@ -35,7 +34,7 @@ const MapEventHandler: React.FC = () => {
       console.debug('[MapView] Map load complete');
     });
 
-    // recalcular tamaño en cada resize de ventana
+    // Recalcular tamaño en cada resize de ventana
     const handleResize = () => map.invalidateSize();
     window.addEventListener('resize', handleResize);
 
@@ -63,12 +62,10 @@ const MapView: React.FC<Props> = ({ center, zoom = 12, points = [], style }) => 
         center={center}
         zoom={zoom}
         style={{ flex: 1 }}
-        scrollWheelZoom={true}
+        scrollWheelZoom
       >
         <MapEventHandler />
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         {points.map((p) => (
           <CircleMarker
             key={p.id}
@@ -77,7 +74,7 @@ const MapView: React.FC<Props> = ({ center, zoom = 12, points = [], style }) => 
             pathOptions={{
               color: '#2F1D4A',
               fillColor: '#7d6ae2',
-              fillOpacity: 0.9
+              fillOpacity: 0.9,
             }}
           >
             <Popup>{p.title}</Popup>

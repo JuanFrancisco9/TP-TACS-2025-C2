@@ -1,9 +1,12 @@
 package org.utn.ba.tptacsg2.controllers;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.utn.ba.tptacsg2.dtos.EventoDTO;
 import org.utn.ba.tptacsg2.dtos.FiltrosDTO;
 import org.utn.ba.tptacsg2.dtos.ParticipanteDTO;
 import org.utn.ba.tptacsg2.dtos.output.ResultadoBusquedaEvento;
@@ -11,9 +14,11 @@ import org.utn.ba.tptacsg2.exceptions.InscripcionNoEncontradaException;
 import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.models.events.SolicitudEvento;
 import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
+import org.utn.ba.tptacsg2.models.events.*;
 import org.utn.ba.tptacsg2.services.EventoService;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -26,11 +31,19 @@ public class EventoController {
     }
 
     @PreAuthorize("hasRole('ORGANIZER')")
-    @PostMapping()
-    public ResponseEntity<Evento> crearEvento(@RequestBody SolicitudEvento solicitudEvento) {
-        Evento evento = eventoService.registrarEvento(solicitudEvento);
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<EventoDTO> crearEvento(@RequestBody SolicitudEvento solicitudEvento) {
+        EventoDTO eventoResponse = eventoService.registrarEventoConImagen(solicitudEvento, null);
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventoResponse);
+    }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(evento);
+    @PreAuthorize("hasRole('ORGANIZER')")
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<EventoDTO> crearEventoConImagen(
+            @RequestPart("evento") SolicitudEvento solicitudEvento,
+            @RequestPart(value = "imagen", required = false) MultipartFile imagen) {
+        EventoDTO eventoResponse = eventoService.registrarEventoConImagen(solicitudEvento, imagen);
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventoResponse);
     }
 
     @PreAuthorize("hasRole('ORGANIZER')")
@@ -82,7 +95,7 @@ public class EventoController {
             @RequestParam(required = false) String ubicacion,
             @RequestParam(required = false) Double precioMin,
             @RequestParam(required = false) Double precioMax,
-            @RequestParam() String palabrasClave,
+            @RequestParam(required = false) String palabrasClave,
             @RequestParam(defaultValue = "1") Integer nroPagina){
 
         FiltrosDTO filtros = new FiltrosDTO(fechaInicio, fechaFin, categoria, ubicacion, precioMin, precioMax, palabrasClave, nroPagina);
