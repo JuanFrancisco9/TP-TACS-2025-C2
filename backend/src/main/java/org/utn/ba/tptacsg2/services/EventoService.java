@@ -15,14 +15,13 @@ import org.utn.ba.tptacsg2.models.events.SolicitudEvento;
 import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
-import org.utn.ba.tptacsg2.repositories.db.EstadoEventoRepositoryDB;
-import org.utn.ba.tptacsg2.repositories.db.EventoRepositoryDB;
-import org.utn.ba.tptacsg2.repositories.db.InscripcionRepositoryDB;
-import org.utn.ba.tptacsg2.repositories.db.OrganizadorRepositoryDB;
+import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
+import org.utn.ba.tptacsg2.repositories.db.*;
 import org.w3c.dom.events.EventException;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -37,17 +36,19 @@ public class EventoService {
     private final GeneradorIDService generadorIDService;
     private final EstadoEventoRepositoryDB estadoEventoRepository;
     private final CategoriaService categoriaService;
+    private final EstadoInscripcionRepositoryDB estadoInscripcionRepository;
     @Value("${app.pagination.default-page-size}")
     private Integer tamanioPagina;
 
     @Autowired
-    public EventoService(EventoRepositoryDB eventoRepository, InscripcionRepositoryDB inscripcionRepository, OrganizadorRepositoryDB organizadorRepository, GeneradorIDService generadorIDService,EstadoEventoRepositoryDB estadoEventoRepository, CategoriaService categoriaService) {
+    public EventoService(EventoRepositoryDB eventoRepository, InscripcionRepositoryDB inscripcionRepository, OrganizadorRepositoryDB organizadorRepository, GeneradorIDService generadorIDService, EstadoEventoRepositoryDB estadoEventoRepository, CategoriaService categoriaService, EstadoInscripcionRepositoryDB estadoInscripcionRepository) {
         this.eventoRepository = eventoRepository;
         this.inscripcionRepository = inscripcionRepository;
         this.organizadorRepository = organizadorRepository;
         this.generadorIDService = generadorIDService;
         this.estadoEventoRepository = estadoEventoRepository;
         this.categoriaService = categoriaService;
+        this.estadoInscripcionRepository = estadoInscripcionRepository;
     }
 
     public Integer cuposDisponibles(Evento evento) {
@@ -154,6 +155,44 @@ public class EventoService {
 
         return eventoActualizado;
     }
+
+    // Mucho texto pero no es para tanto
+    private void actualizarInscripciones(Evento evento, TipoEstadoEvento tipoEstadoEvento) {
+        // Obtengo todas las inscripciones que no estén canceladas (esas ya fueron, no me interesan)
+        List<Inscripcion> inscripciones = inscripcionRepository.findByEvento_Id(evento.id()).stream()
+                .filter(i -> {return !(i.estado().getTipoEstado().equals(TipoEstadoInscripcion.CANCELADA));})
+                .toList();
+
+        switch (tipoEstadoEvento) {
+            case CONFIRMADO -> { // Pasa todas las primeras n inscripciones (no canceladas) a CONFIRMADAS
+                inscripciones.sort(Comparator.comparing(Inscripcion::fechaRegistro));
+
+                for(int i=0; i < Math.min(evento.cupoMaximo(), inscripciones.size()); i++) {
+                    Inscripcion inscripcion = inscripciones.get(i);
+                    estadoInscripcionRepository.save(inscripcion.estado().updateEstado(TipoEstadoInscripcion.ACEPTADA));
+                }
+
+                return;
+            }
+            case PENDIENTE -> { // Pasa todas las inscripciones en estado ACEPTADA a PENDIENTE
+                inscripciones.stream()
+                        .filter(i -> {return i.estado().getTipoEstado().equals(TipoEstadoInscripcion.ACEPTADA);})
+                        .forEach(i -> {estadoInscripcionRepository.save(i.estado().updateEstado(TipoEstadoInscripcion.PENDIENTE));});
+                return;
+            }
+            case CANCELADO -> { // Cancelo todas las inscripciones
+                inscripciones.forEach(i -> {estadoInscripcionRepository.save(i.estado().updateEstado(TipoEstadoInscripcion.CANCELADA));});
+                return;
+            }
+            case NO_ACEPTA_INSCRIPCIONES -> { // Do nothing
+                return;
+            }
+            default -> {
+                throw new RuntimeException("No existe el estado de evento: " + tipoEstadoEvento);
+            }
+        }
+    }
+
 
     public Evento getEvento(String eventoId){
         return eventoRepository.findById(eventoId).orElseThrow(()-> new RuntimeException("Evento " + eventoId + " no encontrado"));

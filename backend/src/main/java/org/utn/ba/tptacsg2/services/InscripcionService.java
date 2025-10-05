@@ -1,6 +1,8 @@
 package org.utn.ba.tptacsg2.services;
 
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.utn.ba.tptacsg2.dtos.output.Waitlist;
 import org.utn.ba.tptacsg2.exceptions.EventoNoEncontradoException;
@@ -188,5 +190,13 @@ public class InscripcionService {
                 .orElseThrow(() -> new EventoNoEncontradoException("No se encontró el evento con ID: " + eventoId));
 
         return new Waitlist(inscripcionRepository.findWaitlistByEventoOrderByFechaAsc(evento.id(), TipoEstadoInscripcion.PENDIENTE), evento);
+    }
+
+    public void actualizarEstado(Inscripcion inscripcion, TipoEstadoInscripcion tipoEstadoInscripcion) {
+        estadoInscripcionRepository.save(inscripcion.estado().updateEstado(tipoEstadoInscripcion));
+    }
+
+    public ResponseEntity<List<Inscripcion>> getAll() {
+        return ResponseEntity.ok(inscripcionRepository.findAll());
     }
 }
