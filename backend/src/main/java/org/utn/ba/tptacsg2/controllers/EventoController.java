@@ -95,7 +95,7 @@ public class EventoController {
             @RequestParam(required = false) String ubicacion,
             @RequestParam(required = false) Double precioMin,
             @RequestParam(required = false) Double precioMax,
-            @RequestParam() String palabrasClave,
+            @RequestParam(required = false) String palabrasClave,
             @RequestParam(defaultValue = "1") Integer nroPagina){
 
         FiltrosDTO filtros = new FiltrosDTO(fechaInicio, fechaFin, categoria, ubicacion, precioMin, precioMax, palabrasClave, nroPagina);
