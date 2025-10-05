@@ -117,7 +117,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                 organizador,
                 estadoEvento,
                 categoria,
-                Arrays.asList("Java", "Spring", "Microservicios")
+                Arrays.asList("Java", "Spring", "Microservicios"),
+                null
         );
 
         evento = eventoRepositoryDB.save(evento);
