@@ -26,8 +26,16 @@ import { getCategoryIconFor } from '../utils/categoryIcons';
 const eventosToPoints = (eventos: Evento[]): MapPoint[] => {
   return eventos
     .map((ev) => {
-      const lat = Number((ev as any)?.ubicacion?.latitud);
-      const lon = Number((ev as any)?.ubicacion?.longitud);
+      if (ev.ubicacion?.esVirtual) {
+        return null;
+      }
+      const latRaw = ev.ubicacion?.latitud;
+      const lonRaw = ev.ubicacion?.longitud;
+      if (latRaw == null || lonRaw == null) {
+        return null;
+      }
+      const lat = Number(latRaw);
+      const lon = Number(lonRaw);
       if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
       return {
         id: ev.id,

@@ -62,7 +62,7 @@ public class EventoControllerE2ETest {
 
         Categoria categoria1 = new Categoria("Musica");
 
-        SolicitudEvento solicitud = new SolicitudEvento("1",  "Concierto de rock vivo", "Musica", LocalDateTime.of(2025, 9, 10, 20, 0), "20:00", 2f, new Ubicacion("", "", "La Plata", "CABA"), 100,0, new Precio("ARS", 1000f), TipoEstadoEvento.CONFIRMADO, categoria1, new ArrayList<>());
+        SolicitudEvento solicitud = new SolicitudEvento("1",  "Concierto de rock vivo", "Musica", LocalDateTime.of(2025, 9, 10, 20, 0), "20:00", 2f, new Ubicacion("", "", "Buenos Aires", "La Plata", "Teatro Argentino", false, null), 100,0, new Precio("ARS", 1000f), TipoEstadoEvento.CONFIRMADO, categoria1, new ArrayList<>());
 
         Evento eventoCreado = new Evento(
                 "EV-001",
@@ -119,7 +119,7 @@ public class EventoControllerE2ETest {
     void modificarEvento_deberiaRetornar200YEventoActualizado() throws Exception {
         Categoria categoria1 = new Categoria("Musica");
 
-        SolicitudEvento solicitud = new SolicitudEvento("2", "Festival Jazz", "Musica", LocalDateTime.of(2025, 10, 5, 18, 0), "18:00", 2f, new Ubicacion("", "", "Rosario", "Santa Fe"), 200,0, new Precio("ARS", 2000f), TipoEstadoEvento.PENDIENTE, categoria1,new ArrayList<>());
+        SolicitudEvento solicitud = new SolicitudEvento("2", "Festival Jazz", "Musica", LocalDateTime.of(2025, 10, 5, 18, 0), "18:00", 2f, new Ubicacion("", "", "Santa Fe", "Rosario", "Centro Cultural", false, null), 200,0, new Precio("ARS", 2000f), TipoEstadoEvento.PENDIENTE, categoria1,new ArrayList<>());
         Evento eventoCreado = new Evento(
                 "EV-010",
                 solicitud.titulo(),
@@ -204,7 +204,7 @@ public class EventoControllerE2ETest {
                 LocalDateTime.now(),
                 "20:00",
                 1.0f,
-                new Ubicacion("", "", "CABA", ""),
+                new Ubicacion("", "", "Ciudad Autónoma de Buenos Aires", "CABA", "Sala conferencia", false, null),
                 10,
                 0,
                 new Precio("ARS", 500f),
@@ -240,5 +240,52 @@ public class EventoControllerE2ETest {
                 .param("palabrasClave", "Musica"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.eventos").isArray());
+    }
+
+    @Test
+    void obtenerEventoPorId_deberiaRetornar200YEvento() throws Exception {
+        Evento evento = new Evento(
+                "EV-555",
+                "Foro de tecnología",
+                "Encuentro con especialistas del sector",
+                LocalDateTime.of(2026, 3, 15, 10, 0),
+                "10:00",
+                3.0f,
+                new Ubicacion("-34.6", "-58.38", "Buenos Aires", "CABA", "Centro de convenciones", false, null),
+                200,
+                50,
+                new Precio("ARS", 15000f),
+                new Organizador("ORG-555", "Laura", "Martinez", "789", null),
+                new EstadoEvento("EST-555", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
+                new Categoria("TECNOLOGIA"),
+                List.of("tech", "foro"),
+                "imagen-key"
+        );
+
+        EventoDTO eventoDto = new EventoDTO(
+                evento.id(),
+                evento.titulo(),
+                evento.descripcion(),
+                evento.fecha(),
+                evento.horaInicio(),
+                evento.duracion(),
+                evento.ubicacion(),
+                evento.cupoMaximo(),
+                evento.cupoMinimo(),
+                evento.precio(),
+                evento.organizador(),
+                evento.estado(),
+                evento.categoria(),
+                "https://example.com/imagen.jpg",
+                evento.imagenKey()
+        );
+
+        when(eventoService.obtenerEventoPorId(evento.id())).thenReturn(eventoDto);
+
+        mockMvc.perform(get("/eventos/" + evento.id()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value("EV-555"))
+                .andExpect(jsonPath("$.titulo").value("Foro de tecnología"))
+                .andExpect(jsonPath("$.imagenUrl").value("https://example.com/imagen.jpg"));
     }
 }

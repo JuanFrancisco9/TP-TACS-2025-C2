@@ -8,6 +8,7 @@ import org.utn.ba.tptacsg2.dtos.EventoDTO;
 import org.utn.ba.tptacsg2.dtos.FiltrosDTO;
 import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.dtos.output.ResultadoBusquedaEvento;
+import org.utn.ba.tptacsg2.exceptions.EventoNoEncontradoException;
 import org.utn.ba.tptacsg2.helpers.EventPredicateBuilder;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.actors.Participante;
@@ -16,12 +17,17 @@ import org.utn.ba.tptacsg2.models.events.EstadoEvento;
 import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.models.events.Imagen;
 import org.utn.ba.tptacsg2.models.events.SolicitudEvento;
+import org.utn.ba.tptacsg2.models.events.Ubicacion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
+import org.utn.ba.tptacsg2.models.location.Localidad;
+import org.utn.ba.tptacsg2.models.location.Provincia;
 import org.utn.ba.tptacsg2.repositories.db.EstadoEventoRepositoryDB;
 import org.utn.ba.tptacsg2.repositories.db.EventoRepositoryDB;
 import org.utn.ba.tptacsg2.repositories.db.InscripcionRepositoryDB;
 import org.utn.ba.tptacsg2.repositories.db.OrganizadorRepositoryDB;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.*;
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,9 +44,26 @@ public class EventoService {
     private final CategoriaService categoriaService;
     private final R2StorageService r2StorageService;
     private final RedisCacheService redisCacheService;
+    private final UbicacionCatalogService ubicacionCatalogService;
     @Value("${app.pagination.default-page-size}")
     private Integer tamanioPagina;
     private final Duration tiempoDeGracia;
+    private static final List<String> ALLOWED_VIRTUAL_DOMAINS = List.of(
+            "meet.google.com",
+            "zoom.us",
+            "zoom.com",
+            "teams.microsoft.com",
+            "msteams.link",
+            "webex.com",
+            "gotomeet.me",
+            "gotomeeting.com",
+            "whereby.com",
+            "jitsi.org",
+            "discord.com",
+            "youtube.com",
+            "youtu.be",
+            "twitch.tv"
+    );
 
     @Autowired
     public EventoService(EventoRepositoryDB eventoRepository,
@@ -50,7 +73,8 @@ public class EventoService {
                          EstadoEventoRepositoryDB estadoEventoRepository,
                          CategoriaService categoriaService,
                          R2StorageService r2StorageService,
-                         RedisCacheService redisCacheService) {
+                         RedisCacheService redisCacheService,
+                         UbicacionCatalogService ubicacionCatalogService) {
         this.eventoRepository = eventoRepository;
         this.inscripcionRepository = inscripcionRepository;
         this.organizadorRepository = organizadorRepository;
@@ -59,6 +83,7 @@ public class EventoService {
         this.categoriaService = categoriaService;
         this.r2StorageService = r2StorageService;
         this.redisCacheService = redisCacheService;
+        this.ubicacionCatalogService = ubicacionCatalogService;
         this.tiempoDeGracia = Duration.ofHours(36);
     }
 
@@ -77,6 +102,8 @@ public class EventoService {
         // Obtener o crear la categoría basándose en el nombre que viene del frontend
         Categoria categoria = this.categoriaService.obtenerOCrearCategoria(solicitud.categoria());
 
+        Ubicacion ubicacionNormalizada = prepararUbicacion(solicitud.ubicacion());
+
         Evento evento = new Evento(
                 generadorIDService.generarID(),
                 solicitud.titulo(),
@@ -84,7 +111,7 @@ public class EventoService {
                 solicitud.fecha(),
                 solicitud.horaInicio(),
                 solicitud.duracion(),
-                solicitud.ubicacion(),
+                ubicacionNormalizada,
                 solicitud.cupoMaximo(),
                 solicitud.cupoMinimo(),
                 solicitud.precio(),
@@ -148,6 +175,8 @@ public class EventoService {
         }
         Categoria categoria = this.categoriaService.obtenerOCrearCategoria(solicitud.categoria());
 
+        Ubicacion ubicacionNormalizada = prepararUbicacion(solicitud.ubicacion());
+
         Evento evento = new Evento(
                 generadorIDService.generarID(),
                 solicitud.titulo(),
@@ -155,7 +184,7 @@ public class EventoService {
                 solicitud.fecha(),
                 solicitud.horaInicio(),
                 solicitud.duracion(),
-                solicitud.ubicacion(),
+                ubicacionNormalizada,
                 solicitud.cupoMaximo(),
                 solicitud.cupoMinimo(),
                 solicitud.precio(),
@@ -170,7 +199,106 @@ public class EventoService {
         this.estadoEventoRepository.save(estadoInicial);
         eventoRepository.save(evento);
 
-        return convertirAEventoDTO(evento);
+        return mapearEventoDTO(evento);
+    }
+
+    private void validarUbicacionVirtual(org.utn.ba.tptacsg2.models.events.Ubicacion ubicacion) {
+        if (ubicacion == null) {
+            throw new IllegalArgumentException("La ubicación del evento es obligatoria.");
+        }
+
+        if (ubicacion.esVirtual()) {
+            String enlace = ubicacion.enlaceVirtual();
+            if (enlace == null || enlace.isBlank()) {
+                throw new IllegalArgumentException("Ingresá el enlace del evento virtual.");
+            }
+
+            URI uri;
+            try {
+                uri = new URI(enlace.trim());
+            } catch (URISyntaxException e) {
+                throw new IllegalArgumentException("El enlace del evento virtual no tiene un formato válido.");
+            }
+
+            if (!"https".equalsIgnoreCase(uri.getScheme())) {
+                throw new IllegalArgumentException("El enlace del evento virtual debe utilizar HTTPS.");
+            }
+
+            String host = uri.getHost();
+            if (host == null || host.isBlank()) {
+                throw new IllegalArgumentException("El enlace del evento virtual debe incluir un dominio válido.");
+            }
+
+            String hostLower = host.toLowerCase();
+            boolean permitido = ALLOWED_VIRTUAL_DOMAINS.stream()
+                    .map(String::toLowerCase)
+                    .anyMatch(dominio -> hostLower.equals(dominio) || hostLower.endsWith("." + dominio));
+
+            if (!permitido) {
+                throw new IllegalArgumentException("El dominio del enlace virtual no está permitido.");
+            }
+
+            if (uri.getUserInfo() != null && !uri.getUserInfo().isBlank()) {
+                throw new IllegalArgumentException("El enlace del evento virtual no debe contener credenciales.");
+            }
+        }
+    }
+
+    private Ubicacion prepararUbicacion(Ubicacion ubicacion) {
+        if (ubicacion == null) {
+            throw new IllegalArgumentException("La ubicación del evento es obligatoria.");
+        }
+
+        if (ubicacion.esVirtual()) {
+            validarUbicacionVirtual(ubicacion);
+            String enlace = ubicacion.enlaceVirtual() == null ? null : ubicacion.enlaceVirtual().trim();
+            return Ubicacion.virtual(enlace);
+        }
+
+        return normalizarUbicacionPresencial(ubicacion);
+    }
+
+    private Ubicacion normalizarUbicacionPresencial(Ubicacion ubicacion) {
+        String provinciaNombre = ubicacion.provincia() != null ? ubicacion.provincia().trim() : "";
+        if (provinciaNombre.isEmpty()) {
+            throw new IllegalArgumentException("Seleccioná una provincia válida.");
+        }
+
+        Provincia provincia = ubicacionCatalogService.buscarProvinciaPorNombre(provinciaNombre)
+                .orElseThrow(() -> new IllegalArgumentException("La provincia " + provinciaNombre + " no está registrada."));
+
+        String localidadNombre = ubicacion.localidad() != null ? ubicacion.localidad().trim() : "";
+        if (localidadNombre.isEmpty()) {
+            throw new IllegalArgumentException("Seleccioná una localidad válida.");
+        }
+
+        Localidad localidad = ubicacionCatalogService.buscarLocalidadPorNombreYProvincia(localidadNombre, provincia.getId())
+                .orElseThrow(() -> new IllegalArgumentException("La localidad " + localidadNombre + " no existe en la provincia " + provincia.getNombre() + "."));
+
+        String direccion = ubicacion.direccion() != null ? ubicacion.direccion().trim() : "";
+        if (direccion.isEmpty()) {
+            throw new IllegalArgumentException("Ingresá la dirección del evento presencial.");
+        }
+
+        String latitud = ubicacion.latitud();
+        String longitud = ubicacion.longitud();
+
+        if ((latitud == null || latitud.isBlank()) && localidad.getLatitud() != null) {
+            latitud = localidad.getLatitud().toString();
+        }
+        if ((longitud == null || longitud.isBlank()) && localidad.getLongitud() != null) {
+            longitud = localidad.getLongitud().toString();
+        }
+
+        return new Ubicacion(
+                latitud != null && !latitud.isBlank() ? latitud.trim() : null,
+                longitud != null && !longitud.isBlank() ? longitud.trim() : null,
+                provincia.getNombre(),
+                localidad.getNombre(),
+                direccion,
+                false,
+                null
+        );
     }
 
     public Instant fechaExpiracionDeCache(Evento evento) {
@@ -183,6 +311,8 @@ public class EventoService {
     public Evento actualizarEvento(String idEvento, Evento eventoUpdate) {
         Evento eventoExistente = eventoRepository.findById(idEvento)
                 .orElseThrow(() -> new RuntimeException("No existe el evento con el id: " + idEvento));
+
+        Ubicacion ubicacionNormalizada = prepararUbicacion(eventoUpdate.ubicacion());
 
         // Verificar si el estado cambió
         EstadoEvento estadoFinal;
@@ -215,7 +345,7 @@ public class EventoService {
                 eventoUpdate.fecha(),
                 eventoUpdate.horaInicio(),
                 eventoUpdate.duracion(),
-                eventoUpdate.ubicacion(),
+                ubicacionNormalizada,
                 eventoUpdate.cupoMaximo(),
                 eventoUpdate.cupoMinimo(),
                 eventoUpdate.precio(),
@@ -313,13 +443,19 @@ public class EventoService {
 
         // Convertir eventos a DTOs con URLs de imagen
         List<EventoDTO> eventosDTO = eventosFiltradosYPaginados.stream()
-                .map(this::convertirAEventoDTO)
+                .map(this::mapearEventoDTO)
                 .toList();
 
         return new ResultadoBusquedaEvento(eventosDTO, filtros.nroPagina() + 1, totalElementos, totalPaginas);
     }
 
-    private EventoDTO convertirAEventoDTO(Evento evento) {
+    public EventoDTO obtenerEventoPorId(String eventoId) {
+        Evento evento = eventoRepository.findById(eventoId)
+                .orElseThrow(() -> new EventoNoEncontradoException("No se encontró el evento con ID: " + eventoId));
+        return mapearEventoDTO(evento);
+    }
+
+    public EventoDTO mapearEventoDTO(Evento evento) {
         String imagenUrl = null;
         if (evento.imagenKey() != null) {
             imagenUrl = r2StorageService.getImageUrl(evento.imagenKey());

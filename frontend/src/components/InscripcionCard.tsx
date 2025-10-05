@@ -89,26 +89,25 @@ const InscripcionCard: React.FC<InscripcionCardProps> = ({
         }}
       >
         <Box
+          component="img"
+          src={inscripcion.evento.imagenUrl ?? inscripcion.evento.imagen ?? `/logo.PNG`}
+          alt={inscripcion.evento.titulo}
           sx={{
             width: '100%',
             height: 160,
-            backgroundColor: '#f5f5f5',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            objectFit: 'cover',
             cursor: 'pointer',
-            transition: 'background-color 0.3s',
-            ':hover': { backgroundColor: '#eeeeee' }
+            transition: 'filter 0.3s',
+            ':hover': { filter: 'brightness(0.95)' }
           }}
           onClick={onVerDetalle}
           tabIndex={0}
           role="button"
           aria-label={`Ver detalles de ${inscripcion.evento.titulo}`}
-        >
-          <Typography variant="h4" color="text.secondary">
-            📅
-          </Typography>
-        </Box>
+          onError={(event) => {
+            (event.currentTarget as HTMLImageElement).src = '/logo.PNG';
+          }}
+        />
 
         <Box sx={{ p: 1.5 }}>
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
