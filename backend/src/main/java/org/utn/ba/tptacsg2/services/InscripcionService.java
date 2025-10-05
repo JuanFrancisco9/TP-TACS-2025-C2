@@ -33,12 +33,13 @@ public class InscripcionService {
     private final GeneradorIDService generadorIDService;
     private final EstadoInscripcionRepositoryDB estadoInscripcionRepository;
     private final EventoLockService eventoLockService;
+    private final RedisCacheService redisCacheService;
 
     @Autowired
     public InscripcionService (EventoRepositoryDB eventoRepository, InscripcionRepositoryDB inscripcionRepository,
                                WaitlistService waitlistService, GeneradorIDService generadorIDService,
                                EventoService eventoService, EstadoInscripcionRepositoryDB estadoInscripcionRepository,
-                               EventoLockService eventoLockService) {
+                               EventoLockService eventoLockService, RedisCacheService redisCacheService) {
         this.eventoRepository = eventoRepository;
         this.inscripcionRepository = inscripcionRepository;
         this.waitlistService = waitlistService;
@@ -46,6 +47,7 @@ public class InscripcionService {
         this.eventoService = eventoService;
         this.estadoInscripcionRepository = estadoInscripcionRepository;
         this.eventoLockService = eventoLockService;
+        this.redisCacheService = redisCacheService;
     }
 
     public Inscripcion inscribir(SolicitudInscripcion solicitud) {
@@ -53,36 +55,63 @@ public class InscripcionService {
                         .orElseThrow(() -> new EventoNoEncontradoException("No se encontró el evento " + solicitud.evento_id()));
 
         if(evento.estado().getTipoEstado() == TipoEstadoEvento.CONFIRMADO) {
-            ReentrantLock lock = eventoLockService.getLock(evento.id());
-            try {
-                lock.lock();
-                this.validarParticipanteNoInscripto(solicitud, evento);
-                if (eventoService.cuposDisponibles(evento) <= 0) {
-                    Inscripcion inscripcionPendiente = this.waitlistService.inscribirAWaitlist(solicitud);
-                    this.inscripcionRepository.save(inscripcionPendiente);
-                    return inscripcionPendiente;
-                }
 
-                EstadoInscripcion estadoInscripcionAceptada = new EstadoInscripcion(this.generadorIDService.generarID(), TipoEstadoInscripcion.ACEPTADA, LocalDateTime.now());
-
-                Inscripcion inscripcionAceptada = new Inscripcion(
-                        generadorIDService.generarID(),
-                        solicitud.participante(),
-                        LocalDateTime.now(),
-                        estadoInscripcionAceptada,
-                        evento
-                );
-
-                estadoInscripcionAceptada.setInscripcion(inscripcionAceptada);
-                //TODO chequear cómo se maneja esto en Mongo
-
-                inscripcionRepository.save(inscripcionAceptada);
-                this.estadoInscripcionRepository.save(estadoInscripcionAceptada);
-                return inscripcionAceptada;
-
-            } finally {
-                lock.unlock();
+            // Caso en que no hay más cupos, voy a la waitlist
+            if (!redisCacheService.reservarCupo(solicitud.evento_id())) {
+                Inscripcion inscripcionPendiente = this.waitlistService.inscribirAWaitlist(solicitud);
+                this.inscripcionRepository.save(inscripcionPendiente);
+                return inscripcionPendiente;
             }
+
+            // Caso feliz, hay cupos, me inscribo
+
+            EstadoInscripcion estadoInscripcionAceptada = new EstadoInscripcion(this.generadorIDService.generarID(), TipoEstadoInscripcion.ACEPTADA, LocalDateTime.now());
+
+            Inscripcion inscripcionAceptada = new Inscripcion(
+                    generadorIDService.generarID(),
+                    solicitud.participante(),
+                    LocalDateTime.now(),
+                    estadoInscripcionAceptada,
+                    evento
+            );
+
+            estadoInscripcionAceptada.setInscripcion(inscripcionAceptada);
+            //TODO chequear cómo se maneja esto en Mongo
+
+            inscripcionRepository.save(inscripcionAceptada);
+            this.estadoInscripcionRepository.save(estadoInscripcionAceptada);
+            return inscripcionAceptada;
+
+//            ReentrantLock lock = eventoLockService.getLock(evento.id());
+//            try {
+//                lock.lock();
+//                this.validarParticipanteNoInscripto(solicitud, evento);
+//                if (eventoService.cuposDisponibles(evento) <= 0) {
+//                    Inscripcion inscripcionPendiente = this.waitlistService.inscribirAWaitlist(solicitud);
+//                    this.inscripcionRepository.save(inscripcionPendiente);
+//                    return inscripcionPendiente;
+//                }
+//
+//                EstadoInscripcion estadoInscripcionAceptada = new EstadoInscripcion(this.generadorIDService.generarID(), TipoEstadoInscripcion.ACEPTADA, LocalDateTime.now());
+//
+//                Inscripcion inscripcionAceptada = new Inscripcion(
+//                        generadorIDService.generarID(),
+//                        solicitud.participante(),
+//                        LocalDateTime.now(),
+//                        estadoInscripcionAceptada,
+//                        evento
+//                );
+//
+//                estadoInscripcionAceptada.setInscripcion(inscripcionAceptada);
+//                //TODO chequear cómo se maneja esto en Mongo
+//
+//                inscripcionRepository.save(inscripcionAceptada);
+//                this.estadoInscripcionRepository.save(estadoInscripcionAceptada);
+//                return inscripcionAceptada;
+//
+//            } finally {
+//                lock.unlock();
+//            }
         }
 
         else {
