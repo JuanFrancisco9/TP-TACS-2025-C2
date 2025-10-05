@@ -9,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
+import org.utn.ba.tptacsg2.dtos.InscripcionDTO;
 import org.utn.ba.tptacsg2.services.ParticipanteService;
 
 import java.util.Arrays;
@@ -38,8 +38,8 @@ class ParticipanteControllerTest {
     void getInscripcionesDeUsuario_devuelve200YListaDeInscripciones() throws Exception {
 
         String idUsuario = "usuario1";
-        Inscripcion inscripcion1 = org.mockito.Mockito.mock(Inscripcion.class);
-        Inscripcion inscripcion2 = org.mockito.Mockito.mock(Inscripcion.class);
+        InscripcionDTO inscripcion1 = new InscripcionDTO("1", null, null, null, null);
+        InscripcionDTO inscripcion2 = new InscripcionDTO("2", null, null, null, null);
 
         when(participanteService.getInscripcionesDeParticipante(idUsuario))
             .thenReturn(Arrays.asList(inscripcion1, inscripcion2));
