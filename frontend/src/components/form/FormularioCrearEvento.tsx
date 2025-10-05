@@ -9,8 +9,11 @@ import {
     MenuItem,
 } from "@mui/material";
 import authService from "../../services/authService";
+import { CATEGORY_PRESETS } from "../../utils/categoryIcons";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+const buildDefaultCategoria = () => (CATEGORY_PRESETS[0] ? { ...CATEGORY_PRESETS[0] } : { tipo: "", icono: undefined });
 
 type Ubicacion = {
     latitud: string;
@@ -32,6 +35,7 @@ type TipoEstadoEvento =
 
 type Categoria = {
     tipo: string; // clase con un único campo
+    icono?: string;
 };
 
 type SolicitudEventoDto = {
@@ -79,7 +83,7 @@ export default function FormularioCrearEvento() {
     const [precioCantidad, setPrecioCantidad] = React.useState<string>("");
 
     const [estado, setEstado] = React.useState<TipoEstadoEvento>("PENDIENTE");
-    const [categoriaTipo, setCategoriaTipo] = React.useState("");
+    const [categoriaSeleccionada, setCategoriaSeleccionada] = React.useState<Categoria>(buildDefaultCategoria);
 
     const [etiquetasCSV, setEtiquetasCSV] = React.useState("");
     const [imagen, setImagen] = React.useState<File | null>(null);
@@ -93,6 +97,12 @@ export default function FormularioCrearEvento() {
         setImagen(file ?? null);
     };
 
+    const handleCategoriaChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = event.target.value;
+        const preset = CATEGORY_PRESETS.find((categoria) => categoria.tipo === value);
+        setCategoriaSeleccionada(preset ? { ...preset } : buildDefaultCategoria());
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setErrorMsg(null);
@@ -102,8 +112,8 @@ export default function FormularioCrearEvento() {
             setErrorMsg("Completá título, fecha y hora de inicio.");
             return;
         }
-        if (!categoriaTipo) {
-            setErrorMsg("Ingresá la categoría (campo 'tipo').");
+        if (!categoriaSeleccionada || !categoriaSeleccionada.tipo) {
+            setErrorMsg("Debés seleccionar una categoría.");
             return;
         }
 
@@ -134,7 +144,10 @@ export default function FormularioCrearEvento() {
                 ? { moneda: (precioMoneda || "ARS").toUpperCase(), cantidad: parseFloat(precioCantidad) }
                 : null,
             estado,
-            categoria: { tipo: categoriaTipo.trim() },
+            categoria: {
+                tipo: categoriaSeleccionada.tipo,
+                icono: categoriaSeleccionada.icono,
+            },
             etiquetas: etiquetasCSV.split(",").map(s => s.trim()).filter(Boolean),
         };
 
@@ -183,7 +196,7 @@ export default function FormularioCrearEvento() {
             setPrecioCantidad("");
             setPrecioMoneda("ARS");
             setEstado("PENDIENTE");
-            setCategoriaTipo("");
+            setCategoriaSeleccionada(buildDefaultCategoria());
             setEtiquetasCSV("");
             setImagen(null);
         } catch (err: any) {
@@ -293,14 +306,21 @@ export default function FormularioCrearEvento() {
 
                 <Grid size={{xs:12,sm:6}}>
                     <TextField
-                        label="Categoría (categoria.tipo)"
-                        value={categoriaTipo}
-                        onChange={(e) => setCategoriaTipo(e.target.value)}
+                        select
+                        label="Categoría"
+                        value={categoriaSeleccionada.tipo}
+                        onChange={handleCategoriaChange}
                         fullWidth
                         required
                         disabled={submitting}
-                        helperText="Se enviará como { tipo: '...' }"
-                    />
+                        helperText="Se enviará el icono asociado automáticamente"
+                    >
+                        {CATEGORY_PRESETS.map((cat) => (
+                            <MenuItem key={cat.tipo} value={cat.tipo}>
+                                {cat.tipo}
+                            </MenuItem>
+                        ))}
+                    </TextField>
                 </Grid>
 
                 {/* Cupos */}

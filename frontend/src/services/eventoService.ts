@@ -290,13 +290,11 @@ export class EventoService {
   }
 
   // Obtener lista de categorías desde el backend
-  static async obtenerCategorias(): Promise<string[]> {
+  static async obtenerCategorias(): Promise<CategoriaDTO[]> {
     try {
       const url = `/categorias`;
-      const response = await this.api.get<CategoriaDTO[]>(url, {
-        headers: authService.getAuthHeaders({ contentType: 'application/json' }),
-      });
-      return (response.data || []).map(c => c.tipo);
+      const response = await this.api.get<CategoriaDTO[]>(url);
+      return response.data ?? [];
     } catch (error) {
       console.error('Error obteniendo categorías:', error);
       return [];

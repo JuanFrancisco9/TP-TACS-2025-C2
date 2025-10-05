@@ -100,7 +100,7 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         Ubicacion ubicacion = new Ubicacion("34.6037", "58.3816", "CABA", "Av. 9 de Julio 1234");
         Precio precio = new Precio("ARS", 1500.0f);
-        Categoria categoria = new Categoria("Conferencia");
+        Categoria categoria = new Categoria("Conferencia", "Event");
         categoria = categoriaRepositoryDB.save(categoria);
 
         Evento evento = new Evento(

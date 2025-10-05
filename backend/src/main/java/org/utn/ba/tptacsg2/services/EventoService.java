@@ -72,7 +72,7 @@ public class EventoService {
         EstadoEvento estadoInicial = new EstadoEvento(this.generadorIDService.generarID(), solicitud.estado(), LocalDateTime.now());
 
         // Obtener o crear la categoría basándose en el nombre que viene del frontend
-        Categoria categoria = this.categoriaService.obtenerOCrearCategoria(solicitud.categoria().getTipo());
+        Categoria categoria = this.categoriaService.obtenerOCrearCategoria(solicitud.categoria());
 
         Evento evento = new Evento(
                 generadorIDService.generarID(),
@@ -142,7 +142,7 @@ public class EventoService {
         if (solicitud.categoria() == null || solicitud.categoria().getTipo() == null) {
             throw new IllegalArgumentException("La categoría es obligatoria");
         }
-        Categoria categoria = this.categoriaService.obtenerOCrearCategoria(solicitud.categoria().getTipo());
+        Categoria categoria = this.categoriaService.obtenerOCrearCategoria(solicitud.categoria());
 
         Evento evento = new Evento(
                 generadorIDService.generarID(),
@@ -192,7 +192,7 @@ public class EventoService {
         // Manejar la categoría de la misma forma que en registrarEvento
         Categoria categoriaFinal;
         if (eventoUpdate.categoria() != null && eventoUpdate.categoria().getTipo() != null) {
-            categoriaFinal = this.categoriaService.obtenerOCrearCategoria(eventoUpdate.categoria().getTipo());
+            categoriaFinal = this.categoriaService.obtenerOCrearCategoria(eventoUpdate.categoria());
         } else {
             categoriaFinal = eventoExistente.categoria();
         }

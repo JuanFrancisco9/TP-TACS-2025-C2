@@ -18,6 +18,7 @@ export interface Evento {
     estado: EstadoEvento;
     categoria: {
         tipo: string;
+        icono?: string;
     };
     duracion: number;
     cupoMinimo: number;
@@ -49,4 +50,5 @@ interface EstadoEvento {
 
 export interface CategoriaDTO {
     tipo: string;
+    icono?: string;
 }
