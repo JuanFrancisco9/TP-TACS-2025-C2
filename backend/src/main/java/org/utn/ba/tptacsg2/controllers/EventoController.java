@@ -9,11 +9,11 @@ import org.springframework.web.multipart.MultipartFile;
 import org.utn.ba.tptacsg2.dtos.EventoDTO;
 import org.utn.ba.tptacsg2.dtos.FiltrosDTO;
 import org.utn.ba.tptacsg2.dtos.ParticipanteDTO;
+import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.dtos.output.ResultadoBusquedaEvento;
 import org.utn.ba.tptacsg2.exceptions.InscripcionNoEncontradaException;
 import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.models.events.SolicitudEvento;
-import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.events.*;
 import org.utn.ba.tptacsg2.services.EventoService;
 
@@ -58,6 +58,13 @@ public class EventoController {
     public ResponseEntity<Evento> modificarEvento(@PathVariable ("id_evento") String idEvento,  @RequestBody Evento eventoActualizado) {
         Evento evento = eventoService.actualizarEvento(idEvento, eventoActualizado);
         return ResponseEntity.status(HttpStatus.OK).body(evento);
+    }
+
+    @PreAuthorize("hasAnyRole('USER', 'ORGANIZER', 'ADMIN')")
+    @GetMapping("/{id_evento}")
+    public ResponseEntity<EventoDTO> obtenerEventoPorId(@PathVariable("id_evento") String idEvento) {
+        EventoDTO evento = eventoService.obtenerEventoPorId(idEvento);
+        return ResponseEntity.ok(evento);
     }
 
     /**

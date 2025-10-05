@@ -6,9 +6,11 @@ export interface Estado {
 }
 
 export interface EventoResumen {
-  id: string;
-  titulo: string;
-  descripcion: string;
+    id: string;
+    titulo: string;
+    descripcion: string;
+    imagenUrl?: string;
+    imagen?: string;
 }
 
 export interface Inscripcion {

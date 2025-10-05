@@ -52,7 +52,7 @@ public class InscripcionServiceTest {
     @BeforeEach
     public void setUp() {
         participante = new Participante("1", "Pepito", "Pépez", "123456789", null);
-        evento = new Evento(ID_EVENTO_VALIDO, "Evento mock", "", LocalDateTime.now(), "1900", 5F, new Ubicacion("","","",""), 3,0, new Precio("ARS", 10F), new Organizador("1","","","",null), new EstadoEvento("1",TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null, new ArrayList<>(), null);
+        evento = new Evento(ID_EVENTO_VALIDO, "Evento mock", "", LocalDateTime.now(), "1900", 5F, new Ubicacion("", "", "Buenos Aires", "CABA", "Lugar genérico", false, null), 3,0, new Precio("ARS", 10F), new Organizador("1","","","",null), new EstadoEvento("1",TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null, new ArrayList<>(), null);
         lenient().when(eventoLockService.getLock(ID_EVENTO_VALIDO)).thenReturn(new ReentrantLock());
         lenient().when(eventoRepository.findById(ID_EVENTO_VALIDO)).thenReturn(Optional.of(evento));
 

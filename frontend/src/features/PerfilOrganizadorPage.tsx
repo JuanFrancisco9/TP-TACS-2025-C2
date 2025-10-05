@@ -4,10 +4,11 @@ import {
     Paper, Button, Dialog, DialogTitle, DialogContent, DialogActions,
     TextField, Typography, Select, MenuItem, InputLabel, CircularProgress
 } from "@mui/material";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import BlockIcon from '@mui/icons-material/Block';
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import GroupIcon from "@mui/icons-material/Group";
 import type {Inscripcion} from "../types/inscripciones.ts";
 import FormControl from "@mui/material/FormControl";
 import { EventoService } from '../services/eventoService';
@@ -15,6 +16,7 @@ import { formatDateForInput } from "../utils/formatFecha.ts";
 import authService from "../services/authService.ts";
 import type { Evento } from "../types/evento.ts";
 import type {Participante, Usuario} from "../types/auth.ts";
+import DetallesEvento from '../components/EventDetails';
 
 interface EditEvent {
     event: Evento | null;
@@ -36,6 +38,7 @@ export default function PerfilOrganizador() {
     const [editEvent, setEditEvent] = useState<Evento | null>(null);
     const [viewEvent, setViewEvent] = useState<Evento | null>(null);
     const [waitlistEvent, setWaitlistEvent] = useState<Evento | null>(null);
+    const [detailEvent, setDetailEvent] = useState<Evento | null>(null);
 
     // ---- handlers ----
     const handleSaveEdit = async (updatedEvent: Evento) => {
@@ -93,6 +96,15 @@ export default function PerfilOrganizador() {
         );
     }
 
+    if (detailEvent) {
+        return (
+            <DetallesEvento
+                evento={detailEvent}
+                onVolver={() => setDetailEvent(null)}
+            />
+        );
+    }
+
     // ---- UI principal ----
     return (
         <div style={{ padding: "2rem" }}>
@@ -109,6 +121,7 @@ export default function PerfilOrganizador() {
                     <Table>
                         <TableHead>
                             <TableRow>
+                                <TableCell>Imagen</TableCell>
                                 <TableCell>Título</TableCell>
                                 <TableCell>Fecha</TableCell>
                                 <TableCell>Ubicación</TableCell>
@@ -117,12 +130,33 @@ export default function PerfilOrganizador() {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {events.map((e) => (
-                                <TableRow key={e.id}>
+                            {events.map((e) => {
+                                const imageSrc = e.imagenUrl ?? e.imagen ?? `/logo.PNG`;
+                                return (
+                                <TableRow
+                                    key={e.id}
+                                    hover
+                                    onClick={() => setDetailEvent(e)}
+                                    sx={{ cursor: 'pointer' }}
+                                >
+                                    <TableCell>
+                                        <img
+                                            src={imageSrc}
+                                            alt={e.titulo}
+                                            style={{ width: 96, height: 54, objectFit: 'cover', borderRadius: 8 }}
+                                            onError={(event) => {
+                                                (event.currentTarget as HTMLImageElement).src = '/logo.PNG';
+                                            }}
+                                        />
+                                    </TableCell>
                                     <TableCell>{e.titulo}</TableCell>
                                     <TableCell>{e.fecha}</TableCell>
                                     <TableCell>
-                                        {e.ubicacion.localidad}, {e.ubicacion.direccion}
+                                        {e.ubicacion.esVirtual
+                                            ? 'Virtual'
+                                            : [e.ubicacion.provincia, e.ubicacion.localidad, e.ubicacion.direccion]
+                                                .filter(Boolean)
+                                                .join(', ')}
                                     </TableCell>
                                     <TableCell>
                                         {e.estado.tipoEstado === "NO_ACEPTA_INSCRIPCIONES"
@@ -130,13 +164,14 @@ export default function PerfilOrganizador() {
                                             : e.estado.tipoEstado}
                                     </TableCell>
                                     <TableCell>
-                                        <Button onClick={() => setEditEvent(e)}><EditIcon /></Button>
-                                        <Button onClick={() => setViewEvent(e)}><VisibilityIcon /></Button>
-                                        <Button onClick={() => setWaitlistEvent(e)}><ListAltIcon /></Button>
-                                        <Button onClick={() => handelCloseInscriptions(e)}><BlockIcon /></Button>
+                                        <Button onClick={(ev) => { ev.stopPropagation(); setEditEvent(e); }}><EditIcon /></Button>
+                                        <Button onClick={(ev) => { ev.stopPropagation(); setDetailEvent(e); }}><VisibilityIcon /></Button>
+                                        <Button onClick={(ev) => { ev.stopPropagation(); setViewEvent(e); }}><GroupIcon /></Button>
+                                        <Button onClick={(ev) => { ev.stopPropagation(); setWaitlistEvent(e); }}><ListAltIcon /></Button>
+                                        <Button onClick={(ev) => { ev.stopPropagation(); handelCloseInscriptions(e); }}><BlockIcon /></Button>
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            );})}
                         </TableBody>
                     </Table>
                 </TableContainer>
@@ -245,21 +280,21 @@ const EditEvent = ({ event, onClose, onSave }: EditEvent) => {
                     label="Latitud"
                     fullWidth
                     margin="normal"
-                    value={localEvent.ubicacion.latitud}
+                    value={localEvent.ubicacion.latitud ?? ''}
                     onChange={e => handleNestedChange("ubicacion", "latitud", e.target.value)}
                 />
                 <TextField
                     label="Longitud"
                     fullWidth
                     margin="normal"
-                    value={localEvent.ubicacion.longitud}
+                    value={localEvent.ubicacion.longitud ?? ''}
                     onChange={e => handleNestedChange("ubicacion", "longitud", e.target.value)}
                 />
                 <TextField
                     label="Dirección"
                     fullWidth
                     margin="normal"
-                    value={localEvent.ubicacion.direccion}
+                    value={localEvent.ubicacion.direccion ?? ''}
                     onChange={e => handleNestedChange("ubicacion", "direccion", e.target.value)}
                 />
 

@@ -86,7 +86,7 @@ public class InscripcionRepository {
         // Crear evento de prueba (similar al del EventoRepository)
         Organizador organizador = new Organizador("1", "Juan", "Pérez", "12345678", null);
         Evento evento = new Evento("0", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
-                "19:00", 5F, new Ubicacion("", "", "", ""), 10,0,
+                "19:00", 5F, Ubicacion.presencial("-34.6037", "-58.3816", "Buenos Aires", "CABA", "Av. Siempre Viva 123"), 10,0,
                 new Precio("Pesos", 100F), organizador,
                 new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), new Categoria("Educativo"), new ArrayList<String>(), null);
 
