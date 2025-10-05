@@ -76,13 +76,16 @@ class AuthService {
         return user?.actorId || null;
     }
 
-    getAuthHeaders(): Record<string, string> {
+    getAuthHeaders(options?: { contentType?: string | null }): Record<string, string> {
         // Asegurar que las credenciales estén cargadas
         this.getCurrentUser();
 
-        const headers: Record<string, string> = {
-            'Content-Type': 'application/json'
-        };
+        const headers: Record<string, string> = {};
+        const contentType = options?.contentType;
+
+        if (contentType !== null) {
+            headers['Content-Type'] = contentType ?? 'application/json';
+        }
 
         if (this.credentials) {
             headers['Authorization'] = `Basic ${this.credentials}`;

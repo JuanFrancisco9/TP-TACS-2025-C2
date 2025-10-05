@@ -206,7 +206,8 @@ public class TestE2EInscripcion {
                 new Organizador("ORG1", "Org", "Uno", "30111222", null),
                 new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
                 new Categoria("Test"),
-                List.of()
+                List.of(),
+                null
         );
     }
 
