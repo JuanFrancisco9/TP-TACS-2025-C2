@@ -1,7 +1,7 @@
 import axios, { AxiosHeaders } from 'axios';
 import type {Inscripcion} from "../types/inscripciones.ts";
 import authService from "./authService.ts";
-import type {Evento, ResultadoBusquedaEvento, CategoriaDTO } from "../types/evento.ts";
+import type {Evento, ResultadoBusquedaEvento, CategoriaDTO, CategoriaIconRule } from "../types/evento.ts";
 import type {Participante} from "../types/auth.ts";
 
 // Service para manejar eventoss
@@ -36,6 +36,16 @@ export class EventoService {
       config.headers = headers;
       return config;
     });
+  }
+
+  static async obtenerReglasIcono(): Promise<CategoriaIconRule[]> {
+    try {
+      const response = await this.api.get<CategoriaIconRule[]>(`/categorias/iconos`);
+      return response.data ?? [];
+    } catch (error) {
+      console.error('Error obteniendo reglas de icono:', error);
+      return [];
+    }
   }
 
   // Método para obtener todos los eventos (usando buscarEventos)

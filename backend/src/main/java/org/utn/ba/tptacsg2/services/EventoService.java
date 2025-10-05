@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.utn.ba.tptacsg2.dtos.EventoDTO;
 import org.utn.ba.tptacsg2.dtos.FiltrosDTO;
+import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.dtos.output.ResultadoBusquedaEvento;
 import org.utn.ba.tptacsg2.helpers.EventPredicateBuilder;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
@@ -15,7 +16,6 @@ import org.utn.ba.tptacsg2.models.events.EstadoEvento;
 import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.models.events.Imagen;
 import org.utn.ba.tptacsg2.models.events.SolicitudEvento;
-import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
 import org.utn.ba.tptacsg2.repositories.db.EstadoEventoRepositoryDB;
 import org.utn.ba.tptacsg2.repositories.db.EventoRepositoryDB;
@@ -49,8 +49,8 @@ public class EventoService {
                          GeneradorIDService generadorIDService,
                          EstadoEventoRepositoryDB estadoEventoRepository,
                          CategoriaService categoriaService,
-                         R2StorageService r2StorageService) {
-    public EventoService(EventoRepositoryDB eventoRepository, InscripcionRepositoryDB inscripcionRepository, OrganizadorRepositoryDB organizadorRepository, GeneradorIDService generadorIDService,EstadoEventoRepositoryDB estadoEventoRepository, CategoriaService categoriaService, RedisCacheService redisCacheService) {
+                         R2StorageService r2StorageService,
+                         RedisCacheService redisCacheService) {
         this.eventoRepository = eventoRepository;
         this.inscripcionRepository = inscripcionRepository;
         this.organizadorRepository = organizadorRepository;

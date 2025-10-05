@@ -8,12 +8,24 @@ import {
     Typography,
     MenuItem,
 } from "@mui/material";
+import Autocomplete from "@mui/material/Autocomplete";
 import authService from "../../services/authService";
-import { CATEGORY_PRESETS } from "../../utils/categoryIcons";
+import { EventoService } from "../../services/eventoService";
+import { getCategoryIconComponent, inferIconName, normalizeKey } from "../../utils/categoryIcons";
+import type { CategoriaDTO, CategoriaIconRule } from "../../types/evento";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-const buildDefaultCategoria = () => (CATEGORY_PRESETS[0] ? { ...CATEGORY_PRESETS[0] } : { tipo: "", icono: undefined });
+const createEmptyCategoria = (): CategoriaDTO => ({ tipo: "", icono: undefined });
+
+const formatForDisplay = (value: string) =>
+    value
+        .trim()
+        .replace(/\s+/g, " ")
+        .split(" ")
+        .filter(Boolean)
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(" ");
 
 type Ubicacion = {
     latitud: string;
@@ -33,11 +45,6 @@ type TipoEstadoEvento =
     | "CANCELADO"
     | "NO_ACEPTA_INSCRIPCIONES";
 
-type Categoria = {
-    tipo: string; // clase con un único campo
-    icono?: string;
-};
-
 type SolicitudEventoDto = {
     organizadorId: string;
     titulo: string;
@@ -50,7 +57,7 @@ type SolicitudEventoDto = {
     cupoMinimo: number | null;
     precio: Precio | null;
     estado: TipoEstadoEvento;
-    categoria: Categoria;
+    categoria: CategoriaDTO;
     etiquetas: string[];
 };
 
@@ -83,7 +90,10 @@ export default function FormularioCrearEvento() {
     const [precioCantidad, setPrecioCantidad] = React.useState<string>("");
 
     const [estado, setEstado] = React.useState<TipoEstadoEvento>("PENDIENTE");
-    const [categoriaSeleccionada, setCategoriaSeleccionada] = React.useState<Categoria>(buildDefaultCategoria);
+    const [categoriasDisponibles, setCategoriasDisponibles] = React.useState<CategoriaDTO[]>([]);
+    const [iconRules, setIconRules] = React.useState<CategoriaIconRule[]>([]);
+    const [categoriaSeleccionada, setCategoriaSeleccionada] = React.useState<CategoriaDTO>(createEmptyCategoria);
+    const [categoriaInputValue, setCategoriaInputValue] = React.useState("");
 
     const [etiquetasCSV, setEtiquetasCSV] = React.useState("");
     const [imagen, setImagen] = React.useState<File | null>(null);
@@ -92,16 +102,81 @@ export default function FormularioCrearEvento() {
     const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
     const [successMsg, setSuccessMsg] = React.useState<string | null>(null);
 
+    React.useEffect(() => {
+        let active = true;
+        (async () => {
+            try {
+                const [categorias, reglas] = await Promise.all([
+                    EventoService.obtenerCategorias(),
+                    EventoService.obtenerReglasIcono(),
+                ]);
+                if (!active) return;
+                setCategoriasDisponibles(categorias);
+                if (reglas.length > 0) {
+                    setIconRules(reglas);
+                }
+                if (categorias.length > 0) {
+                    setCategoriaSeleccionada((prev) => {
+                        if (prev.tipo) {
+                            return prev;
+                        }
+                        const primera = categorias[0];
+                        setCategoriaInputValue(primera.tipo);
+                        return primera;
+                    });
+                }
+            } catch (error) {
+                console.error("Error cargando categorías o reglas de iconos", error);
+            }
+        })();
+        return () => {
+            active = false;
+        };
+    }, []);
+
+    const syncCategoria = React.useCallback((rawValue: string) => {
+        const trimmed = rawValue.trim();
+        if (!trimmed) {
+            setCategoriaSeleccionada(createEmptyCategoria());
+            setCategoriaInputValue("");
+            return;
+        }
+        const display = formatForDisplay(trimmed);
+        const normalizedTarget = normalizeKey(display);
+        setCategoriasDisponibles((prev) => {
+            const existente = prev.find((cat) => normalizeKey(cat.tipo) === normalizedTarget);
+            if (existente) {
+                setCategoriaSeleccionada(existente);
+                setCategoriaInputValue(existente.tipo);
+                return prev;
+            }
+            const iconoInferido = inferIconName(iconRules, display);
+            const nuevaCategoria: CategoriaDTO = { tipo: display, icono: iconoInferido };
+            setCategoriaSeleccionada(nuevaCategoria);
+            setCategoriaInputValue(display);
+            return [...prev, nuevaCategoria].sort((a, b) => a.tipo.localeCompare(b.tipo, "es", { sensitivity: "base" }));
+        });
+    }, [iconRules]);
+
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         setImagen(file ?? null);
     };
 
-    const handleCategoriaChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const value = event.target.value;
-        const preset = CATEGORY_PRESETS.find((categoria) => categoria.tipo === value);
-        setCategoriaSeleccionada(preset ? { ...preset } : buildDefaultCategoria());
+    const handleCategoriaSelection = (_event: React.SyntheticEvent, newValue: string | null) => {
+        syncCategoria(newValue ?? "");
     };
+
+    const handleCategoriaInputChange = (_event: React.SyntheticEvent, newInputValue: string) => {
+        setCategoriaInputValue(newInputValue);
+        if (!newInputValue) {
+            setCategoriaSeleccionada(createEmptyCategoria());
+        }
+    };
+
+    const ensureCategoriaSincronizada = React.useCallback(() => {
+        syncCategoria(categoriaInputValue);
+    }, [categoriaInputValue, syncCategoria]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -112,10 +187,35 @@ export default function FormularioCrearEvento() {
             setErrorMsg("Completá título, fecha y hora de inicio.");
             return;
         }
-        if (!categoriaSeleccionada || !categoriaSeleccionada.tipo) {
+        const categoriaTexto = (categoriaInputValue || categoriaSeleccionada.tipo).trim();
+        const categoriaDisplay = categoriaTexto ? formatForDisplay(categoriaTexto) : "";
+
+        let categoriaPayload: CategoriaDTO | null = null;
+        if (categoriaDisplay) {
+            const normalized = normalizeKey(categoriaDisplay);
+            const existente = categoriasDisponibles.find((cat) => normalizeKey(cat.tipo) === normalized);
+            categoriaPayload = existente ?? { tipo: categoriaDisplay, icono: inferIconName(iconRules, categoriaDisplay) };
+        }
+
+        if (!categoriaPayload || !categoriaPayload.tipo) {
             setErrorMsg("Debés seleccionar una categoría.");
             return;
         }
+
+        const categoriaFinal: CategoriaDTO = {
+            tipo: categoriaPayload.tipo,
+            icono: categoriaPayload.icono ?? inferIconName(iconRules, categoriaPayload.tipo),
+        };
+
+        setCategoriaSeleccionada(categoriaFinal);
+        setCategoriaInputValue(categoriaFinal.tipo);
+        setCategoriasDisponibles((prev) => {
+            const objetivo = normalizeKey(categoriaFinal.tipo);
+            if (prev.some((cat) => normalizeKey(cat.tipo) === objetivo)) {
+                return prev;
+            }
+            return [...prev, categoriaFinal].sort((a, b) => a.tipo.localeCompare(b.tipo, "es", { sensitivity: "base" }));
+        });
 
         const fechaISO = `${fecha}T${horaInicio}:00`;
 
@@ -145,8 +245,8 @@ export default function FormularioCrearEvento() {
                 : null,
             estado,
             categoria: {
-                tipo: categoriaSeleccionada.tipo,
-                icono: categoriaSeleccionada.icono,
+                tipo: categoriaFinal.tipo,
+                icono: categoriaFinal.icono,
             },
             etiquetas: etiquetasCSV.split(",").map(s => s.trim()).filter(Boolean),
         };
@@ -196,9 +296,28 @@ export default function FormularioCrearEvento() {
             setPrecioCantidad("");
             setPrecioMoneda("ARS");
             setEstado("PENDIENTE");
-            setCategoriaSeleccionada(buildDefaultCategoria());
+            setCategoriaSeleccionada(createEmptyCategoria());
+            setCategoriaInputValue("");
             setEtiquetasCSV("");
             setImagen(null);
+            void (async () => {
+                try {
+                    const [categoriasActualizadas, reglasActualizadas] = await Promise.all([
+                        EventoService.obtenerCategorias(),
+                        EventoService.obtenerReglasIcono(),
+                    ]);
+                    setCategoriasDisponibles(categoriasActualizadas);
+                    if (reglasActualizadas.length > 0) {
+                        setIconRules(reglasActualizadas);
+                    }
+                    if (categoriasActualizadas.length > 0) {
+                        setCategoriaSeleccionada(categoriasActualizadas[0]);
+                        setCategoriaInputValue(categoriasActualizadas[0].tipo);
+                    }
+                } catch (fetchError) {
+                    console.error("No se pudieron refrescar las categorías/iconos", fetchError);
+                }
+            })();
         } catch (err: any) {
             setErrorMsg(err?.message ?? "No se pudo conectar con el servidor.");
         } finally {
@@ -305,22 +424,40 @@ export default function FormularioCrearEvento() {
                 </Grid>
 
                 <Grid size={{xs:12,sm:6}}>
-                    <TextField
-                        select
-                        label="Categoría"
-                        value={categoriaSeleccionada.tipo}
-                        onChange={handleCategoriaChange}
-                        fullWidth
-                        required
+                    <Autocomplete
+                        freeSolo
+                        options={categoriasDisponibles.map((cat) => cat.tipo)}
+                        value={categoriaSeleccionada.tipo || null}
+                        inputValue={categoriaInputValue}
+                        onChange={handleCategoriaSelection}
+                        onInputChange={handleCategoriaInputChange}
                         disabled={submitting}
-                        helperText="Se enviará el icono asociado automáticamente"
-                    >
-                        {CATEGORY_PRESETS.map((cat) => (
-                            <MenuItem key={cat.tipo} value={cat.tipo}>
-                                {cat.tipo}
-                            </MenuItem>
-                        ))}
-                    </TextField>
+                        renderInput={(params) => {
+                            const iconNamePreview = categoriaSeleccionada.icono
+                                ?? inferIconName(iconRules, categoriaInputValue || categoriaSeleccionada.tipo);
+                            const IconPreview = getCategoryIconComponent(iconNamePreview);
+                            return (
+                                <TextField
+                                    {...params}
+                                    label="Categoría"
+                                    required
+                                    helperText="Elegí una existente o escribí una nueva"
+                                    onBlur={ensureCategoriaSincronizada}
+                                    InputProps={{
+                                        ...params.InputProps,
+                                        endAdornment: (
+                                            <>
+                                                <Box sx={{ display: "flex", alignItems: "center", pr: 1 }}>
+                                                    <IconPreview fontSize="small" />
+                                                </Box>
+                                                {params.InputProps.endAdornment}
+                                            </>
+                                        ),
+                                    }}
+                                />
+                            );
+                        }}
+                    />
                 </Grid>
 
                 {/* Cupos */}

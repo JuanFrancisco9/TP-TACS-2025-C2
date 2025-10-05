@@ -52,3 +52,8 @@ export interface CategoriaDTO {
     tipo: string;
     icono?: string;
 }
+
+export interface CategoriaIconRule {
+    icono: string;
+    keywords: string[];
+}

@@ -19,7 +19,7 @@ import DetallesEvento from '../components/EventDetails';
 import { useLocation } from 'react-router-dom';
 import { EventoService } from '../services/eventoService';
 import type { Evento, CategoriaDTO } from '../types/evento.ts';
-import { getCategoryIcon } from '../utils/categoryIcons';
+import { getCategoryIconFor } from '../utils/categoryIcons';
 
 
 // Helper para convertir eventos -> puntos del mapa
@@ -167,7 +167,7 @@ const EventOverview: React.FC = () => {
                 <FormGroup>
                   {categories.map((categoria) => {
                     const tipo = categoria.tipo;
-                    const IconComponent = getCategoryIcon(categoria.icono, tipo);
+                    const IconComponent = getCategoryIconFor(undefined, categoria.icono, tipo);
                     return (
                       <FormControlLabel
                         key={tipo}

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { CircularProgress } from '@mui/material';
 import { EventoService } from '../services/eventoService';
 import type { CategoriaDTO } from '../types/evento.ts';
-import { getCategoryIcon } from '../utils/categoryIcons';
+import { getCategoryIconFor } from '../utils/categoryIcons';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -43,7 +43,7 @@ const LandingPage: React.FC = () => {
           ) : (
             categories.map((categoria) => {
               const tipo = categoria.tipo;
-              const IconComponent = getCategoryIcon(categoria.icono, tipo);
+              const IconComponent = getCategoryIconFor(undefined, categoria.icono, tipo);
               return (
                 <button
                   key={tipo}
