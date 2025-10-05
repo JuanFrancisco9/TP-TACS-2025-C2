@@ -49,8 +49,8 @@ public class EventoService {
                          GeneradorIDService generadorIDService,
                          EstadoEventoRepositoryDB estadoEventoRepository,
                          CategoriaService categoriaService,
-                         R2StorageService r2StorageService) {
-    public EventoService(EventoRepositoryDB eventoRepository, InscripcionRepositoryDB inscripcionRepository, OrganizadorRepositoryDB organizadorRepository, GeneradorIDService generadorIDService,EstadoEventoRepositoryDB estadoEventoRepository, CategoriaService categoriaService, RedisCacheService redisCacheService) {
+                         R2StorageService r2StorageService,
+                         RedisCacheService redisCacheService) {
         this.eventoRepository = eventoRepository;
         this.inscripcionRepository = inscripcionRepository;
         this.organizadorRepository = organizadorRepository;

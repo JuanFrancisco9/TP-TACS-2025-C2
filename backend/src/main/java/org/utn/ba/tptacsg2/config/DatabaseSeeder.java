@@ -1,9 +1,11 @@
 package org.utn.ba.tptacsg2.config;
 
+import jakarta.servlet.http.Part;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
@@ -37,6 +39,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final EstadoEventoRepositoryDB estadoEventoRepository;
     private final InscripcionRepositoryDB inscripcionRepository;
     private final EstadoInscripcionRepositoryDB estadoInscripcionRepositoryDB;
+    private final PasswordEncoder passwordEncoder;
 
     public DatabaseSeeder(
             UsuarioRepositoryDB usuarioRepository,
@@ -46,7 +49,8 @@ public class DatabaseSeeder implements CommandLineRunner {
             CategoriaRepositoryDB categoriaRepositoryDB,
             EstadoEventoRepositoryDB estadoEventoRepository,
             InscripcionRepositoryDB inscripcionRepository,
-            EstadoInscripcionRepositoryDB estadoInscripcionRepositoryDB
+            EstadoInscripcionRepositoryDB estadoInscripcionRepositoryDB,
+            PasswordEncoder passwordEncoder
     ) {
         this.usuarioRepository = usuarioRepository;
         this.organizadorRepository = organizadorRepository;
@@ -56,6 +60,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         this.estadoEventoRepository = estadoEventoRepository;
         this.inscripcionRepository = inscripcionRepository;
         this.estadoInscripcionRepositoryDB = estadoInscripcionRepositoryDB;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -68,24 +73,45 @@ public class DatabaseSeeder implements CommandLineRunner {
         Usuario userPart = new Usuario( "usuario", "$argon2id$v=19$m=65536,t=4,p=1$hC1J7qKqgmkSUfl8kMdQow$wva2eKpy3Mw8/oJPvJw5JdPse+cEJ73EdmcT6uhcXmU", Rol.ROLE_USER);
         Usuario userOrg = new Usuario( "organizador", "$argon2id$v=19$m=65536,t=4,p=1$IDXLIGuWc88CLL+7VyhCOA$CXr5e1xeozTTolyjDn1PNX1cs9uHqXFbH6TrtDKOCtk", Rol.ROLE_ORGANIZER);
 
-        List<Usuario> savedUsers = usuarioRepository.saveAll(Arrays.asList(userOrg, userPart, admin));
+        userPart = usuarioRepository.save(userPart);
+        userOrg = usuarioRepository.save(userOrg);
 
-        Usuario savedUserOrg = savedUsers.stream()
-                .filter(u -> u.username().equals("organizador"))
-                .findFirst().orElseThrow();
-        Usuario savedUserPart = savedUsers.stream()
-                .filter(u -> u.username().equals("usuario"))
-                .findFirst().orElseThrow();
-
-        Organizador organizador = new Organizador(
-                "Juan", "Perez", "12345678", savedUserOrg
-        );
-        Participante participante = new Participante(
-                "Maria", "Gomez", "87654321", savedUserPart
-        );
+        Organizador organizador = new Organizador("Juan", "Perez", "12345678", userOrg);
+        Participante participante = new Participante("Maria", "Gomez", "87654321", userPart);
 
         organizador = organizadorRepository.save(organizador);
         participante = participanteRepository.save(participante);
+
+        //Nuestros usuraios participantes
+        Usuario juanF = new Usuario("Juan F", passwordEncoder.encode("Juan F"), Rol.ROLE_USER);
+        juanF = usuarioRepository.save(juanF);
+        Participante juanFParticiapnte = new Participante("Juan Francisco", "Cáceres", "87654321", juanF);
+        juanFParticiapnte = participanteRepository.save(juanFParticiapnte);
+
+        Usuario valen = new Usuario("Valen", passwordEncoder.encode("Valen"), Rol.ROLE_USER);
+        valen = usuarioRepository.save(valen);
+        Participante valenParticiapnte = new Participante("Valentina", "Albiero", "87654321", valen);
+        valenParticiapnte = participanteRepository.save(valenParticiapnte);
+
+        Usuario aylu = new Usuario("Aylu", passwordEncoder.encode("Aylu"), Rol.ROLE_USER);
+        aylu = usuarioRepository.save(aylu);
+        Participante ayluParticiapnte = new Participante("Aylen", "Sandoval", "87654321", aylu);
+        ayluParticiapnte = participanteRepository.save(ayluParticiapnte);
+
+        Usuario juanma = new Usuario("Juanma", passwordEncoder.encode("Juanma"), Rol.ROLE_USER);
+        juanma = usuarioRepository.save(juanma);
+        Participante juanmaParticiapnte = new Participante("Juan Manuel", "Prividera", "87654321", juanma);
+        juanmaParticiapnte = participanteRepository.save(juanmaParticiapnte);
+
+        Usuario tomi = new Usuario("Tomi", passwordEncoder.encode("Tomi"), Rol.ROLE_USER);
+        tomi = usuarioRepository.save(tomi);
+        Participante tomiParticiapnte = new Participante("Tomas", "Pauza Sager", "87654321", tomi);
+        tomiParticiapnte = participanteRepository.save(tomiParticiapnte);
+
+        Usuario lucas = new Usuario("Lucas", passwordEncoder.encode("Lucas"), Rol.ROLE_USER);
+        lucas = usuarioRepository.save(lucas);
+        Participante lucasParticiapnte = new Participante("Lucas Manuel", "Vazquez", "87654321", lucas);
+        lucasParticiapnte = participanteRepository.save(lucasParticiapnte);
 
         log.info("Usuarios, Organizadores y Participantes creados.");
 
