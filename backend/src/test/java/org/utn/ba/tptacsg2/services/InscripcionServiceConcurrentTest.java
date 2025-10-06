@@ -77,7 +77,7 @@ class InscripcionServiceConcurrentTest {
                 LocalDateTime.now(),
                 "",
                 2.0f,
-                new Ubicacion("-34.6", "-58.4", "CABA", ""),
+                new Ubicacion("-34.6", "-58.4", "Buenos Aires", "CABA", "Sede central", false, null),
                 1,
                 0,
                 new Precio("Pesos", 100F),

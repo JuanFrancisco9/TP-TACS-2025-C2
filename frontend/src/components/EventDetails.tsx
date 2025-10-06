@@ -20,11 +20,13 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import EventIcon from '@mui/icons-material/Event';
 import PlaceIcon from '@mui/icons-material/Place';
+import LanguageIcon from '@mui/icons-material/Language';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import PersonIcon from '@mui/icons-material/Person';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
+import type { AlertColor } from '@mui/material/Alert';
 import type { Evento } from '../types/evento.ts';
 import { formatFecha } from '../utils/formatFecha';
 
@@ -45,6 +47,7 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
   const [showDialog, setShowDialog] = React.useState(false);
   const [showSnackbar, setShowSnackbar] = React.useState(false);
   const [snackbarMsg, setSnackbarMsg] = React.useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = React.useState<AlertColor>('success');
   const [loading, setLoading] = React.useState(false);
   const imageSrc = evento.imagenUrl ?? evento.imagen ?? `https://picsum.photos/seed/${encodeURIComponent(evento.id)}/1200/600`;
 
@@ -54,11 +57,13 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
     setLoading(true);
     try {
       await EventoService.inscribirseAEvento(evento.id);
+      setSnackbarSeverity('success');
       setSnackbarMsg(`Inscripción confirmada a: ${evento.titulo}`);
     } catch (error) {
       const message = error instanceof Error && error.message
         ? error.message
         : 'Error al inscribirse. Intenta nuevamente.';
+      setSnackbarSeverity('warning');
       setSnackbarMsg(message);
     }
     setShowSnackbar(true);
@@ -134,10 +139,36 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
                 </Stack>
 
                 <Stack direction="row" spacing={1} alignItems="center">
-                  <PlaceIcon color="action" fontSize="small" />
-                  <Typography variant="body2">
-                    <strong>Ubicación:</strong> {evento.ubicacion.localidad} - {evento.ubicacion.direccion}
-                  </Typography>
+                  {evento.ubicacion.esVirtual ? (
+                    <>
+                      <LanguageIcon color="action" fontSize="small" />
+                      <Typography variant="body2">
+                        <strong>Modalidad:</strong> Virtual
+                        {evento.ubicacion.enlaceVirtual && (
+                          <>
+                            {' – '}
+                            <a
+                              href={evento.ubicacion.enlaceVirtual}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              Ingresar al enlace
+                            </a>
+                          </>
+                        )}
+                      </Typography>
+                    </>
+                  ) : (
+                    <>
+                      <PlaceIcon color="action" fontSize="small" />
+                      <Typography variant="body2">
+                        <strong>Ubicación:</strong>{' '}
+                        {[evento.ubicacion.provincia, evento.ubicacion.localidad, evento.ubicacion.direccion]
+                          .filter(Boolean)
+                          .join(', ')}
+                      </Typography>
+                    </>
+                  )}
                 </Stack>
 
                 {evento.duracion && (
@@ -259,6 +290,7 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
         snackbarMsg={snackbarMsg}
         showSnackbar={showSnackbar}
         onSnackbarClose={() => setShowSnackbar(false)}
+        snackbarSeverity={snackbarSeverity}
         titulo={evento.titulo}
       />
         </Box>

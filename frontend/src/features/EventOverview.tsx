@@ -18,15 +18,24 @@ import EventCard from '../components/EventCard';
 import DetallesEvento from '../components/EventDetails';
 import { useLocation } from 'react-router-dom';
 import { EventoService } from '../services/eventoService';
-import type { Evento } from '../types/evento.ts';
+import type { Evento, CategoriaDTO } from '../types/evento.ts';
+import { getCategoryIconFor } from '../utils/categoryIcons';
 
 
 // Helper para convertir eventos -> puntos del mapa
 const eventosToPoints = (eventos: Evento[]): MapPoint[] => {
   return eventos
     .map((ev) => {
-      const lat = Number((ev as any)?.ubicacion?.latitud);
-      const lon = Number((ev as any)?.ubicacion?.longitud);
+      if (ev.ubicacion?.esVirtual) {
+        return null;
+      }
+      const latRaw = ev.ubicacion?.latitud;
+      const lonRaw = ev.ubicacion?.longitud;
+      if (latRaw == null || lonRaw == null) {
+        return null;
+      }
+      const lat = Number(latRaw);
+      const lon = Number(lonRaw);
       if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
       return {
         id: ev.id,
@@ -41,7 +50,7 @@ const EventOverview: React.FC = () => {
   const location = useLocation() as any;
   const [eventos, setEventos] = useState<Evento[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<CategoriaDTO[]>([]);
   const [loadingCats, setLoadingCats] = useState<boolean>(false);
   const [selectedCategories, setSelectedCategories] = useState<Record<string, boolean>>({});
   const [eventoSeleccionado, setEventoSeleccionado] = useState<Evento | null>(null);
@@ -71,7 +80,7 @@ const EventOverview: React.FC = () => {
       .then((cats) => {
         setCategories(cats);
         const map: Record<string, boolean> = {};
-        cats.forEach((c) => (map[c] = true));
+        cats.forEach((c) => (map[c.tipo] = true));
         setSelectedCategories(map);
       })
       .finally(() => setLoadingCats(false));
@@ -164,19 +173,28 @@ const EventOverview: React.FC = () => {
                 </Box>
               ) : (
                 <FormGroup>
-                  {categories.map((n) => (
-                    <FormControlLabel
-                      key={n}
-                      control={
-                        <Checkbox
-                          size="small"
-                          checked={selectedCategories[n] ?? true}
-                          onChange={() => handleToggleCategory(n)}
-                        />
-                      }
-                      label={n}
-                    />
-                  ))}
+                  {categories.map((categoria) => {
+                    const tipo = categoria.tipo;
+                    const IconComponent = getCategoryIconFor(undefined, categoria.icono, tipo);
+                    return (
+                      <FormControlLabel
+                        key={tipo}
+                        control={
+                          <Checkbox
+                            size="small"
+                            checked={selectedCategories[tipo] ?? true}
+                            onChange={() => handleToggleCategory(tipo)}
+                          />
+                        }
+                        label={
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <IconComponent fontSize="small" />
+                            <span>{tipo}</span>
+                          </Stack>
+                        }
+                      />
+                    );
+                  })}
                 </FormGroup>
               )}
               <Divider sx={{ my: 2 }} />

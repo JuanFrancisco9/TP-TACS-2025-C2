@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
+import org.utn.ba.tptacsg2.dtos.InscripcionDTO;
 import org.utn.ba.tptacsg2.services.ParticipanteService;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +24,8 @@ public class ParticipanteController {
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping("/inscripciones/{id_usuario}")
-    public ResponseEntity<List<Inscripcion>> getInscripcionesDeUsuario(@PathVariable("id_usuario") String idUsuario) {
-        List<Inscripcion> inscripciones = participanteService.getInscripcionesDeParticipante(idUsuario);
+    public ResponseEntity<List<InscripcionDTO>> getInscripcionesDeUsuario(@PathVariable("id_usuario") String idUsuario) {
+        List<InscripcionDTO> inscripciones = participanteService.getInscripcionesDeParticipante(idUsuario);
         if (inscripciones.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
