@@ -23,9 +23,7 @@ function UserLanding() {
 
     const fetchInscripciones = async () => {
         try {
-
             setLoading(true);
-
             setError(null);
 
             const data = await inscripcionesService.obtenerInscripcionesDeParticipante(participanteId);
@@ -35,10 +33,8 @@ function UserLanding() {
                 const existingIndex = acc.findIndex(item => item.id === current.id);
 
                 if (existingIndex === -1) {
-                    // No existe, agregar
                     acc.push(current);
                 } else {
-                    // Existe, comparar fechas y quedarse con la más reciente
                     const existing = acc[existingIndex];
                     const currentDate = new Date(current.estado.fechaDeCambio);
                     const existingDate = new Date(existing.estado.fechaDeCambio);
@@ -51,7 +47,22 @@ function UserLanding() {
                 return acc;
             }, []);
 
-            setInscripciones(inscripcionesFiltradas);
+            // Definir orden de estados
+            const ordenEstados: Record<string, number> = {
+                'ACEPTADA': 1,
+                'PENDIENTE': 2,
+                'CANCELADA': 3
+            };
+
+            // Ordenar inscripciones según el estado
+            const inscripcionesOrdenadas = [...inscripcionesFiltradas].sort((a, b) => {
+                const estadoA = ordenEstados[a.estado.tipoEstado] || 99;
+                const estadoB = ordenEstados[b.estado.tipoEstado] || 99;
+                return estadoA - estadoB;
+            });
+
+            setInscripciones(inscripcionesOrdenadas);
+
         } catch (err) {
             setError('No se pudieron cargar las inscripciones');
             console.error('Error:', err);

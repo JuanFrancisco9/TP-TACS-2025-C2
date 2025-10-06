@@ -55,6 +55,7 @@ public class InscripcionService {
     public Inscripcion inscribir(SolicitudInscripcion solicitud) {
         Evento evento = eventoRepository.findById(solicitud.evento_id())
                         .orElseThrow(() -> new EventoNoEncontradoException("No se encontró el evento " + solicitud.evento_id()));
+        validarParticipanteNoInscripto(solicitud, evento);
 
         if(evento.estado().getTipoEstado() == TipoEstadoEvento.CONFIRMADO) {
 

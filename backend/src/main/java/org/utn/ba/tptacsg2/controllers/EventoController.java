@@ -94,7 +94,6 @@ public class EventoController {
      * output: 200 + lista con eventos, total de eventos y total de paginas,
      *         404 + mensaje de error, en caso de fallo
      */
-    @PreAuthorize("hasRole('USER')")
     @GetMapping()
     public ResponseEntity<ResultadoBusquedaEvento> buscarEventos(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,

@@ -45,6 +45,17 @@ export class EventoService {
       config.headers = headers;
       return config;
     });
+
+    this.api.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          authService.logout();
+          window.location.href = '/login';
+        }
+        return Promise.reject(error);
+      }
+    );
   }
 
   static async obtenerReglasIcono(): Promise<CategoriaIconRule[]> {
