@@ -4,8 +4,17 @@ import authService from "./authService.ts";
 import type {Evento, ResultadoBusquedaEvento, CategoriaDTO, CategoriaIconRule } from "../types/evento.ts";
 import type {Participante} from "../types/auth.ts";
 
+// 👉 helper local
+const toLocalISODate = (d: Date) => {
+  const off = d.getTimezoneOffset();
+  const local = new Date(d.getTime() - off * 60_000);
+  return local.toISOString().slice(0, 10); // "YYYY-MM-DD"
+};
+
 // Service para manejar eventoss
 export class EventoService {
+
+  
   // URL base del backend
   private static readonly BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -90,6 +99,7 @@ export class EventoService {
       params.set("palabrasClave", termino ?? "");
       params.set("nroPagina", String(pagina));
       if (ubicacion && ubicacion.trim()) params.set("ubicacion", ubicacion.trim());
+      console.log(params.toString());
       const url = `/eventos?${params.toString()}`;
       
       const response = await this.api.get<ResultadoBusquedaEvento>(url);
@@ -230,45 +240,55 @@ export class EventoService {
         }
     }
 
-  // Método para buscar eventos con filtros avanzados
-  static async buscarEventosConFiltros(filtros: {
-    palabrasClave?: string;
-    categoria?: string;
-    ubicacion?: string;
-    fechaInicio?: string;
-    fechaFin?: string;
-    precioMin?: number;
-    precioMax?: number;
-    pagina?: number;
-  }): Promise<{eventos: Evento[], totalPaginas: number, totalElementos: number}> {
-    try {
-      const params = new URLSearchParams();
-      
-      if (filtros.palabrasClave) params.append('palabrasClave', filtros.palabrasClave);
-      if (filtros.categoria) params.append('categoria', filtros.categoria);
-      if (filtros.ubicacion) params.append('ubicacion', filtros.ubicacion);
-      if (filtros.fechaInicio) params.append('fechaInicio', filtros.fechaInicio);
-      if (filtros.fechaFin) params.append('fechaFin', filtros.fechaFin);
-      if (filtros.precioMin !== undefined) params.append('precioMin', filtros.precioMin.toString());
-      if (filtros.precioMax !== undefined) params.append('precioMax', filtros.precioMax.toString());
-      
-      params.append('nroPagina', (filtros.pagina || 0).toString());
 
-      const url = `/eventos?${params.toString()}`;
-      
-      const response = await this.api.get<ResultadoBusquedaEvento>(url);
-      
-      return {
-        eventos: response.data.eventos,
-        totalPaginas: response.data.totalPaginas,
-        totalElementos: response.data.totalElementos
-      };
-    } catch (error) {
-      console.error('❌ Error buscando eventos con filtros:', error);
-      throw new Error('Error al buscar eventos con filtros');
+
+// Método para buscar eventos con filtros avanzados
+static async buscarEventosConFiltros(filtros: {
+  palabrasClave?: string;
+  categoria?: string;
+  ubicacion?: string;
+  // aceptamos string "YYYY-MM-DD" o Date
+  fechaInicio?: string | Date;
+  fechaFin?: string | Date;
+  precioMin?: number;
+  precioMax?: number;
+  // tu backend usa 1-based → default 1
+  pagina?: number;
+}): Promise<{ eventos: Evento[]; totalPaginas: number; totalElementos: number }> {
+  try {
+    const params = new URLSearchParams();
+
+    if (filtros.palabrasClave) params.append('palabrasClave', filtros.palabrasClave);
+    if (filtros.categoria) params.append('categoria', filtros.categoria);
+    if (filtros.ubicacion) params.append('ubicacion', filtros.ubicacion);
+
+    if (filtros.fechaInicio) {
+      const v = filtros.fechaInicio instanceof Date ? toLocalISODate(filtros.fechaInicio) : filtros.fechaInicio;
+      params.append('fechaInicio', v);
     }
-  }
+    if (filtros.fechaFin) {
+      const v = filtros.fechaFin instanceof Date ? toLocalISODate(filtros.fechaFin) : filtros.fechaFin;
+      params.append('fechaFin', v);
+    }
 
+    if (filtros.precioMin !== undefined) params.append('precioMin', String(filtros.precioMin));
+    if (filtros.precioMax !== undefined) params.append('precioMax', String(filtros.precioMax));
+
+    params.append('nroPagina', String(filtros.pagina ?? 1));
+
+    const url = `/eventos?${params.toString()}`;
+    const response = await this.api.get<ResultadoBusquedaEvento>(url);
+
+    return {
+      eventos: response.data.eventos,
+      totalPaginas: response.data.totalPaginas,
+      totalElementos: response.data.totalElementos,
+    };
+  } catch (error) {
+    console.error('❌ Error buscando eventos con filtros:', error);
+    throw new Error('Error al buscar eventos con filtros');
+  }
+}
   // Obtener lista de categorías desde el backend
   static async obtenerCategorias(): Promise<CategoriaDTO[]> {
     try {

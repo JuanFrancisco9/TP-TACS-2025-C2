@@ -1,5 +1,6 @@
 package org.utn.ba.tptacsg2.controllers;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -96,8 +97,8 @@ public class EventoController {
     @PreAuthorize("hasRole('USER')")
     @GetMapping()
     public ResponseEntity<ResultadoBusquedaEvento> buscarEventos(
-            @RequestParam(required = false) LocalDate fechaInicio,
-            @RequestParam(required = false) LocalDate fechaFin,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin,
             @RequestParam(required = false) String categoria,
             @RequestParam(required = false) String ubicacion,
             @RequestParam(required = false) Double precioMin,
