@@ -189,7 +189,15 @@ const EditEvent = ({ event, onClose, onSave }: EditEvent) => {
     const [localEvent, setLocalEvent] = useState<Evento | null>(null);
 
     useEffect(() => {
-        setLocalEvent(event ? { ...event } : null);
+        if (!event) {
+            setLocalEvent(null);
+            return;
+        }
+
+        setLocalEvent({
+            ...event,
+            etiquetas: event.etiquetas ?? []
+        });
     }, [event]);
 
     if (!localEvent) return null;
@@ -361,11 +369,14 @@ const EditEvent = ({ event, onClose, onSave }: EditEvent) => {
                     label="Etiquetas (separadas por coma)"
                     fullWidth
                     margin="normal"
-                    value={localEvent.etiquetas.join(", ")}
+                    value={(localEvent.etiquetas ?? []).join(", ")}
                     onChange={e =>
                         handleChange(
                             "etiquetas",
-                            e.target.value.split(",").map(t => t.trim())
+                            e.target.value
+                                .split(",")
+                                .map(t => t.trim())
+                                .filter(Boolean)
                         )
                     }
                 />

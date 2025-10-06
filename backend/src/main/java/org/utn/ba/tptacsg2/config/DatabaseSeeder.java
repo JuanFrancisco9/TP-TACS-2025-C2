@@ -133,7 +133,7 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         estadoEvento = estadoEventoRepository.save(estadoEvento);
 
-        Ubicacion ubicacion = Ubicacion.presencial("-34.6037", "-58.3816", "Buenos Aires", "CABA", "Av. 9 de Julio 1234");
+        Ubicacion ubicacion = Ubicacion.presencial("-34.6037", "-58.3816", "Ciudad Autónoma de Buenos Aires", "CABA", "Av. 9 de Julio 1234");
         Precio precio = new Precio("ARS", 1500.0f);
         Categoria categoria = new Categoria("Conferencia", "Event");
         categoria = categoriaRepositoryDB.save(categoria);
@@ -174,7 +174,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 LocalDateTime.now().plusDays(7),
                 "11:00",
                 2.5f,
-                Ubicacion.presencial("30","30","Buenos Aires","CABA", "Av. La plata 800"),
+                Ubicacion.presencial("30","30","Ciudad Autónoma de Buenos Aires","CABA", "Av. La plata 800"),
                 100,
                 10,
                 precio,
@@ -200,7 +200,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 LocalDateTime.now().plusDays(7),
                 "11:00",
                 2.5f,
-                Ubicacion.presencial("30","30","Buenos Aires","CABA", "Av. Independencia 800"),
+                Ubicacion.presencial("30","30","Ciudad Autónoma de Buenos Aires","CABA", "Av. Independencia 800"),
                 100,
                 10,
                 new Precio("ARS", 0.f),
