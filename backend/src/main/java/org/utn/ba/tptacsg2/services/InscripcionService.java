@@ -192,11 +192,9 @@ public class InscripcionService {
         return new Waitlist(inscripcionRepository.findWaitlistByEventoOrderByFechaAsc(evento.id(), TipoEstadoInscripcion.PENDIENTE), evento);
     }
 
-    public void actualizarEstado(Inscripcion inscripcion, TipoEstadoInscripcion tipoEstadoInscripcion) {
-        estadoInscripcionRepository.save(inscripcion.estado().updateEstado(tipoEstadoInscripcion));
-    }
-
+    /*
     public ResponseEntity<List<Inscripcion>> getAll() {
         return ResponseEntity.ok(inscripcionRepository.findAll());
     }
+    */
 }
