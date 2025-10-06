@@ -207,6 +207,7 @@ public class EventoService {
         estadoInicial.setEvento(evento);
         this.estadoEventoRepository.save(estadoInicial);
         eventoRepository.save(evento);
+        this.redisCacheService.crearEventoConCupos(evento.id(), evento.cupoMaximo(), this.fechaExpiracionDeCache(evento));
 
         return mapearEventoDTO(evento);
     }
@@ -310,11 +311,19 @@ public class EventoService {
         );
     }
 
-    public Instant fechaExpiracionDeCache(Evento evento) {
-        return evento.fecha()
-                .plus(tiempoDeGracia)
-                .atZone(ZoneId.from(evento.fecha()))
-                .toInstant();
+    public Duration fechaExpiracionDeCache(Evento evento) {
+        if (evento.fecha() == null) {
+            return Duration.ZERO;
+        }
+
+        LocalDateTime expiracion = evento.fecha().plus(tiempoDeGracia);
+        LocalDateTime ahora = LocalDateTime.now();
+
+        if (expiracion.isBefore(ahora)) {
+            return Duration.ZERO;
+        }
+
+        return Duration.between(ahora, expiracion);
     }
 
     public Evento actualizarEvento(String idEvento, Evento eventoUpdate) {

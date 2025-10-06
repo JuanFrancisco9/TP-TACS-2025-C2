@@ -55,6 +55,8 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedOrigin("http://localhost:5173");
         configuration.addAllowedOrigin("http://127.0.0.1:5173");
+        configuration.addAllowedOriginPattern("http://localhost:*");
+        configuration.addAllowedOriginPattern("http://127.0.0.1:*");
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");
         // CRÍTICO para Basic Auth
@@ -81,6 +83,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/eventos").permitAll()
                         .anyRequest().authenticated()
                 )
                 .httpBasic(hb -> hb.authenticationEntryPoint(basicEntryPoint));
