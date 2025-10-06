@@ -18,6 +18,8 @@ import org.utn.ba.tptacsg2.models.location.Provincia;
 import org.utn.ba.tptacsg2.models.users.Rol;
 import org.utn.ba.tptacsg2.models.users.Usuario;
 import org.utn.ba.tptacsg2.repositories.db.*; // Asume que tienes todos los repositorios definidos
+import org.utn.ba.tptacsg2.services.EventoService;
+import org.utn.ba.tptacsg2.services.RedisCacheService;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -47,6 +49,8 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final ProvinciaRepositoryDB provinciaRepositoryDB;
     private final LocalidadRepositoryDB localidadRepositoryDB;
+    private final RedisCacheService redisCacheService;
+    private final EventoService eventoService;
 
     public DatabaseSeeder(
             UsuarioRepositoryDB usuarioRepository,
@@ -59,7 +63,9 @@ public class DatabaseSeeder implements CommandLineRunner {
             EstadoInscripcionRepositoryDB estadoInscripcionRepositoryDB,
             PasswordEncoder passwordEncoder,
             ProvinciaRepositoryDB provinciaRepositoryDB,
-            LocalidadRepositoryDB localidadRepositoryDB
+            LocalidadRepositoryDB localidadRepositoryDB,
+            RedisCacheService redisCacheService,
+            EventoService eventoService
     ) {
         this.usuarioRepository = usuarioRepository;
         this.organizadorRepository = organizadorRepository;
@@ -72,6 +78,8 @@ public class DatabaseSeeder implements CommandLineRunner {
         this.passwordEncoder = passwordEncoder;
         this.provinciaRepositoryDB = provinciaRepositoryDB;
         this.localidadRepositoryDB = localidadRepositoryDB;
+        this.redisCacheService = redisCacheService;
+        this.eventoService = eventoService;
     }
 
     @Override
@@ -161,6 +169,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         );
 
         evento = eventoRepositoryDB.save(evento);
+        redisCacheService.crearEventoConCupos(evento.id(), evento.cupoMaximo(), eventoService.fechaExpiracionDeCache(evento));
 
 
         estadoEvento.setEvento(evento);
@@ -191,6 +200,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         evento2 = eventoRepositoryDB.save(evento2);
         estadoEvento2.setEvento(evento2);
         estadoEventoRepository.save(estadoEvento2);
+        redisCacheService.crearEventoConCupos(evento.id(), evento.cupoMaximo(), eventoService.fechaExpiracionDeCache(evento2));
 
         EstadoEvento estadoEvento3 = new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now());
         estadoEvento3 = estadoEventoRepository.save(estadoEvento3);
@@ -214,6 +224,8 @@ public class DatabaseSeeder implements CommandLineRunner {
         );
 
         evento3 = eventoRepositoryDB.save(evento3);
+        redisCacheService.crearEventoConCupos(evento.id(), evento.cupoMaximo(), eventoService.fechaExpiracionDeCache(evento3));
+
         estadoEvento3.setEvento(evento3);
         estadoEventoRepository.save(estadoEvento3);
 
