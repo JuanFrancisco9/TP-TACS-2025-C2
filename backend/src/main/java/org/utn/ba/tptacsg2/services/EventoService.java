@@ -19,6 +19,7 @@ import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.models.events.Imagen;
 import org.utn.ba.tptacsg2.models.events.SolicitudEvento;
 import org.utn.ba.tptacsg2.models.events.Ubicacion;
+import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
 import org.utn.ba.tptacsg2.models.location.Localidad;
 import org.utn.ba.tptacsg2.models.location.Provincia;
@@ -80,8 +81,8 @@ public class EventoService {
                          CategoriaService categoriaService,
                          R2StorageService r2StorageService,
                          RedisCacheService redisCacheService,
-                         UbicacionCatalogService ubicacionCatalogService) {
-    public EventoService(EventoRepositoryDB eventoRepository, InscripcionRepositoryDB inscripcionRepository, OrganizadorRepositoryDB organizadorRepository, GeneradorIDService generadorIDService, EstadoEventoRepositoryDB estadoEventoRepository, CategoriaService categoriaService, EstadoInscripcionRepositoryDB estadoInscripcionRepository) {
+                         UbicacionCatalogService ubicacionCatalogService,
+                         EstadoInscripcionRepositoryDB estadoInscripcionRepository) {
         this.eventoRepository = eventoRepository;
         this.inscripcionRepository = inscripcionRepository;
         this.organizadorRepository = organizadorRepository;
@@ -210,7 +211,7 @@ public class EventoService {
         return mapearEventoDTO(evento);
     }
 
-    private void validarUbicacionVirtual(org.utn.ba.tptacsg2.models.events.Ubicacion ubicacion) {
+    private void validarUbicacionVirtual(Ubicacion ubicacion) {
         if (ubicacion == null) {
             throw new IllegalArgumentException("La ubicación del evento es obligatoria.");
         }
