@@ -36,6 +36,5 @@ public class InscripcionController {
     public ResponseEntity<Waitlist> getWaitlist(@PathVariable String eventoId) {
         return ResponseEntity.ok(this.inscripcionService.getWaitlist(eventoId));
     }
-
 }
 

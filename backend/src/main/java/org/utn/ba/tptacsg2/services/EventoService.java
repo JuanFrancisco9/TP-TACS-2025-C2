@@ -9,6 +9,7 @@ import org.utn.ba.tptacsg2.dtos.FiltrosDTO;
 import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.dtos.output.ResultadoBusquedaEvento;
 import org.utn.ba.tptacsg2.exceptions.EventoNoEncontradoException;
+import org.utn.ba.tptacsg2.exceptions.EventoUpdateInvalidoException;
 import org.utn.ba.tptacsg2.helpers.EventPredicateBuilder;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.actors.Participante;
@@ -18,6 +19,7 @@ import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.models.events.Imagen;
 import org.utn.ba.tptacsg2.models.events.SolicitudEvento;
 import org.utn.ba.tptacsg2.models.events.Ubicacion;
+import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
 import org.utn.ba.tptacsg2.models.location.Localidad;
 import org.utn.ba.tptacsg2.models.location.Provincia;
@@ -25,12 +27,16 @@ import org.utn.ba.tptacsg2.repositories.db.EstadoEventoRepositoryDB;
 import org.utn.ba.tptacsg2.repositories.db.EventoRepositoryDB;
 import org.utn.ba.tptacsg2.repositories.db.InscripcionRepositoryDB;
 import org.utn.ba.tptacsg2.repositories.db.OrganizadorRepositoryDB;
+import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
+import org.utn.ba.tptacsg2.repositories.db.*;
+import org.w3c.dom.events.EventException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.*;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -45,6 +51,7 @@ public class EventoService {
     private final R2StorageService r2StorageService;
     private final RedisCacheService redisCacheService;
     private final UbicacionCatalogService ubicacionCatalogService;
+    private final EstadoInscripcionRepositoryDB estadoInscripcionRepository;
     @Value("${app.pagination.default-page-size}")
     private Integer tamanioPagina;
     private final Duration tiempoDeGracia;
@@ -74,7 +81,8 @@ public class EventoService {
                          CategoriaService categoriaService,
                          R2StorageService r2StorageService,
                          RedisCacheService redisCacheService,
-                         UbicacionCatalogService ubicacionCatalogService) {
+                         UbicacionCatalogService ubicacionCatalogService,
+                         EstadoInscripcionRepositoryDB estadoInscripcionRepository) {
         this.eventoRepository = eventoRepository;
         this.inscripcionRepository = inscripcionRepository;
         this.organizadorRepository = organizadorRepository;
@@ -85,6 +93,7 @@ public class EventoService {
         this.redisCacheService = redisCacheService;
         this.ubicacionCatalogService = ubicacionCatalogService;
         this.tiempoDeGracia = Duration.ofHours(36);
+        this.estadoInscripcionRepository = estadoInscripcionRepository;
     }
 
     public Integer cuposDisponibles(Evento evento) {
@@ -202,7 +211,7 @@ public class EventoService {
         return mapearEventoDTO(evento);
     }
 
-    private void validarUbicacionVirtual(org.utn.ba.tptacsg2.models.events.Ubicacion ubicacion) {
+    private void validarUbicacionVirtual(Ubicacion ubicacion) {
         if (ubicacion == null) {
             throw new IllegalArgumentException("La ubicación del evento es obligatoria.");
         }
@@ -363,8 +372,19 @@ public class EventoService {
         }
 
         eventoRepository.save(eventoActualizado);
+        actualizarInscripciones(eventoActualizado, eventoActualizado.estado().getTipoEstado());
 
         return eventoActualizado;
+    }
+
+    private void isUpdateValido(String idEvent, Evento eventoUpdate) {
+        Evento eventoActual = eventoRepository.findById(idEvent).orElse(null);
+
+        int cantidadInscriptos = inscripcionRepository.findByEvento_Id(idEvent).size();
+
+        if (eventoUpdate.cupoMaximo() < cantidadInscriptos) {
+            throw new EventoUpdateInvalidoException("Evento tiene una cantidad de inscriptos mayor al cupo maximo que se desea setear");
+        }
     }
 
     public Evento cambiarEstado(String idEvento,TipoEstadoEvento estado) {
@@ -391,10 +411,49 @@ public class EventoService {
                 evento.imagenKey()
         );
 
+        actualizarInscripciones(eventoActualizado, eventoActualizado.estado().getTipoEstado());
+
         eventoRepository.save(eventoActualizado);
 
         return eventoActualizado;
     }
+
+    // Mucho texto pero no es para tanto
+    private void actualizarInscripciones(Evento evento, TipoEstadoEvento tipoEstadoEvento) {
+        // Obtengo todas las inscripciones que no estén canceladas (esas ya fueron, no me interesan) y  las ordena por orden de inscripcion
+        List<Inscripcion> inscripciones = inscripcionRepository.findByEvento_Id(evento.id()).stream()
+                .filter(i -> i.estado().getTipoEstado() != TipoEstadoInscripcion.CANCELADA)
+                .sorted(Comparator.comparing(Inscripcion::fechaRegistro))
+                .toList();
+
+        switch (tipoEstadoEvento) {
+            case CONFIRMADO -> { // Pasa todas las primeras n inscripciones (no canceladas) a CONFIRMADAS
+                for(int i=0; i < Math.min(evento.cupoMaximo(), inscripciones.size()); i++) {
+                    Inscripcion inscripcion = inscripciones.get(i);
+                    estadoInscripcionRepository.save(inscripcion.estado().updateEstado(TipoEstadoInscripcion.ACEPTADA));
+                }
+
+                return;
+            }
+            case PENDIENTE -> { // Pasa todas las inscripciones en estado ACEPTADA a PENDIENTE
+                inscripciones.stream()
+                        .filter(i -> {return i.estado().getTipoEstado().equals(TipoEstadoInscripcion.ACEPTADA);})
+                        .forEach(i -> {estadoInscripcionRepository.save(i.estado().updateEstado(TipoEstadoInscripcion.PENDIENTE));});
+                return;
+            }
+            case CANCELADO -> { // Cancelo todas las inscripciones
+                inscripciones.forEach(i -> {estadoInscripcionRepository.save(i.estado().updateEstado(TipoEstadoInscripcion.CANCELADA));});
+                return;
+            }
+            case NO_ACEPTA_INSCRIPCIONES -> { // Do nothing
+                return;
+            }
+            default -> {
+                throw new RuntimeException("No existe el estado de evento: " + tipoEstadoEvento);
+            }
+        }
+    }
+
 
     public Evento getEvento(String eventoId){
         return eventoRepository.findById(eventoId).orElseThrow(()-> new RuntimeException("Evento " + eventoId + " no encontrado"));

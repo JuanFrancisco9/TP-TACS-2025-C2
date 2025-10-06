@@ -52,4 +52,10 @@ public class EstadoInscripcion {
     public void setFechaDeCambio(LocalDateTime fechaDeCambio) {
         this.fechaDeCambio = fechaDeCambio;
     }
+
+    public EstadoInscripcion updateEstado(TipoEstadoInscripcion estadoInscripcion){
+        this.tipoEstado = estadoInscripcion;
+        this.setFechaDeCambio(LocalDateTime.now());
+        return this;
+    }
 }
