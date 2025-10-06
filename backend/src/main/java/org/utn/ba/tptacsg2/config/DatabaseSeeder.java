@@ -54,7 +54,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             EstadoEventoRepositoryDB estadoEventoRepository,
             InscripcionRepositoryDB inscripcionRepository,
             EstadoInscripcionRepositoryDB estadoInscripcionRepositoryDB,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
             ProvinciaRepositoryDB provinciaRepositoryDB,
             LocalidadRepositoryDB localidadRepositoryDB
     ) {
@@ -83,6 +83,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         Usuario userPart = new Usuario( "usuario", "$argon2id$v=19$m=65536,t=4,p=1$hC1J7qKqgmkSUfl8kMdQow$wva2eKpy3Mw8/oJPvJw5JdPse+cEJ73EdmcT6uhcXmU", Rol.ROLE_USER);
         Usuario userOrg = new Usuario( "organizador", "$argon2id$v=19$m=65536,t=4,p=1$IDXLIGuWc88CLL+7VyhCOA$CXr5e1xeozTTolyjDn1PNX1cs9uHqXFbH6TrtDKOCtk", Rol.ROLE_ORGANIZER);
 
+        admin = usuarioRepository.save(admin);
         userPart = usuarioRepository.save(userPart);
         userOrg = usuarioRepository.save(userOrg);
 
@@ -125,8 +126,6 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         log.info("Usuarios, Organizadores y Participantes creados.");
 
-
-
         EstadoEvento estadoEvento = new EstadoEvento(
                 TipoEstadoEvento.CONFIRMADO,
                 LocalDateTime.now()
@@ -162,6 +161,59 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         estadoEvento.setEvento(evento);
         estadoEventoRepository.save(estadoEvento);
+
+        EstadoEvento estadoEvento2 = new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now());
+        estadoEvento2 = estadoEventoRepository.save(estadoEvento2);
+        Categoria categoria2 = new Categoria("Entretenimiento", "Event");
+        categoria2 = categoriaRepositoryDB.save(categoria2);
+
+        Evento evento2 = new Evento(
+                "700-151891-02068",
+                "G2 en el Movistar Arena",
+                "Un evento familiar que no te podes perder",
+                LocalDateTime.now().plusDays(7),
+                "11:00",
+                2.5f,
+                Ubicacion.presencial("30","30","Buenos Aires","CABA", "Av. La plata 800"),
+                100,
+                10,
+                precio,
+                organizador,
+                estadoEvento2,
+                categoria2,
+                Arrays.asList("Familia", "Comedia", "Entretenimiento"),
+                null
+        );
+
+        evento2 = eventoRepositoryDB.save(evento2);
+        estadoEvento2.setEvento(evento2);
+        estadoEventoRepository.save(estadoEvento2);
+
+        EstadoEvento estadoEvento3 = new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now());
+        estadoEvento3 = estadoEventoRepository.save(estadoEvento3);
+        Categoria categoria3 = new Categoria("Gratis", "Event");
+        categoria3 = categoriaRepositoryDB.save(categoria3);
+        Evento evento3 = new Evento(
+                "700-02068",
+                "Caminito",
+                "Recorrer caminito a la luz de las velas",
+                LocalDateTime.now().plusDays(7),
+                "11:00",
+                2.5f,
+                Ubicacion.presencial("30","30","Buenos Aires","CABA", "Av. Independencia 800"),
+                100,
+                10,
+                new Precio("ARS", 0.f),
+                organizador,
+                estadoEvento3,
+                categoria3,
+                Arrays.asList("Luz", "Velas", "Caminata"),
+                null
+        );
+
+        evento3 = eventoRepositoryDB.save(evento3);
+        estadoEvento3.setEvento(evento3);
+        estadoEventoRepository.save(estadoEvento3);
 
         log.info("Evento y EstadoEvento creados.");
 
