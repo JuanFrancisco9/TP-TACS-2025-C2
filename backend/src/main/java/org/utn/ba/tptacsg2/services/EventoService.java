@@ -111,6 +111,7 @@ public class EventoService {
         );
 
         eventoRepository.save(eventoActualizado);
+        actualizarInscripciones(eventoActualizado, eventoActualizado.estado().getTipoEstado());
 
         return eventoActualizado;
         }else  {
@@ -151,6 +152,8 @@ public class EventoService {
                 evento.etiquetas()
         );
 
+        actualizarInscripciones(eventoActualizado, eventoActualizado.estado().getTipoEstado());
+
         eventoRepository.save(eventoActualizado);
 
         return eventoActualizado;
@@ -158,15 +161,14 @@ public class EventoService {
 
     // Mucho texto pero no es para tanto
     private void actualizarInscripciones(Evento evento, TipoEstadoEvento tipoEstadoEvento) {
-        // Obtengo todas las inscripciones que no estén canceladas (esas ya fueron, no me interesan)
+        // Obtengo todas las inscripciones que no estén canceladas (esas ya fueron, no me interesan) y  las ordena por orden de inscripcion
         List<Inscripcion> inscripciones = inscripcionRepository.findByEvento_Id(evento.id()).stream()
-                .filter(i -> {return !(i.estado().getTipoEstado().equals(TipoEstadoInscripcion.CANCELADA));})
+                .filter(i -> i.estado().getTipoEstado() != TipoEstadoInscripcion.CANCELADA)
+                .sorted(Comparator.comparing(Inscripcion::fechaRegistro))
                 .toList();
 
         switch (tipoEstadoEvento) {
             case CONFIRMADO -> { // Pasa todas las primeras n inscripciones (no canceladas) a CONFIRMADAS
-                inscripciones.sort(Comparator.comparing(Inscripcion::fechaRegistro));
-
                 for(int i=0; i < Math.min(evento.cupoMaximo(), inscripciones.size()); i++) {
                     Inscripcion inscripcion = inscripciones.get(i);
                     estadoInscripcionRepository.save(inscripcion.estado().updateEstado(TipoEstadoInscripcion.ACEPTADA));
