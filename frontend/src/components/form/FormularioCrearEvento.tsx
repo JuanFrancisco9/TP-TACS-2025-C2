@@ -13,26 +13,15 @@ import {
     FormControlLabel,
     Radio,
 } from "@mui/material";
-import Autocomplete from "@mui/material/Autocomplete";
+import InputAdornment from "@mui/material/InputAdornment";
 import authService from "../../services/authService";
 import { EventoService } from "../../services/eventoService";
-import { getCategoryIconComponent, inferIconName, normalizeKey } from "../../utils/categoryIcons";
+import { getCategoryIconComponent, inferIconName } from "../../utils/categoryIcons";
 import LocationPickerMap from "./LocationPickerMap";
 import { PROVINCIAS, getDefaultCoordenadas, getLocalidades } from "../../utils/locationData";
 import type { CategoriaDTO, CategoriaIconRule } from "../../types/evento";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-const createEmptyCategoria = (): CategoriaDTO => ({ tipo: "", icono: undefined });
-
-const formatForDisplay = (value: string) =>
-    value
-        .trim()
-        .replace(/\s+/g, " ")
-        .split(" ")
-        .filter(Boolean)
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(" ");
 
 type Ubicacion = {
     latitud: string | null;
@@ -82,7 +71,7 @@ const validarEnlaceVirtual = (enlace: string): { ok: boolean; mensaje: string | 
     let url: URL;
     try {
         url = new URL(enlace);
-    } catch (err) {
+    } catch {
         return { ok: false, mensaje: "Enlace invalido." };
     }
 
@@ -120,8 +109,7 @@ export default function FormularioCrearEvento() {
     const estado: TipoEstadoEvento = "CONFIRMADO";
     const [categoriasDisponibles, setCategoriasDisponibles] = React.useState<CategoriaDTO[]>([]);
     const [iconRules, setIconRules] = React.useState<CategoriaIconRule[]>([]);
-    const [categoriaSeleccionada, setCategoriaSeleccionada] = React.useState<CategoriaDTO>(createEmptyCategoria);
-    const [categoriaInputValue, setCategoriaInputValue] = React.useState("");
+    const [categoriaSeleccionada, setCategoriaSeleccionada] = React.useState<CategoriaDTO | null>(null);
 
     const [etiquetasCSV, setEtiquetasCSV] = React.useState("");
     const [imagen, setImagen] = React.useState<File | null>(null);
@@ -135,6 +123,28 @@ export default function FormularioCrearEvento() {
         [modalidad, provincia]
     );
 
+    const iconNamePreview = categoriaSeleccionada?.icono
+        ?? inferIconName(iconRules, categoriaSeleccionada?.tipo);
+    const IconPreview = getCategoryIconComponent(iconNamePreview);
+
+    const aplicarCatalogos = React.useCallback((categorias: CategoriaDTO[], reglas: CategoriaIconRule[]) => {
+        const ordenadas = [...categorias].sort((a, b) =>
+            a.tipo.localeCompare(b.tipo, "es", { sensitivity: "base" })
+        );
+        setCategoriasDisponibles(ordenadas);
+        setIconRules(reglas.length > 0 ? reglas : []);
+        setCategoriaSeleccionada((prev) => {
+            if (prev && prev.tipo) {
+                const prevLower = prev.tipo.toLowerCase();
+                const match = ordenadas.find((cat) => cat.tipo.toLowerCase() === prevLower);
+                if (match) {
+                    return match;
+                }
+            }
+            return ordenadas.length > 0 ? ordenadas[0] : null;
+        });
+    }, []);
+
     React.useEffect(() => {
         let active = true;
         (async () => {
@@ -144,20 +154,7 @@ export default function FormularioCrearEvento() {
                     EventoService.obtenerReglasIcono(),
                 ]);
                 if (!active) return;
-                setCategoriasDisponibles(categorias);
-                if (reglas.length > 0) {
-                    setIconRules(reglas);
-                }
-                if (categorias.length > 0) {
-                    setCategoriaSeleccionada((prev) => {
-                        if (prev.tipo) {
-                            return prev;
-                        }
-                        const primera = categorias[0];
-                        setCategoriaInputValue(primera.tipo);
-                        return primera;
-                    });
-                }
+                aplicarCatalogos(categorias, reglas);
             } catch (error) {
                 console.error("Error cargando categorías o reglas de iconos", error);
             }
@@ -165,7 +162,7 @@ export default function FormularioCrearEvento() {
         return () => {
             active = false;
         };
-    }, []);
+    }, [aplicarCatalogos]);
 
     React.useEffect(() => {
         if (modalidad === "PRESENCIAL") {
@@ -250,30 +247,6 @@ export default function FormularioCrearEvento() {
         };
     }, [modalidad, direccion, localidad, provincia]);
 
-    const syncCategoria = React.useCallback((rawValue: string) => {
-        const trimmed = rawValue.trim();
-        if (!trimmed) {
-            setCategoriaSeleccionada(createEmptyCategoria());
-            setCategoriaInputValue("");
-            return;
-        }
-        const display = formatForDisplay(trimmed);
-        const normalizedTarget = normalizeKey(display);
-        setCategoriasDisponibles((prev) => {
-            const existente = prev.find((cat) => normalizeKey(cat.tipo) === normalizedTarget);
-            if (existente) {
-                setCategoriaSeleccionada(existente);
-                setCategoriaInputValue(existente.tipo);
-                return prev;
-            }
-            const iconoInferido = inferIconName(iconRules, display);
-            const nuevaCategoria: CategoriaDTO = { tipo: display, icono: iconoInferido };
-            setCategoriaSeleccionada(nuevaCategoria);
-            setCategoriaInputValue(display);
-            return [...prev, nuevaCategoria].sort((a, b) => a.tipo.localeCompare(b.tipo, "es", { sensitivity: "base" }));
-        });
-    }, [iconRules]);
-
     const handleModalidadChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value as ModalidadEvento;
         setModalidad(value);
@@ -319,20 +292,13 @@ export default function FormularioCrearEvento() {
         setImagen(file ?? null);
     };
 
-    const handleCategoriaSelection = (_event: React.SyntheticEvent, newValue: string | null) => {
-        syncCategoria(newValue ?? "");
-    };
-
-    const handleCategoriaInputChange = (_event: React.SyntheticEvent, newInputValue: string) => {
-        setCategoriaInputValue(newInputValue);
-        if (!newInputValue) {
-            setCategoriaSeleccionada(createEmptyCategoria());
+    const handleCategoriaSelect = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const valor = event.target.value;
+        const seleccionada = categoriasDisponibles.find((cat) => cat.tipo === valor);
+        if (seleccionada) {
+            setCategoriaSeleccionada(seleccionada);
         }
     };
-
-    const ensureCategoriaSincronizada = React.useCallback(() => {
-        syncCategoria(categoriaInputValue);
-    }, [categoriaInputValue, syncCategoria]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -370,35 +336,21 @@ export default function FormularioCrearEvento() {
                 return;
             }
         }
-        const categoriaTexto = (categoriaInputValue || categoriaSeleccionada.tipo).trim();
-        const categoriaDisplay = categoriaTexto ? formatForDisplay(categoriaTexto) : "";
-
-        let categoriaPayload: CategoriaDTO | null = null;
-        if (categoriaDisplay) {
-            const normalized = normalizeKey(categoriaDisplay);
-            const existente = categoriasDisponibles.find((cat) => normalizeKey(cat.tipo) === normalized);
-            categoriaPayload = existente ?? { tipo: categoriaDisplay, icono: inferIconName(iconRules, categoriaDisplay) };
-        }
-
-        if (!categoriaPayload || !categoriaPayload.tipo) {
+        if (!categoriaSeleccionada) {
             setErrorMsg("Debés seleccionar una categoría.");
             return;
         }
 
+        const categoriaElegida = categoriasDisponibles.find(
+            (cat) => cat.tipo.toLowerCase() === categoriaSeleccionada.tipo.toLowerCase()
+        ) ?? categoriaSeleccionada;
+
         const categoriaFinal: CategoriaDTO = {
-            tipo: categoriaPayload.tipo,
-            icono: categoriaPayload.icono ?? inferIconName(iconRules, categoriaPayload.tipo),
+            tipo: categoriaElegida.tipo,
+            icono: categoriaElegida.icono ?? inferIconName(iconRules, categoriaElegida.tipo),
         };
 
-        setCategoriaSeleccionada(categoriaFinal);
-        setCategoriaInputValue(categoriaFinal.tipo);
-        setCategoriasDisponibles((prev) => {
-            const objetivo = normalizeKey(categoriaFinal.tipo);
-            if (prev.some((cat) => normalizeKey(cat.tipo) === objetivo)) {
-                return prev;
-            }
-            return [...prev, categoriaFinal].sort((a, b) => a.tipo.localeCompare(b.tipo, "es", { sensitivity: "base" }));
-        });
+        setCategoriaSeleccionada(categoriaElegida);
 
         const enlaceLimpio = enlaceVirtual.trim();
         const validacionEnlace = modalidad === "VIRTUAL" ? validarEnlaceVirtual(enlaceLimpio) : { ok: true, mensaje: null };
@@ -479,7 +431,9 @@ export default function FormularioCrearEvento() {
                 try {
                     const txt = await res.text();
                     if (txt) msg = txt;
-                } catch {}
+                } catch (textError) {
+                    console.warn("No se pudo leer la respuesta de error", textError);
+                }
                 setErrorMsg(msg);
                 return;
             }
@@ -507,8 +461,7 @@ export default function FormularioCrearEvento() {
             setLatitud("");
             setLongitud("");
             setCoordsAjustadasManualmente(false);
-            setCategoriaSeleccionada(createEmptyCategoria());
-            setCategoriaInputValue("");
+            setCategoriaSeleccionada(categoriasDisponibles[0] ?? null);
             setEtiquetasCSV("");
             setImagen(null);
             void (async () => {
@@ -517,20 +470,17 @@ export default function FormularioCrearEvento() {
                         EventoService.obtenerCategorias(),
                         EventoService.obtenerReglasIcono(),
                     ]);
-                    setCategoriasDisponibles(categoriasActualizadas);
-                    if (reglasActualizadas.length > 0) {
-                        setIconRules(reglasActualizadas);
-                    }
-                    if (categoriasActualizadas.length > 0) {
-                        setCategoriaSeleccionada(categoriasActualizadas[0]);
-                        setCategoriaInputValue(categoriasActualizadas[0].tipo);
-                    }
+                    aplicarCatalogos(categoriasActualizadas, reglasActualizadas);
                 } catch (fetchError) {
                     console.error("No se pudieron refrescar las categorías/iconos", fetchError);
                 }
             })();
-        } catch (err: any) {
-            setErrorMsg(err?.message ?? "No se pudo conectar con el servidor.");
+        } catch (err: unknown) {
+            if (err instanceof Error && err.message.trim().length > 0) {
+                setErrorMsg(err.message);
+            } else {
+                setErrorMsg("No se pudo conectar con el servidor.");
+            }
         } finally {
             setSubmitting(false);
         }
@@ -618,39 +568,43 @@ export default function FormularioCrearEvento() {
 
                 {/* Categoría */}
                 <Grid size={{xs:12,sm:6}}>
-                    <Autocomplete
-                        freeSolo
-                        options={categoriasDisponibles.map((cat) => cat.tipo)}
-                        value={categoriaSeleccionada.tipo || null}
-                        inputValue={categoriaInputValue}
-                        onChange={handleCategoriaSelection}
-                        onInputChange={handleCategoriaInputChange}
-                        disabled={submitting}
-                        renderInput={(params) => {
-                            const iconNamePreview = categoriaSeleccionada.icono
-                                ?? inferIconName(iconRules, categoriaInputValue || categoriaSeleccionada.tipo);
-                            const IconPreview = getCategoryIconComponent(iconNamePreview);
-                            return (
-                                <TextField
-                                    {...params}
-                                    label="Categoría"
-                                    required
-                                    onBlur={ensureCategoriaSincronizada}
-                                    InputProps={{
-                                        ...params.InputProps,
-                                        endAdornment: (
-                                            <>
-                                                <Box sx={{ display: "flex", alignItems: "center", pr: 1 }}>
-                                                    <IconPreview fontSize="small" />
-                                                </Box>
-                                                {params.InputProps.endAdornment}
-                                            </>
-                                        ),
-                                    }}
-                                />
-                            );
+                    <TextField
+                        select
+                        label="Categoría"
+                        value={categoriaSeleccionada?.tipo ?? ""}
+                        onChange={handleCategoriaSelect}
+                        fullWidth
+                        required
+                        disabled={submitting || categoriasDisponibles.length === 0}
+                        SelectProps={{
+                            MenuProps: {
+                                PaperProps: {
+                                    style: { maxHeight: 240 }
+                                }
+                            },
+                            renderValue: (selected) => (selected ? String(selected) : "")
                         }}
-                    />
+                        InputProps={{
+                            startAdornment: categoriaSeleccionada ? (
+                                <InputAdornment position="start">
+                                    <IconPreview fontSize="small" />
+                                </InputAdornment>
+                            ) : undefined,
+                        }}
+                    >
+                        {categoriasDisponibles.map((cat) => {
+                            const iconName = cat.icono ?? inferIconName(iconRules, cat.tipo);
+                            const IconOption = getCategoryIconComponent(iconName);
+                            return (
+                                <MenuItem key={cat.tipo} value={cat.tipo}>
+                                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                        <IconOption fontSize="small" />
+                                        <span>{cat.tipo}</span>
+                                    </Box>
+                                </MenuItem>
+                            );
+                        })}
+                    </TextField>
                 </Grid>
 
                 <Grid size={{xs:12}}>
