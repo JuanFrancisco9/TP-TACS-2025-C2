@@ -105,7 +105,7 @@ public class EventoController {
             @RequestParam(required = false) String palabrasClave,
             @RequestParam(defaultValue = "1") Integer nroPagina){
 
-        FiltrosDTO filtros = new FiltrosDTO(fechaInicio, fechaFin, categoria, ubicacion, precioMin, precioMax, palabrasClave, nroPagina);
+        FiltrosDTO filtros = new FiltrosDTO(fechaInicio, fechaFin, categoria, ubicacion, precioMax, precioMin, palabrasClave, nroPagina);
 
         ResultadoBusquedaEvento resultado = eventoService.buscarEventos(filtros);
 

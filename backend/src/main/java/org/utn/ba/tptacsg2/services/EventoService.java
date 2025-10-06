@@ -491,21 +491,30 @@ public class EventoService {
                 .conPalabrasClave(filtros.palabrasClave())
                 .build();
 
-        List<Evento> eventosFiltrados = eventos.stream().filter(predicadosCombinados).toList();
+        List<Evento> filtrados = eventos.stream()
+                .filter(predicadosCombinados)
+                .toList();
 
-        Integer totalElementos = eventosFiltrados.size();
-        Integer totalPaginas = (int) Math.ceil((double) totalElementos / tamanioPagina);
-        Integer inicioEventos = filtros.nroPagina() * tamanioPagina;
-        Integer finalEventos = Math.min(inicioEventos + tamanioPagina , eventosFiltrados.size());
+        int totalElementos = filtrados.size();
+        int tamanioPaginaEfectivo = tamanioPagina != null && tamanioPagina > 0 ? tamanioPagina : 20;
 
-        List<Evento> eventosFiltradosYPaginados = inicioEventos >= eventosFiltrados.size() ? new ArrayList<>() : eventosFiltrados.subList(inicioEventos, finalEventos);
+        int paginaActual = filtros.nroPagina() == null ? 1 : Math.max(1, filtros.nroPagina());
+        int indiceInicio = (paginaActual - 1) * tamanioPaginaEfectivo;
+        int indiceFin = Math.min(indiceInicio + tamanioPaginaEfectivo, totalElementos);
 
-        // Convertir eventos a DTOs con URLs de imagen
-        List<EventoDTO> eventosDTO = eventosFiltradosYPaginados.stream()
+        // Evitar subList fuera de rango
+        List<Evento> pagina = (indiceInicio >= totalElementos)
+                ? List.of()
+                : filtrados.subList(indiceInicio, indiceFin);
+
+        // Calcular total de páginas (ceil)
+        int totalPaginas = totalElementos == 0 ? 0 : (int) Math.ceil((double) totalElementos / tamanioPaginaEfectivo);
+
+        List<EventoDTO> eventosDTO = pagina.stream()
                 .map(this::mapearEventoDTO)
                 .toList();
 
-        return new ResultadoBusquedaEvento(eventosDTO, filtros.nroPagina() + 1, totalElementos, totalPaginas);
+        return new ResultadoBusquedaEvento(eventosDTO, paginaActual, totalElementos, totalPaginas);
     }
 
     public EventoDTO obtenerEventoPorId(String eventoId) {
