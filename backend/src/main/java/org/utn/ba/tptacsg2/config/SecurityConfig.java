@@ -55,6 +55,8 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedOrigin("http://localhost:5173");
         configuration.addAllowedOrigin("http://127.0.0.1:5173");
+        configuration.addAllowedOriginPattern("http://localhost:*");
+        configuration.addAllowedOriginPattern("http://127.0.0.1:*");
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");
         // CRÍTICO para Basic Auth

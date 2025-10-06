@@ -8,8 +8,11 @@ import {
   Divider,
   Paper
 } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
 
 const Footer: React.FC = () => {
+  const inscripcionesUrl = import.meta.env.VITE_INSCRIPCIONES_URL ?? 'http://localhost:5174/mis-eventos#';
+
   return (
     <Paper
       elevation={0}
@@ -38,18 +41,16 @@ const Footer: React.FC = () => {
               Enlaces Rápidos
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <Link href="https://wiki.archlinux.org/title/Desktop_environment_(Espa%C3%B1ol)" color="inherit" underline="hover">
+              <Link component={RouterLink} to="/eventos" color="inherit" underline="hover">
                 Eventos
               </Link>
-              <Link href="#" color="inherit" underline="hover">
+              <Link component={RouterLink} to="/mis-eventos" color="inherit" underline="hover">
                 Inscripciones
               </Link>
-              <Link href="#" color="inherit" underline="hover">
+              <Link component={RouterLink} to="/estadisticas" color="inherit" underline="hover">
                 Estadísticas
               </Link>
-              <Link href="#" color="inherit" underline="hover">
-                Contacto
-              </Link>
+
             </Box>
           </Grid>
 
