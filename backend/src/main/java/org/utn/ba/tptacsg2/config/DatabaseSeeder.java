@@ -22,6 +22,9 @@ import org.utn.ba.tptacsg2.repositories.db.*; // Asume que tienes todos los repo
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @ConditionalOnProperty(
@@ -79,6 +82,8 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         seedProvinciasYLocalidades();
 
+        Map<String, Categoria> categoriasPorTipo = seedCategorias();
+
         Usuario admin = new Usuario( "admin", "$argon2id$v=19$m=65536,t=4,p=1$Y6QXibp2pRk+u6XDSSX6Wg$vaFyKiCj6Tvl06OGHuJtPaw5+4iZDi4f2iN0jrsYYLs", Rol.ROLE_ADMIN);
         Usuario userPart = new Usuario( "usuario", "$argon2id$v=19$m=65536,t=4,p=1$hC1J7qKqgmkSUfl8kMdQow$wva2eKpy3Mw8/oJPvJw5JdPse+cEJ73EdmcT6uhcXmU", Rol.ROLE_USER);
         Usuario userOrg = new Usuario( "organizador", "$argon2id$v=19$m=65536,t=4,p=1$IDXLIGuWc88CLL+7VyhCOA$CXr5e1xeozTTolyjDn1PNX1cs9uHqXFbH6TrtDKOCtk", Rol.ROLE_ORGANIZER);
@@ -135,8 +140,7 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         Ubicacion ubicacion = Ubicacion.presencial("-34.6037", "-58.3816", "Ciudad Autónoma de Buenos Aires", "CABA", "Av. 9 de Julio 1234");
         Precio precio = new Precio("ARS", 1500.0f);
-        Categoria categoria = new Categoria("Conferencia", "Event");
-        categoria = categoriaRepositoryDB.save(categoria);
+        Categoria categoria = categoriaPorTipo(categoriasPorTipo, "Tecnología");
 
         Evento evento = new Evento(
                 "15616515611",
@@ -164,8 +168,7 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         EstadoEvento estadoEvento2 = new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now());
         estadoEvento2 = estadoEventoRepository.save(estadoEvento2);
-        Categoria categoria2 = new Categoria("Entretenimiento", "Event");
-        categoria2 = categoriaRepositoryDB.save(categoria2);
+        Categoria categoria2 = categoriaPorTipo(categoriasPorTipo, "Entretenimiento");
 
         Evento evento2 = new Evento(
                 "700-151891-02068",
@@ -191,8 +194,7 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         EstadoEvento estadoEvento3 = new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now());
         estadoEvento3 = estadoEventoRepository.save(estadoEvento3);
-        Categoria categoria3 = new Categoria("Gratis", "Event");
-        categoria3 = categoriaRepositoryDB.save(categoria3);
+        Categoria categoria3 = categoriaPorTipo(categoriasPorTipo, "Turismo");
         Evento evento3 = new Evento(
                 "700-02068",
                 "Caminito",
@@ -242,6 +244,51 @@ public class DatabaseSeeder implements CommandLineRunner {
         log.info("Inscripción y EstadoInscripcion creados.");
 
         log.info("Base de datos inicializada con datos de ejemplo.");
+    }
+
+    private Map<String, Categoria> seedCategorias() {
+        List<Categoria> categorias = List.of(
+                new Categoria("Arte y Cultura", "Palette"),
+                new Categoria("Arte Digital", "Brush"),
+                new Categoria("Bienestar", "SelfImprovement"),
+                new Categoria("Ciencia e Innovación", "Science"),
+                new Categoria("Cine y Series", "Movie"),
+                new Categoria("Comunidad y Encuentros", "Group"),
+                new Categoria("Conferencia", "Event"),
+                new Categoria("Deportes", "SportsSoccer"),
+                new Categoria("Educación", "School"),
+                new Categoria("Entretenimiento", "TheaterComedy"),
+                new Categoria("Familia y Niños", "Groups"),
+                new Categoria("Fiestas y Celebraciones", "Celebration"),
+                new Categoria("Gaming y eSports", "SportsEsports"),
+                new Categoria("Gastronomía", "Restaurant"),
+                new Categoria("Mascotas", "Pets"),
+                new Categoria("Música", "MusicNote"),
+                new Categoria("Negocios y Networking", "Handshake"),
+                new Categoria("Outdoor y Naturaleza", "Landscape"),
+                new Categoria("Salud y Fitness", "FitnessCenter"),
+                new Categoria("Tecnología", "Terminal"),
+                new Categoria("Turismo", "TravelExplore"),
+                new Categoria("Voluntariado", "VolunteerActivism")
+        );
+
+        List<Categoria> guardadas = categoriaRepositoryDB.saveAll(categorias);
+        log.info("Catálogo de categorías inicializado ({} categorías).", guardadas.size());
+
+        return guardadas.stream()
+                .collect(Collectors.toMap(
+                        categoria -> categoria.getTipo().toLowerCase(Locale.ROOT),
+                        categoria -> categoria,
+                        (existente, duplicado) -> existente
+                ));
+    }
+
+    private Categoria categoriaPorTipo(Map<String, Categoria> categoriasPorTipo, String tipo) {
+        Categoria categoria = categoriasPorTipo.get(tipo.toLowerCase(Locale.ROOT));
+        if (categoria == null) {
+            throw new IllegalStateException("No se encontró la categoría predefinida: " + tipo);
+        }
+        return categoria;
     }
 
     private void cleanUp() {
