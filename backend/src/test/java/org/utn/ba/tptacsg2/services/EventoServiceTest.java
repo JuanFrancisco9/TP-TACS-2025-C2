@@ -7,9 +7,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.utn.ba.tptacsg2.dtos.EventoDTO;
 import org.utn.ba.tptacsg2.dtos.FiltrosDTO;
 import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.dtos.output.ResultadoBusquedaEvento;
+import org.utn.ba.tptacsg2.exceptions.EventoNoEncontradoException;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
 import org.utn.ba.tptacsg2.models.events.*;
 import org.utn.ba.tptacsg2.models.users.Rol;
@@ -18,6 +20,9 @@ import org.utn.ba.tptacsg2.repositories.db.EstadoEventoRepositoryDB;
 import org.utn.ba.tptacsg2.repositories.db.EventoRepositoryDB;
 import org.utn.ba.tptacsg2.repositories.db.InscripcionRepositoryDB;
 import org.utn.ba.tptacsg2.repositories.db.OrganizadorRepositoryDB;
+import org.utn.ba.tptacsg2.models.location.Provincia;
+import org.utn.ba.tptacsg2.models.location.Localidad;
+import org.utn.ba.tptacsg2.services.UbicacionCatalogService;
 
 
 import java.time.LocalDate;
@@ -47,6 +52,8 @@ public class EventoServiceTest {
     private CategoriaService categoriaService;
     @Mock
     private R2StorageService r2StorageService;
+    @Mock
+    private UbicacionCatalogService ubicacionCatalogService;
 
     @InjectMocks
     private EventoService eventoService;
@@ -73,7 +80,7 @@ public class EventoServiceTest {
                 LocalDateTime.of(2025, 9, 10, 20, 0),
                 "20:00",
                 3.5f,
-                new Ubicacion("-34.6037", "-58.3816", "Av. Medrano 951, CABA", ""),
+                new Ubicacion("-34.6037", "-58.3816", "Buenos Aires", "CABA", "Av. Medrano 951", false, null),
                 100,
                 0,
                 new Precio("ARS", 5000f),
@@ -87,7 +94,7 @@ public class EventoServiceTest {
                 LocalDateTime.of(2025, 9, 10, 20, 0),
                 "20:00",
                 3.5f,
-                new Ubicacion("-34.6037", "-58.3816", "Av. Medrano 951, CABA", ""),
+                new Ubicacion("-34.6037", "-58.3816", "Ciudad Autónoma de Buenos Aires", "CABA", "Av. Medrano 951", false, null),
                 100,
                 0,
                 new Precio("ARS", 5000f),
@@ -98,8 +105,20 @@ public class EventoServiceTest {
         Categoria categoria1 = new Categoria("MUSICA");
         Categoria categoria2 = new Categoria("TECNOLOGIA");
 
-        eventoValido1 = new Evento("E1", "Concierto de rock vivo", "Musica", LocalDateTime.of(2025, 9, 10, 20, 0), "20:00", 2f, new Ubicacion("", "", "La Plata", "CABA"), 100, 0, new Precio("ARS", 1000f), organizadorMock, new EstadoEvento("2", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria1, new ArrayList<>(), null);
-        eventoValido2 = new Evento("E2", "Charla", "Tecnologia", LocalDateTime.of(2025, 10, 10, 18, 0), "18:00", 1.5f, new Ubicacion("", "", "CABA", "CABA"), 50, 0, new Precio("ARS", 500f), organizadorMock, new EstadoEvento("3", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria2, new ArrayList<>(), null);
+        eventoValido1 = new Evento("E1", "Concierto de rock vivo", "Musica", LocalDateTime.of(2025, 9, 10, 20, 0), "20:00", 2f, new Ubicacion("", "", "Buenos Aires", "La Plata", "Teatro Argentino", false, null), 100, 0, new Precio("ARS", 1000f), organizadorMock, new EstadoEvento("2", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria1, new ArrayList<>(), null);
+        eventoValido2 = new Evento("E2", "Charla", "Tecnologia", LocalDateTime.of(2025, 10, 10, 18, 0), "18:00", 1.5f, new Ubicacion("", "", "Ciudad Autónoma de Buenos Aires", "CABA", "Centro Cultural", false, null), 50, 0, new Precio("ARS", 500f), organizadorMock, new EstadoEvento("3", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria2, new ArrayList<>(), null);
+
+        when(ubicacionCatalogService.buscarProvinciaPorNombre(anyString()))
+                .thenAnswer(invocation -> java.util.Optional.of(new Provincia((String) invocation.getArgument(0), invocation.getArgument(0))));
+        when(ubicacionCatalogService.buscarLocalidadPorNombreYProvincia(anyString(), anyString()))
+                .thenAnswer(invocation -> java.util.Optional.of(
+                        new Localidad(
+                                invocation.getArgument(0) + "-" + invocation.getArgument(1),
+                                invocation.getArgument(1),
+                                invocation.getArgument(0),
+                                null,
+                                null
+                        )));
 
         lenient().when(eventoRepository.findAll()).thenReturn(Arrays.asList(eventoValido1, eventoValido2));
 
@@ -130,7 +149,7 @@ public class EventoServiceTest {
                 LocalDateTime.of(2025, 9, 10, 20, 0),
                 "20:00",
                 3.5f,
-                new Ubicacion("-34.6037", "-58.3816", "Av. Medrano 951, CABA", ""),
+                new Ubicacion("-34.6037", "-58.3816", null, "Av. Medrano 951, CABA", "", false, null),
                 100,
                 0,
                 new Precio("ARS", 5000f),
@@ -241,7 +260,7 @@ public class EventoServiceTest {
                 fechaProxima,
                 fechaProxima.toLocalTime().toString(),
                 2.0f,
-                new Ubicacion("", "", "CABA", ""),
+                new Ubicacion("", "", "Ciudad Autónoma de Buenos Aires", "CABA", "Sala principal", false, null),
                 50,
                 10,
                 new Precio("ARS", 1000f),
@@ -259,7 +278,7 @@ public class EventoServiceTest {
                 ahora.plusDays(2),
                 "20:00",
                 2.0f,
-                new Ubicacion("", "", "CABA", ""),
+                new Ubicacion("", "", "Ciudad Autónoma de Buenos Aires", "CABA", "Auditorio secundario", false, null),
                 50,
                 10,
                 new Precio("ARS", 1000f),
@@ -297,7 +316,7 @@ public class EventoServiceTest {
                 fechaProxima,
                 fechaProxima.toLocalTime().toString(),
                 2.0f,
-                new Ubicacion("", "", "CABA", ""),
+                new Ubicacion("", "", "Ciudad Autónoma de Buenos Aires", "CABA", "Centro cultural", false, null),
                 50,
                 10,
                 new Precio("ARS", 1000f),
@@ -327,7 +346,7 @@ public class EventoServiceTest {
                 fechaHoy,
                 fechaHoy.toLocalTime().toString(),
                 2.0f,
-                new Ubicacion("", "", "CABA", ""),
+                new Ubicacion("", "", "Ciudad Autónoma de Buenos Aires", "CABA", "Espacio cultural", false, null),
                 50,
                 10,
                 new Precio("ARS", 1000f),
@@ -348,5 +367,22 @@ public class EventoServiceTest {
                 evento.id().equals("E6") &&
                         evento.estado().getTipoEstado().equals(TipoEstadoEvento.NO_ACEPTA_INSCRIPCIONES)
         ));
+    }
+
+    @Test
+    void obtenerEventoPorId_devuelveDTOCuandoExiste() {
+        when(eventoRepository.findById(eventoValido1.id())).thenReturn(Optional.of(eventoValido1));
+
+        EventoDTO eventoDTO = eventoService.obtenerEventoPorId(eventoValido1.id());
+
+        assertEquals(eventoValido1.id(), eventoDTO.id());
+        assertEquals(eventoValido1.titulo(), eventoDTO.titulo());
+    }
+
+    @Test
+    void obtenerEventoPorId_lanzaExcepcionCuandoNoExiste() {
+        when(eventoRepository.findById("DESCONOCIDO")).thenReturn(Optional.empty());
+
+        assertThrows(EventoNoEncontradoException.class, () -> eventoService.obtenerEventoPorId("DESCONOCIDO"));
     }
 }

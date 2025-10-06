@@ -20,6 +20,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import EventIcon from '@mui/icons-material/Event';
 import PlaceIcon from '@mui/icons-material/Place';
+import LanguageIcon from '@mui/icons-material/Language';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import PersonIcon from '@mui/icons-material/Person';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -138,10 +139,36 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
                 </Stack>
 
                 <Stack direction="row" spacing={1} alignItems="center">
-                  <PlaceIcon color="action" fontSize="small" />
-                  <Typography variant="body2">
-                    <strong>Ubicación:</strong> {evento.ubicacion.localidad} - {evento.ubicacion.direccion}
-                  </Typography>
+                  {evento.ubicacion.esVirtual ? (
+                    <>
+                      <LanguageIcon color="action" fontSize="small" />
+                      <Typography variant="body2">
+                        <strong>Modalidad:</strong> Virtual
+                        {evento.ubicacion.enlaceVirtual && (
+                          <>
+                            {' – '}
+                            <a
+                              href={evento.ubicacion.enlaceVirtual}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              Ingresar al enlace
+                            </a>
+                          </>
+                        )}
+                      </Typography>
+                    </>
+                  ) : (
+                    <>
+                      <PlaceIcon color="action" fontSize="small" />
+                      <Typography variant="body2">
+                        <strong>Ubicación:</strong>{' '}
+                        {[evento.ubicacion.provincia, evento.ubicacion.localidad, evento.ubicacion.direccion]
+                          .filter(Boolean)
+                          .join(', ')}
+                      </Typography>
+                    </>
+                  )}
                 </Stack>
 
                 {evento.duracion && (
