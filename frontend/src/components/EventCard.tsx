@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
-
+import type { AlertColor } from '@mui/material/Alert';
 
 interface EventCardProps {
   item: Evento;
@@ -25,6 +25,7 @@ const EventCard: React.FC<EventCardProps> = ({ item, onVerDetalle }) => {
   const [showDialog, setShowDialog] = React.useState(false);
   const [showSnackbar, setShowSnackbar] = React.useState(false);
   const [snackbarMsg, setSnackbarMsg] = React.useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = React.useState<AlertColor>('success');
   const [loading, setLoading] = React.useState(false);
   const imageSrc = item.imagenUrl ?? item.imagen ?? `https://picsum.photos/seed/${encodeURIComponent(item.id)}/800/400`;
 
@@ -34,11 +35,13 @@ const EventCard: React.FC<EventCardProps> = ({ item, onVerDetalle }) => {
     setLoading(true);
     try {
       await EventoService.inscribirseAEvento(item.id);
+      setSnackbarSeverity('success');
       setSnackbarMsg(`Inscripción confirmada a: ${item.titulo}`);
     } catch (error) {
       const message = error instanceof Error && error.message
         ? error.message
         : 'Error al inscribirse. Intenta nuevamente.';
+      setSnackbarSeverity('warning');
       setSnackbarMsg(message);
     }
     setShowSnackbar(true);
@@ -154,6 +157,7 @@ const EventCard: React.FC<EventCardProps> = ({ item, onVerDetalle }) => {
           snackbarMsg={snackbarMsg}
           showSnackbar={showSnackbar}
           onSnackbarClose={() => setShowSnackbar(false)}
+          snackbarSeverity={snackbarSeverity}
           titulo={item.titulo}
         />
       </Paper>
