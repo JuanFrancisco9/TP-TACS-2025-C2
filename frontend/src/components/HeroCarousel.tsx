@@ -3,10 +3,10 @@ import {Box, Container, IconButton, Typography, MobileStepper} from '@mui/materi
 import {ArrowBackIosNew, ArrowForwardIos} from '@mui/icons-material';
 
 const images = [
-    '/carousel/conferencia.jpg',
-    '/carousel/concierto.jpg',
-    '/carousel/deportivo.png',
-    '/carousel/gamergy.png'
+    '/carousel/show.jpg',
+    '/carousel/deporte.jpg',
+    '/carousel/conferencia.jpg'
+
 ];
 
 const HeroCarousel: React.FC = () => {
