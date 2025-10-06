@@ -4,11 +4,13 @@ import './styles/landing.css';
 import { useNavigate } from 'react-router-dom';
 import { CircularProgress } from '@mui/material';
 import { EventoService } from '../services/eventoService';
+import type { CategoriaDTO } from '../types/evento.ts';
+import { getCategoryIconFor } from '../utils/categoryIcons';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<string | null>(null);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<CategoriaDTO[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -39,20 +41,24 @@ const LandingPage: React.FC = () => {
               <CircularProgress size={28} />
             </div>
           ) : (
-            categories.map((tipo) => (
-              <button
-                key={tipo}
-                className={`category-button ${selected === tipo ? 'active' : ''}`}
-                onClick={() => handleCategoryClick(tipo)}
-                aria-pressed={selected === tipo}
-                aria-label={`Filtrar por ${tipo}`}
-              >
-                <div className="category-circle" aria-hidden>
-                  <span>{tipo.substring(0, 1).toUpperCase()}</span>
-                </div>
-                <div className="category-label">{tipo}</div>
-              </button>
-            ))
+            categories.map((categoria) => {
+              const tipo = categoria.tipo;
+              const IconComponent = getCategoryIconFor(undefined, categoria.icono, tipo);
+              return (
+                <button
+                  key={tipo}
+                  className={`category-button ${selected === tipo ? 'active' : ''}`}
+                  onClick={() => handleCategoryClick(tipo)}
+                  aria-pressed={selected === tipo}
+                  aria-label={`Filtrar por ${tipo}`}
+                >
+                  <div className="category-circle" aria-hidden>
+                    <IconComponent fontSize="medium" />
+                  </div>
+                  <div className="category-label">{tipo}</div>
+                </button>
+              );
+            })
           )}
         </section>
       </main>
@@ -61,4 +67,3 @@ const LandingPage: React.FC = () => {
 };
 
 export default LandingPage;
-

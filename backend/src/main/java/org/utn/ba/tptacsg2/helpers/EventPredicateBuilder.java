@@ -71,7 +71,14 @@ public class EventPredicateBuilder {
     public EventPredicateBuilder conUbicacion(String ubicacion) {
 
         if(ubicacion != null && !ubicacion.isEmpty()) {
-            predicados.add(evento -> evento.ubicacion().localidad().equalsIgnoreCase(ubicacion));        }
+            predicados.add(evento -> {
+                if (evento.ubicacion() == null || evento.ubicacion().esVirtual()) {
+                    return false;
+                }
+                String localidad = evento.ubicacion().localidad();
+                return localidad != null && localidad.equalsIgnoreCase(ubicacion);
+            });
+        }
 
         return this;
     }

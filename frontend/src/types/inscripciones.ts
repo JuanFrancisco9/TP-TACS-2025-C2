@@ -1,5 +1,4 @@
 import type {Participante} from "./auth.ts";
-import type { Evento } from "./evento.ts";
 
 export interface Estado {
   tipoEstado: string;
@@ -7,9 +6,11 @@ export interface Estado {
 }
 
 export interface EventoResumen {
-  id: string;
-  titulo: string;
-  descripcion: string;
+    id: string;
+    titulo: string;
+    descripcion: string;
+    imagenUrl?: string;
+    imagen?: string;
 }
 
 export interface Inscripcion {
@@ -17,5 +18,5 @@ export interface Inscripcion {
   participante: Participante;
   fechaRegistro: string;
   estado: Estado;
-  evento: Evento;
+  evento: EventoResumen;
 }

@@ -5,8 +5,9 @@ import inscripcionesService from '../services/inscripcionesParticipanteService.t
 import authService from '../services/authService.ts';
 import type { Inscripcion } from '../types/inscripciones';
 import { Rol } from '../types/auth';
-import type { Evento } from '../types/evento.ts';
-import DetallesEvento from '../components/EventDetails.tsx';
+import DetallesEvento from '../components/EventDetails';
+import { EventoService } from '../services/eventoService';
+import type { Evento } from '../types/evento';
 
 function UserLanding() {
     const navigate = useNavigate();
@@ -15,7 +16,10 @@ function UserLanding() {
     const [error, setError] = useState<string | null>(null);
     const [currentUser] = useState(authService.getCurrentUser());
     const [participanteId, setParticipanteId] = useState<string>(authService.getActorId()?.toString() || '');
-    const [eventoSeleccionado, setEventoSeleccionado] = useState<Evento | null>(null);
+    const [detalleEvento, setDetalleEvento] = useState<Evento | null>(null);
+    const [detalleCargando, setDetalleCargando] = useState(false);
+
+
 
     const fetchInscripciones = async () => {
         try {
@@ -56,6 +60,32 @@ function UserLanding() {
         }
     };
 
+    const handleVerDetalle = async (eventoId: string) => {
+        if (!eventoId) {
+            setError('No se encontró el evento seleccionado.');
+            return;
+        }
+
+        setDetalleCargando(true);
+        setError(null);
+
+        try {
+            const eventoCompleto = await EventoService.obtenerEventoPorId(eventoId);
+
+            if (!eventoCompleto) {
+                setError('No se pudieron cargar los detalles del evento.');
+                return;
+            }
+
+            setDetalleEvento(eventoCompleto);
+        } catch (err) {
+            console.error('Error al cargar detalle de evento:', err);
+            setError('Ocurrió un error al cargar los detalles. Intenta nuevamente.');
+        } finally {
+            setDetalleCargando(false);
+        }
+    };
+
     useEffect(() => {
         // Si es organizador, redirigir a crear eventos
         if (currentUser?.rol === Rol.ROLE_ORGANIZER) {
@@ -79,13 +109,27 @@ function UserLanding() {
         i.estado.tipoEstado === 'ACEPTADA' || i.estado.tipoEstado === 'PENDIENTE'
     );
 
-     return eventoSeleccionado ? (
-        <DetallesEvento
-          evento={eventoSeleccionado}
-          onVolver={() => setEventoSeleccionado(null)}
-          onInscribirse={undefined}
-        />
-      ) : (
+    if (detalleCargando) {
+        return (
+            <div className="min-vh-100 d-flex flex-column justify-content-center align-items-center">
+                <div className="spinner-border text-primary mb-3" role="status">
+                    <span className="visually-hidden">Cargando detalles del evento...</span>
+                </div>
+                <p className="text-muted">Cargando detalles del evento...</p>
+            </div>
+        );
+    }
+
+    if (detalleEvento) {
+        return (
+            <DetallesEvento
+                evento={detalleEvento}
+                onVolver={() => setDetalleEvento(null)}
+            />
+        );
+    }
+
+    return (
         <div className="min-vh-100">
             <div className="container py-5">
 
@@ -220,7 +264,7 @@ function UserLanding() {
                             <div key={inscripcion.id} className="col-lg-6 col-xl-4">
                                 <InscripcionCard
                                     inscripcion={inscripcion}
-                                    onVerDetalle={() => setEventoSeleccionado(inscripcion.evento)}
+                                    onVerDetalle={() => handleVerDetalle(inscripcion.evento.id)}
                                     onInscripcionCancelada={fetchInscripciones}
                                 />
                             </div>
