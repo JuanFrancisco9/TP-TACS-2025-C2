@@ -199,14 +199,15 @@ public class TestE2EInscripcion {
                 LocalDateTime.now().plusDays(7),
                 "10:00",
                 2.0f,
-                new Ubicacion("-34.6", "-58.4", "CABA", ""),
+                new Ubicacion("-34.6", "-58.4", "Buenos Aires", "CABA", "Av. Siempre Viva 123", false, null),
                 cupoMaximo,
                 0,
                 new Precio("ARS", 1000F),
                 new Organizador("ORG1", "Org", "Uno", "30111222", null),
                 new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
                 new Categoria("Test"),
-                List.of()
+                List.of(),
+                null
         );
     }
 

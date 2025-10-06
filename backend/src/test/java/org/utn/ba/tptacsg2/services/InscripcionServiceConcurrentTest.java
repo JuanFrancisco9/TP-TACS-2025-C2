@@ -77,14 +77,15 @@ class InscripcionServiceConcurrentTest {
                 LocalDateTime.now(),
                 "",
                 2.0f,
-                new Ubicacion("-34.6", "-58.4", "CABA", ""),
+                new Ubicacion("-34.6", "-58.4", "Buenos Aires", "CABA", "Sede central", false, null),
                 1,
                 0,
                 new Precio("Pesos", 100F),
                 new Organizador("ORG1", "Org", "Uno", "30111222", null),
                 new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
                 new Categoria("Test"),
-                new ArrayList<>()
+                new ArrayList<>(),
+                null
         );
 
         inscripciones = new ConcurrentHashMap<>();

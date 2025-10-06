@@ -18,13 +18,16 @@ export interface Evento {
     estado: EstadoEvento;
     categoria: {
         tipo: string;
+        icono?: string;
     };
     duracion: number;
     cupoMinimo: number;
     cupoMaximo: number;
     precio: Precio;
     etiquetas: string[];
-    imagen: string;
+    imagen?: string;
+    imagenUrl?: string;
+    imagenKey?: string;
 }
 
 export interface Precio {
@@ -33,10 +36,13 @@ export interface Precio {
 }
 
 export interface Ubicacion {
-    latitud: string;
-    longitud: string;
-    localidad: string;
-    direccion: string;
+    latitud: string | null;
+    longitud: string | null;
+    provincia: string | null;
+    localidad: string | null;
+    direccion: string | null;
+    esVirtual: boolean;
+    enlaceVirtual?: string | null;
 }
 
 interface EstadoEvento {
@@ -47,4 +53,10 @@ interface EstadoEvento {
 
 export interface CategoriaDTO {
     tipo: string;
+    icono?: string;
+}
+
+export interface CategoriaIconRule {
+    icono: string;
+    keywords: string[];
 }
