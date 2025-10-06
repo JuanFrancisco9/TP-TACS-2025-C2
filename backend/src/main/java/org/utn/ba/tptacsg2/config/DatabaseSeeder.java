@@ -186,7 +186,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 LocalDateTime.now().plusDays(7),
                 "11:00",
                 2.5f,
-                Ubicacion.presencial("30","30","Ciudad Autónoma de Buenos Aires","CABA", "Av. La plata 800"),
+                Ubicacion.presencial("-34.606560","-58.435497","Ciudad Autónoma de Buenos Aires","CABA", "Av. La plata 800"),
                 100,
                 10,
                 precio,
@@ -212,7 +212,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 LocalDateTime.now().plusDays(7),
                 "11:00",
                 2.5f,
-                Ubicacion.presencial("30","30","Ciudad Autónoma de Buenos Aires","CABA", "Av. Independencia 800"),
+                Ubicacion.presencial("-34.614","-58.384","Ciudad Autónoma de Buenos Aires","CABA", "Av. Independencia 800"),
                 100,
                 10,
                 new Precio("ARS", 0.f),
@@ -252,6 +252,28 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         estadoInscripcion.setInscripcion(inscripcion);
         estadoInscripcionRepositoryDB.save(estadoInscripcion);
+
+        EstadoInscripcion estadoInscripcion2 = new EstadoInscripcion(
+                "88811-151",
+                TipoEstadoInscripcion.CANCELADA,
+                LocalDateTime.now()
+        );
+        estadoInscripcion2 = estadoInscripcionRepositoryDB.save(estadoInscripcion2);
+
+        Inscripcion inscripcion2 = new Inscripcion(
+                participante,
+                LocalDateTime.now(),
+                estadoInscripcion2,
+                evento2
+        );
+
+
+        inscripcion2 = inscripcionRepository.save(inscripcion2);
+
+
+        estadoInscripcion2.setInscripcion(inscripcion2);
+        estadoInscripcionRepositoryDB.save(estadoInscripcion2);
+
 
         log.info("Inscripción y EstadoInscripcion creados.");
 
