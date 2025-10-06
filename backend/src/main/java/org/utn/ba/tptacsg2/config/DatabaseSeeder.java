@@ -1,9 +1,11 @@
 package org.utn.ba.tptacsg2.config;
 
+import jakarta.servlet.http.Part;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
@@ -39,6 +41,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final EstadoEventoRepositoryDB estadoEventoRepository;
     private final InscripcionRepositoryDB inscripcionRepository;
     private final EstadoInscripcionRepositoryDB estadoInscripcionRepositoryDB;
+    private final PasswordEncoder passwordEncoder;
     private final ProvinciaRepositoryDB provinciaRepositoryDB;
     private final LocalidadRepositoryDB localidadRepositoryDB;
 
@@ -51,6 +54,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             EstadoEventoRepositoryDB estadoEventoRepository,
             InscripcionRepositoryDB inscripcionRepository,
             EstadoInscripcionRepositoryDB estadoInscripcionRepositoryDB,
+            PasswordEncoder passwordEncoder,
             ProvinciaRepositoryDB provinciaRepositoryDB,
             LocalidadRepositoryDB localidadRepositoryDB
     ) {
@@ -62,6 +66,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         this.estadoEventoRepository = estadoEventoRepository;
         this.inscripcionRepository = inscripcionRepository;
         this.estadoInscripcionRepositoryDB = estadoInscripcionRepositoryDB;
+        this.passwordEncoder = passwordEncoder;
         this.provinciaRepositoryDB = provinciaRepositoryDB;
         this.localidadRepositoryDB = localidadRepositoryDB;
     }
@@ -78,28 +83,48 @@ public class DatabaseSeeder implements CommandLineRunner {
         Usuario userPart = new Usuario( "usuario", "$argon2id$v=19$m=65536,t=4,p=1$hC1J7qKqgmkSUfl8kMdQow$wva2eKpy3Mw8/oJPvJw5JdPse+cEJ73EdmcT6uhcXmU", Rol.ROLE_USER);
         Usuario userOrg = new Usuario( "organizador", "$argon2id$v=19$m=65536,t=4,p=1$IDXLIGuWc88CLL+7VyhCOA$CXr5e1xeozTTolyjDn1PNX1cs9uHqXFbH6TrtDKOCtk", Rol.ROLE_ORGANIZER);
 
-        List<Usuario> savedUsers = usuarioRepository.saveAll(Arrays.asList(userOrg, userPart, admin));
+        admin = usuarioRepository.save(admin);
+        userPart = usuarioRepository.save(userPart);
+        userOrg = usuarioRepository.save(userOrg);
 
-        Usuario savedUserOrg = savedUsers.stream()
-                .filter(u -> u.username().equals("organizador"))
-                .findFirst().orElseThrow();
-        Usuario savedUserPart = savedUsers.stream()
-                .filter(u -> u.username().equals("usuario"))
-                .findFirst().orElseThrow();
-
-        Organizador organizador = new Organizador(
-                "Juan", "Perez", "12345678", savedUserOrg
-        );
-        Participante participante = new Participante(
-                "Maria", "Gomez", "87654321", savedUserPart
-        );
+        Organizador organizador = new Organizador("Juan", "Perez", "12345678", userOrg);
+        Participante participante = new Participante("Maria", "Gomez", "87654321", userPart);
 
         organizador = organizadorRepository.save(organizador);
         participante = participanteRepository.save(participante);
 
+        //Nuestros usuraios participantes
+        Usuario juanF = new Usuario("Juan F", passwordEncoder.encode("Juan F"), Rol.ROLE_USER);
+        juanF = usuarioRepository.save(juanF);
+        Participante juanFParticiapnte = new Participante("Juan Francisco", "Cáceres", "87654321", juanF);
+        juanFParticiapnte = participanteRepository.save(juanFParticiapnte);
+
+        Usuario valen = new Usuario("Valen", passwordEncoder.encode("Valen"), Rol.ROLE_USER);
+        valen = usuarioRepository.save(valen);
+        Participante valenParticiapnte = new Participante("Valentina", "Albiero", "87654321", valen);
+        valenParticiapnte = participanteRepository.save(valenParticiapnte);
+
+        Usuario aylu = new Usuario("Aylu", passwordEncoder.encode("Aylu"), Rol.ROLE_USER);
+        aylu = usuarioRepository.save(aylu);
+        Participante ayluParticiapnte = new Participante("Aylen", "Sandoval", "87654321", aylu);
+        ayluParticiapnte = participanteRepository.save(ayluParticiapnte);
+
+        Usuario juanma = new Usuario("Juanma", passwordEncoder.encode("Juanma"), Rol.ROLE_USER);
+        juanma = usuarioRepository.save(juanma);
+        Participante juanmaParticiapnte = new Participante("Juan Manuel", "Prividera", "87654321", juanma);
+        juanmaParticiapnte = participanteRepository.save(juanmaParticiapnte);
+
+        Usuario tomi = new Usuario("Tomi", passwordEncoder.encode("Tomi"), Rol.ROLE_USER);
+        tomi = usuarioRepository.save(tomi);
+        Participante tomiParticiapnte = new Participante("Tomas", "Pauza Sager", "87654321", tomi);
+        tomiParticiapnte = participanteRepository.save(tomiParticiapnte);
+
+        Usuario lucas = new Usuario("Lucas", passwordEncoder.encode("Lucas"), Rol.ROLE_USER);
+        lucas = usuarioRepository.save(lucas);
+        Participante lucasParticiapnte = new Participante("Lucas Manuel", "Vazquez", "87654321", lucas);
+        lucasParticiapnte = participanteRepository.save(lucasParticiapnte);
+
         log.info("Usuarios, Organizadores y Participantes creados.");
-
-
 
         EstadoEvento estadoEvento = new EstadoEvento(
                 TipoEstadoEvento.CONFIRMADO,
@@ -136,6 +161,59 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         estadoEvento.setEvento(evento);
         estadoEventoRepository.save(estadoEvento);
+
+        EstadoEvento estadoEvento2 = new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now());
+        estadoEvento2 = estadoEventoRepository.save(estadoEvento2);
+        Categoria categoria2 = new Categoria("Entretenimiento", "Event");
+        categoria2 = categoriaRepositoryDB.save(categoria2);
+
+        Evento evento2 = new Evento(
+                "700-151891-02068",
+                "G2 en el Movistar Arena",
+                "Un evento familiar que no te podes perder",
+                LocalDateTime.now().plusDays(7),
+                "11:00",
+                2.5f,
+                Ubicacion.presencial("30","30","Buenos Aires","CABA", "Av. La plata 800"),
+                100,
+                10,
+                precio,
+                organizador,
+                estadoEvento2,
+                categoria2,
+                Arrays.asList("Familia", "Comedia", "Entretenimiento"),
+                null
+        );
+
+        evento2 = eventoRepositoryDB.save(evento2);
+        estadoEvento2.setEvento(evento2);
+        estadoEventoRepository.save(estadoEvento2);
+
+        EstadoEvento estadoEvento3 = new EstadoEvento(TipoEstadoEvento.CONFIRMADO, LocalDateTime.now());
+        estadoEvento3 = estadoEventoRepository.save(estadoEvento3);
+        Categoria categoria3 = new Categoria("Gratis", "Event");
+        categoria3 = categoriaRepositoryDB.save(categoria3);
+        Evento evento3 = new Evento(
+                "700-02068",
+                "Caminito",
+                "Recorrer caminito a la luz de las velas",
+                LocalDateTime.now().plusDays(7),
+                "11:00",
+                2.5f,
+                Ubicacion.presencial("30","30","Buenos Aires","CABA", "Av. Independencia 800"),
+                100,
+                10,
+                new Precio("ARS", 0.f),
+                organizador,
+                estadoEvento3,
+                categoria3,
+                Arrays.asList("Luz", "Velas", "Caminata"),
+                null
+        );
+
+        evento3 = eventoRepositoryDB.save(evento3);
+        estadoEvento3.setEvento(evento3);
+        estadoEventoRepository.save(estadoEvento3);
 
         log.info("Evento y EstadoEvento creados.");
 
