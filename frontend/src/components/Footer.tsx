@@ -11,8 +11,6 @@ import {
 import { Link as RouterLink } from 'react-router-dom';
 
 const Footer: React.FC = () => {
-  const inscripcionesUrl = import.meta.env.VITE_INSCRIPCIONES_URL ?? 'http://localhost:5174/mis-eventos#';
-
   return (
     <Paper
       elevation={0}

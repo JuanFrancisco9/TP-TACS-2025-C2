@@ -83,6 +83,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/eventos").permitAll()
                         .anyRequest().authenticated()
                 )
                 .httpBasic(hb -> hb.authenticationEntryPoint(basicEntryPoint));

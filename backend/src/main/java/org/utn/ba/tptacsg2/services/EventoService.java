@@ -24,7 +24,6 @@ import org.utn.ba.tptacsg2.repositories.db.OrganizadorRepositoryDB;
 
 import java.time.*;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -169,15 +168,24 @@ public class EventoService {
         estadoInicial.setEvento(evento);
         this.estadoEventoRepository.save(estadoInicial);
         eventoRepository.save(evento);
+        this.redisCacheService.crearEventoConCupos(evento.id(), evento.cupoMaximo(), this.fechaExpiracionDeCache(evento));
 
         return convertirAEventoDTO(evento);
     }
 
-    public Instant fechaExpiracionDeCache(Evento evento) {
-        return evento.fecha()
-                .plus(tiempoDeGracia)
-                .atZone(ZoneId.from(evento.fecha()))
-                .toInstant();
+    public Duration fechaExpiracionDeCache(Evento evento) {
+        if (evento.fecha() == null) {
+            return Duration.ZERO;
+        }
+
+        LocalDateTime expiracion = evento.fecha().plus(tiempoDeGracia);
+        LocalDateTime ahora = LocalDateTime.now();
+
+        if (expiracion.isBefore(ahora)) {
+            return Duration.ZERO;
+        }
+
+        return Duration.between(ahora, expiracion);
     }
 
     public Evento actualizarEvento(String idEvento, Evento eventoUpdate) {
