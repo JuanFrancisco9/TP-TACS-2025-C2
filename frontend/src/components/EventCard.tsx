@@ -129,6 +129,7 @@ const EventCard: React.FC<EventCardProps> = ({ item, onVerDetalle }) => {
             <Button
               size="small"
               variant="contained"
+              disabled={item.estado?.tipoEstado !== 'CONFIRMADO'}
               color="primary"
               startIcon={<HowToRegIcon />}
               onClick={e => { e.stopPropagation(); handleInscribirme(); }}

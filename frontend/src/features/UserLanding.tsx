@@ -117,7 +117,7 @@ function UserLanding() {
     }, [participanteId]);
 
     const inscripcionesActivas = inscripciones.filter(i =>
-        i.estado.tipoEstado === 'ACEPTADA' || i.estado.tipoEstado === 'WAITLIST'
+        i.estado.tipoEstado === 'ACEPTADA' || i.estado.tipoEstado === 'PENDIENTE'
     );
 
     if (detalleCargando) {

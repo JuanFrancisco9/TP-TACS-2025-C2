@@ -1,5 +1,6 @@
 package org.utn.ba.tptacsg2.controllers;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -95,8 +96,8 @@ public class EventoController {
      */
     @GetMapping()
     public ResponseEntity<ResultadoBusquedaEvento> buscarEventos(
-            @RequestParam(required = false) LocalDate fechaInicio,
-            @RequestParam(required = false) LocalDate fechaFin,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin,
             @RequestParam(required = false) String categoria,
             @RequestParam(required = false) String ubicacion,
             @RequestParam(required = false) Double precioMin,
@@ -104,7 +105,7 @@ public class EventoController {
             @RequestParam(required = false) String palabrasClave,
             @RequestParam(defaultValue = "1") Integer nroPagina){
 
-        FiltrosDTO filtros = new FiltrosDTO(fechaInicio, fechaFin, categoria, ubicacion, precioMin, precioMax, palabrasClave, nroPagina);
+        FiltrosDTO filtros = new FiltrosDTO(fechaInicio, fechaFin, categoria, ubicacion, precioMax, precioMin, palabrasClave, nroPagina);
 
         ResultadoBusquedaEvento resultado = eventoService.buscarEventos(filtros);
 

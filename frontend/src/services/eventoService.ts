@@ -4,8 +4,17 @@ import authService from "./authService.ts";
 import type {Evento, ResultadoBusquedaEvento, CategoriaDTO, CategoriaIconRule } from "../types/evento.ts";
 import type {Participante} from "../types/auth.ts";
 
+// 👉 helper local
+const toLocalISODate = (d: Date) => {
+  const off = d.getTimezoneOffset();
+  const local = new Date(d.getTime() - off * 60_000);
+  return local.toISOString().slice(0, 10); // "YYYY-MM-DD"
+};
+
 // Service para manejar eventoss
 export class EventoService {
+
+  
   // URL base del backend
   private static readonly BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -63,11 +72,9 @@ export class EventoService {
   static async obtenerEventos(pagina: number = 0): Promise<{eventos: Evento[], totalPaginas: number, totalElementos: number}> {
     try {
       const url = `/eventos?palabrasClave=&nroPagina=${pagina}`;
-      console.log('URL completa:', `${this.BASE_URL}${url}`);
       
       const response = await this.api.get<ResultadoBusquedaEvento>(url);
       
-      console.log('�� Data completa:', response.data);
       return {
         eventos: response.data.eventos,
         totalPaginas: response.data.totalPaginas,
@@ -88,9 +95,7 @@ export class EventoService {
   // Método para obtener un evento por ID
   static async obtenerEventoPorId(id: string): Promise<Evento | null> {
     try {
-      console.log('🔍 EventoService.obtenerEventoPorId - Buscando evento ID:', id);
       const response = await this.api.get<Evento>(`/eventos/${id}`);
-      console.log('✅ Evento encontrado:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Error obteniendo evento:', error);
@@ -105,12 +110,10 @@ export class EventoService {
       params.set("palabrasClave", termino ?? "");
       params.set("nroPagina", String(pagina));
       if (ubicacion && ubicacion.trim()) params.set("ubicacion", ubicacion.trim());
+      console.log(params.toString());
       const url = `/eventos?${params.toString()}`;
-      console.log('🔍 EventoService.buscarEventos - Buscando:', termino);
-      console.log('📍 URL:', `${this.BASE_URL}${url}`);
       
       const response = await this.api.get<ResultadoBusquedaEvento>(url);
-      console.log('✅ Búsqueda exitosa:', response.data);
       
       return {
         eventos: response.data.eventos,
@@ -127,11 +130,8 @@ export class EventoService {
   static async filtrarPorCategoria(categoria: string, pagina: number = 0): Promise<{eventos: Evento[], totalPaginas: number, totalElementos: number}> {
     try {
       const url = `/eventos?categoria=${encodeURIComponent(categoria)}&palabrasClave=&nroPagina=${pagina}`;
-      console.log('🔍 EventoService.filtrarPorCategoria - Categoría:', categoria);
-      console.log('📍 URL:', `${this.BASE_URL}${url}`);
       
       const response = await this.api.get<ResultadoBusquedaEvento>(url);
-      console.log('✅ Filtro exitoso:', response.data);
       
       return {
         eventos: response.data.eventos,
@@ -148,9 +148,7 @@ export class EventoService {
   // Método para crear un evento (para administradores)
   static async crearEvento(evento: Omit<Evento, 'id'>): Promise<Evento> {
     try {
-      console.log('�� EventoService.crearEvento - Creando evento:', evento);
       const response = await this.api.post<Evento>('/eventos', evento);
-      console.log('✅ Evento creado:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Error creando evento:', error);
@@ -161,10 +159,7 @@ export class EventoService {
   // Método para actualizar un evento (para administradores)
   static async actualizarEvento(id: string, evento: Partial<Evento>): Promise<Evento> {
     try {
-      console.log('🔍 EventoService.actualizarEvento - Actualizando evento ID:', id);
-      console.log(evento)
       const response = await this.api.put<Evento>(`/eventos/${id}`, evento);
-      console.log('✅ Evento actualizado:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Error actualizando evento:', error);
@@ -175,9 +170,7 @@ export class EventoService {
   // Método para eliminar un evento (para administradores)
   static async eliminarEvento(id: string): Promise<boolean> {
     try {
-      console.log('�� EventoService.eliminarEvento - Eliminando evento ID:', id);
       await this.api.delete(`/eventos/${id}`);
-      console.log('✅ Evento eliminado');
       return true;
     } catch (error) {
       console.error('❌ Error eliminando evento:', error);
@@ -190,11 +183,8 @@ export class EventoService {
     try {
       const terminoBusqueda = etiquetas.join(' ');
       const url = `/eventos?palabrasClave=${encodeURIComponent(terminoBusqueda)}&nroPagina=${pagina}`;
-      console.log('🔍 EventoService.obtenerEventosPorEtiquetas - Etiquetas:', etiquetas);
-      console.log('📍 URL:', `${this.BASE_URL}${url}`);
       
       const response = await this.api.get<ResultadoBusquedaEvento>(url);
-      console.log('✅ Búsqueda por etiquetas exitosa:', response.data);
       
       return {
         eventos: response.data.eventos,
@@ -211,11 +201,8 @@ export class EventoService {
   static async obtenerEventosPorEstado(estado: string, pagina: number = 0): Promise<{eventos: Evento[], totalPaginas: number, totalElementos: number}> {
     try {
       const url = `/eventos?palabrasClave=${encodeURIComponent(estado)}&nroPagina=${pagina}`;
-      console.log('🔍 EventoService.obtenerEventosPorEstado - Estado:', estado);
-      console.log('📍 URL:', `${this.BASE_URL}${url}`);
       
       const response = await this.api.get<ResultadoBusquedaEvento>(url);
-      console.log('✅ Búsqueda por estado exitosa:', response.data);
       
       return {
         eventos: response.data.eventos,
@@ -233,7 +220,6 @@ export class EventoService {
           const response = await this.api.get(`/waitlist/${evento?.id}`);
           return response.data.inscripcionesSinConfirmar
       }catch (error){
-          console.log(error)
           throw new Error('Error al obtener waitlist');
       }
   }
@@ -243,7 +229,6 @@ export class EventoService {
             const response = await this.api.get(`/eventos/${evento?.id}/participantes`)
             return response.data
         }catch (error){
-            console.log(error)
             throw new Error('Error al obtener participantes del evento');
         }
     }
@@ -253,7 +238,6 @@ export class EventoService {
             const response = await this.api.patch(`/eventos/${evento?.id}?estado=${estado}`, null);
             return response.data
         }catch (error){
-            console.log(error)
             throw new Error('Error al actualizar el estado del evento');
         }
     }
@@ -263,53 +247,59 @@ export class EventoService {
             const response = await this.api.get(`/organizadores/eventos/${organizadorId}`)
             return response.data
         }catch (error){
-            console.log(error)
             throw new Error('Error al obtener eventos para organizador');
         }
     }
 
-  // Método para buscar eventos con filtros avanzados
-  static async buscarEventosConFiltros(filtros: {
-    palabrasClave?: string;
-    categoria?: string;
-    ubicacion?: string;
-    fechaInicio?: string;
-    fechaFin?: string;
-    precioMin?: number;
-    precioMax?: number;
-    pagina?: number;
-  }): Promise<{eventos: Evento[], totalPaginas: number, totalElementos: number}> {
-    try {
-      const params = new URLSearchParams();
-      
-      if (filtros.palabrasClave) params.append('palabrasClave', filtros.palabrasClave);
-      if (filtros.categoria) params.append('categoria', filtros.categoria);
-      if (filtros.ubicacion) params.append('ubicacion', filtros.ubicacion);
-      if (filtros.fechaInicio) params.append('fechaInicio', filtros.fechaInicio);
-      if (filtros.fechaFin) params.append('fechaFin', filtros.fechaFin);
-      if (filtros.precioMin !== undefined) params.append('precioMin', filtros.precioMin.toString());
-      if (filtros.precioMax !== undefined) params.append('precioMax', filtros.precioMax.toString());
-      
-      params.append('nroPagina', (filtros.pagina || 0).toString());
 
-      const url = `/eventos?${params.toString()}`;
-      console.log('🔍 EventoService.buscarEventosConFiltros - Filtros:', filtros);
-      console.log('📍 URL:', `${this.BASE_URL}${url}`);
-      
-      const response = await this.api.get<ResultadoBusquedaEvento>(url);
-      console.log('✅ Búsqueda con filtros exitosa:', response.data);
-      
-      return {
-        eventos: response.data.eventos,
-        totalPaginas: response.data.totalPaginas,
-        totalElementos: response.data.totalElementos
-      };
-    } catch (error) {
-      console.error('❌ Error buscando eventos con filtros:', error);
-      throw new Error('Error al buscar eventos con filtros');
+
+// Método para buscar eventos con filtros avanzados
+static async buscarEventosConFiltros(filtros: {
+  palabrasClave?: string;
+  categoria?: string;
+  ubicacion?: string;
+  // aceptamos string "YYYY-MM-DD" o Date
+  fechaInicio?: string | Date;
+  fechaFin?: string | Date;
+  precioMin?: number;
+  precioMax?: number;
+  // tu backend usa 1-based → default 1
+  pagina?: number;
+}): Promise<{ eventos: Evento[]; totalPaginas: number; totalElementos: number }> {
+  try {
+    const params = new URLSearchParams();
+
+    if (filtros.palabrasClave) params.append('palabrasClave', filtros.palabrasClave);
+    if (filtros.categoria) params.append('categoria', filtros.categoria);
+    if (filtros.ubicacion) params.append('ubicacion', filtros.ubicacion);
+
+    if (filtros.fechaInicio) {
+      const v = filtros.fechaInicio instanceof Date ? toLocalISODate(filtros.fechaInicio) : filtros.fechaInicio;
+      params.append('fechaInicio', v);
     }
-  }
+    if (filtros.fechaFin) {
+      const v = filtros.fechaFin instanceof Date ? toLocalISODate(filtros.fechaFin) : filtros.fechaFin;
+      params.append('fechaFin', v);
+    }
 
+    if (filtros.precioMin !== undefined) params.append('precioMin', String(filtros.precioMin));
+    if (filtros.precioMax !== undefined) params.append('precioMax', String(filtros.precioMax));
+
+    params.append('nroPagina', String(filtros.pagina ?? 1));
+
+    const url = `/eventos?${params.toString()}`;
+    const response = await this.api.get<ResultadoBusquedaEvento>(url);
+
+    return {
+      eventos: response.data.eventos,
+      totalPaginas: response.data.totalPaginas,
+      totalElementos: response.data.totalElementos,
+    };
+  } catch (error) {
+    console.error('❌ Error buscando eventos con filtros:', error);
+    throw new Error('Error al buscar eventos con filtros');
+  }
+}
   // Obtener lista de categorías desde el backend
   static async obtenerCategorias(): Promise<CategoriaDTO[]> {
     try {

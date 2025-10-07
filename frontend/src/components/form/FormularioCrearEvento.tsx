@@ -91,7 +91,7 @@ export default function FormularioCrearEvento() {
 
     const [duracion, setDuracion] = React.useState<string>("");
     const [cupoMaximo, setCupoMaximo] = React.useState<string>("");
-    const [cupoMinimo, setCupoMinimo] = React.useState<string>("");
+    const [cupoMinimo, setCupoMinimo] = React.useState<string>("0");
 
     const [modalidad, setModalidad] = React.useState<ModalidadEvento>("PRESENCIAL");
     const [enlaceVirtual, setEnlaceVirtual] = React.useState("");
@@ -723,6 +723,7 @@ export default function FormularioCrearEvento() {
                         onChange={(e) => setCupoMaximo(e.target.value)}
                         fullWidth
                         disabled={submitting}
+                        required
                         inputProps={{ min: "0" }}
                     />
                 </Grid>

@@ -224,6 +224,7 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
                 variant="contained"
                 color="primary"
                 size="large"
+                disabled={evento.estado?.tipoEstado !== 'CONFIRMADO'}
                 fullWidth
                 startIcon={<HowToRegIcon />}
                 onClick={handleInscribirse}

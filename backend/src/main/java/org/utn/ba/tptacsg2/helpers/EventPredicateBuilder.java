@@ -27,11 +27,14 @@ public class EventPredicateBuilder {
 
     public EventPredicateBuilder conRangoDePrecios(Double precioMin, Double precioMax) {
         if(precioMin != null ) {
-            predicados.add(evento -> evento.precio().cantidad() >= precioMin);
+
+            Float floatPrecioMin = precioMin.floatValue();
+            predicados.add(evento -> evento.precio().cantidad() >= floatPrecioMin);
         }
 
         if(precioMax != null ) {
-            predicados.add(evento -> evento.precio().cantidad() <= precioMax);
+            Float floatPrecioMax = precioMax.floatValue();
+            predicados.add(evento -> evento.precio().cantidad() <= floatPrecioMax);
         }
 
         return this;
