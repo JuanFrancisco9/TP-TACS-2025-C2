@@ -426,6 +426,11 @@ export default function FormularioCrearEvento() {
                 body: formData,
             });
 
+            if (res.status === 401) {
+                authService.handleUnauthorized('session-expired');
+                return;
+            }
+
             if (!res.ok) {
                 let msg = `Error al crear evento (HTTP ${res.status}).`;
                 try {

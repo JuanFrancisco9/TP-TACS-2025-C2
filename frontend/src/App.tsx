@@ -11,6 +11,7 @@ import UserLanding from "./features/UserLanding.tsx";
 import ProtectedRoute from './components/ProtectedRoute';
 import { Rol } from './types/auth';
 import PerfilOrganizadorPage from './features/PerfilOrganizadorPage'
+import UnauthorizedPage from './features/UnauthorizedPage';
 
 function App() {
     return (
@@ -20,6 +21,7 @@ function App() {
                     <Route path="/" element={<LandingPage/>}/>
                     <Route path="/eventos" element={<EventOverview/>}/>
                     <Route path="/login" element={<LoginPage/>}/>
+                    <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
                     {/* Rutas que requieren autenticación */}
                     <Route path="/perfil" element={

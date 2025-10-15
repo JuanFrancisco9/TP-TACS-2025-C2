@@ -16,6 +16,11 @@ class InscripcionesParticipanteService {
             headers: this.getAuthHeaders(),
         });
 
+        if (response.status === 401) {
+            authService.handleUnauthorized('session-expired');
+            throw new Error('No autorizado');
+        }
+
         if (response.status === 204) {
             return [];
         }
@@ -34,6 +39,11 @@ class InscripcionesParticipanteService {
             method: 'POST',
             headers: this.getAuthHeaders(),
         });
+
+        if (response.status === 401) {
+            authService.handleUnauthorized('session-expired');
+            throw new Error('No autorizado');
+        }
 
         if (!response.ok) {
             throw new Error(`Error al cancelar inscripción: ${response.status} - ${response.statusText}`);
