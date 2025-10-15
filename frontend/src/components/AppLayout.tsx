@@ -1,9 +1,19 @@
-import React from 'react';
-import { Outlet } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import SiteHeader from './SiteHeader';
 import Footer from './Footer';
+import authService from '../services/authService';
 
 const AppLayout: React.FC = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    const path = `${location.pathname}${location.search}`;
+    if (!location.pathname.startsWith('/unauthorized')) {
+      authService.updateNavigationHistory(path);
+    }
+  }, [location]);
+
   return (
     <div
       style={{

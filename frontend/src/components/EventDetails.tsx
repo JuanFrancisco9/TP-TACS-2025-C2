@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import InscripcionDialog from './InscripcionDialog';
 import { EventoService } from '../services/eventoService';
+import authService from '../services/authService';
 import Grid from '@mui/material/Grid';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
@@ -29,6 +30,8 @@ import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import type { AlertColor } from '@mui/material/Alert';
 import type { Evento } from '../types/evento.ts';
 import { formatFecha } from '../utils/formatFecha';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Rol, type Usuario } from '../types/auth';
 
 interface DetallesEventoProps {
   evento: Evento;
@@ -49,16 +52,53 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
   const [snackbarMsg, setSnackbarMsg] = React.useState('');
   const [snackbarSeverity, setSnackbarSeverity] = React.useState<AlertColor>('success');
   const [loading, setLoading] = React.useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [currentUser, setCurrentUser] = React.useState<Usuario | null>(authService.getCurrentUser());
+
+  React.useEffect(() => {
+    const handleAuthChange = (event: Event) => {
+      const detail = (event as CustomEvent<Usuario | null>).detail;
+      setCurrentUser(detail ?? authService.getCurrentUser());
+    };
+
+    window.addEventListener('authStateChanged', handleAuthChange as EventListener);
+    return () => {
+      window.removeEventListener('authStateChanged', handleAuthChange as EventListener);
+    };
+  }, []);
+
+  const isOrganizer = currentUser?.rol === Rol.ROLE_ORGANIZER;
   const imageSrc = evento.imagenUrl ?? evento.imagen ?? `https://picsum.photos/seed/${encodeURIComponent(evento.id)}/1200/600`;
 
-  const handleInscribirse = () => (onInscribirse ? onInscribirse() : setShowDialog(true));
+  const handleInscribirse = () => {
+    const user = authService.getCurrentUser();
+    if (!user) {
+      const currentPath = `${location.pathname}${location.search}`;
+      authService.rememberUnauthorizedOrigin(currentPath);
+      navigate('/login', { state: { from: currentPath } });
+      return;
+    }
+
+    if (user.rol === Rol.ROLE_ORGANIZER) {
+      return;
+    }
+
+    if (onInscribirse) {
+      onInscribirse();
+    } else {
+      setShowDialog(true);
+    }
+  };
 
   const handleConfirmar = async () => {
     setLoading(true);
     try {
-      await EventoService.inscribirseAEvento(evento.id);
-      setSnackbarSeverity('success');
-      setSnackbarMsg(`Inscripción confirmada a: ${evento.titulo}`);
+      const inscripcion = await EventoService.inscribirseAEvento(evento.id);
+      const estado = inscripcion?.estado?.tipoEstado?.toUpperCase?.() ?? '';
+      const esWaitlist = estado === 'PENDIENTE';
+      setSnackbarSeverity(esWaitlist ? 'info' : 'success');
+      setSnackbarMsg(esWaitlist ? `Inscripción en waitlist: ${evento.titulo}` : `Inscripción confirmada a: ${evento.titulo}`);
     } catch (error) {
       const message = error instanceof Error && error.message
         ? error.message
@@ -219,30 +259,32 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
 
             <Box sx={{ flexGrow: 1 }} />
 
-            <CardActions sx={{ p: 2, pt: 0 }}>
-              <Button
-                variant="contained"
-                color="primary"
-                size="large"
-                disabled={evento.estado?.tipoEstado !== 'CONFIRMADO'}
-                fullWidth
-                startIcon={<HowToRegIcon />}
-                onClick={handleInscribirse}
-                sx={{
-                  borderRadius: 2,
-                  boxShadow: 1,
-                  textTransform: 'none',
-                  fontWeight: 500,
-                  transition: 'box-shadow 0.3s, transform 0.3s',
-                  ':hover': {
-                    boxShadow: 8,
-                    transform: 'translateY(-2px) scale(1.04)'
-                  }
-                }}
-              >
-                Inscribirse al Evento
-              </Button>
-            </CardActions>
+            {!isOrganizer && (
+              <CardActions sx={{ p: 2, pt: 0 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  disabled={evento.estado?.tipoEstado !== 'CONFIRMADO'}
+                  fullWidth
+                  startIcon={<HowToRegIcon />}
+                  onClick={handleInscribirse}
+                  sx={{
+                    borderRadius: 2,
+                    boxShadow: 1,
+                    textTransform: 'none',
+                    fontWeight: 500,
+                    transition: 'box-shadow 0.3s, transform 0.3s',
+                    ':hover': {
+                      boxShadow: 8,
+                      transform: 'translateY(-2px) scale(1.04)'
+                    }
+                  }}
+                >
+                  Inscribirse al Evento
+                </Button>
+              </CardActions>
+            )}
           </Card>
         </Grid>
       </Grid>

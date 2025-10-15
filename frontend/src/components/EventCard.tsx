@@ -1,7 +1,9 @@
 import * as React from 'react';
 import InscripcionDialog from './InscripcionDialog';
 import { EventoService } from '../services/eventoService';
+import authService from '../services/authService';
 import type { Evento } from '../types/evento';
+import { Rol, type Usuario } from '../types/auth';
 import {
   Typography,
   Button,
@@ -13,6 +15,7 @@ import {
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import type { AlertColor } from '@mui/material/Alert';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface EventCardProps {
   item: Evento;
@@ -28,15 +31,48 @@ const EventCard: React.FC<EventCardProps> = ({ item, onVerDetalle }) => {
   const [snackbarSeverity, setSnackbarSeverity] = React.useState<AlertColor>('success');
   const [loading, setLoading] = React.useState(false);
   const imageSrc = item.imagenUrl ?? item.imagen ?? `https://picsum.photos/seed/${encodeURIComponent(item.id)}/800/400`;
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [currentUser, setCurrentUser] = React.useState<Usuario | null>(authService.getCurrentUser());
 
-  const handleInscribirme = () => setShowDialog(true);
+  React.useEffect(() => {
+    const handleAuthChange = (event: Event) => {
+      const detail = (event as CustomEvent<Usuario | null>).detail;
+      setCurrentUser(detail ?? authService.getCurrentUser());
+    };
+
+    window.addEventListener('authStateChanged', handleAuthChange as EventListener);
+    return () => {
+      window.removeEventListener('authStateChanged', handleAuthChange as EventListener);
+    };
+  }, []);
+
+  const isOrganizer = currentUser?.rol === Rol.ROLE_ORGANIZER;
+
+  const handleInscribirme = () => {
+    const user = authService.getCurrentUser();
+    if (!user) {
+      const currentPath = `${location.pathname}${location.search}`;
+      authService.rememberUnauthorizedOrigin(currentPath);
+      navigate('/login', { state: { from: currentPath } });
+      return;
+    }
+
+    if (user.rol === Rol.ROLE_ORGANIZER) {
+      return;
+    }
+
+    setShowDialog(true);
+  };
 
   const handleConfirmar = async () => {
     setLoading(true);
     try {
-      await EventoService.inscribirseAEvento(item.id);
-      setSnackbarSeverity('success');
-      setSnackbarMsg(`Inscripción confirmada a: ${item.titulo}`);
+      const inscripcion = await EventoService.inscribirseAEvento(item.id);
+      const estado = inscripcion?.estado?.tipoEstado?.toUpperCase?.() ?? '';
+      const esWaitlist = estado === 'PENDIENTE';
+      setSnackbarSeverity(esWaitlist ? 'info' : 'success');
+      setSnackbarMsg(esWaitlist ? `Inscripción en waitlist: ${item.titulo}` : `Inscripción confirmada a: ${item.titulo}`);
     } catch (error) {
       const message = error instanceof Error && error.message
         ? error.message
@@ -126,27 +162,29 @@ const EventCard: React.FC<EventCardProps> = ({ item, onVerDetalle }) => {
             >
               Ver más
             </Button>
-            <Button
-              size="small"
-              variant="contained"
-              disabled={item.estado?.tipoEstado !== 'CONFIRMADO'}
-              color="primary"
-              startIcon={<HowToRegIcon />}
-              onClick={e => { e.stopPropagation(); handleInscribirme(); }}
-              sx={{
-                borderRadius: 2,
-                boxShadow: 1,
-                textTransform: 'none',
-                fontWeight: 500,
-                transition: 'box-shadow 0.3s, transform 0.3s',
-                ':hover': {
-                  boxShadow: 8,
-                  transform: 'translateY(-2px) scale(1.04)'
-                }
-              }}
-            >
-              Inscribirme
-            </Button>
+            {!isOrganizer && (
+              <Button
+                size="small"
+                variant="contained"
+                disabled={item.estado?.tipoEstado !== 'CONFIRMADO'}
+                color="primary"
+                startIcon={<HowToRegIcon />}
+                onClick={e => { e.stopPropagation(); handleInscribirme(); }}
+                sx={{
+                  borderRadius: 2,
+                  boxShadow: 1,
+                  textTransform: 'none',
+                  fontWeight: 500,
+                  transition: 'box-shadow 0.3s, transform 0.3s',
+                  ':hover': {
+                    boxShadow: 8,
+                    transform: 'translateY(-2px) scale(1.04)'
+                  }
+                }}
+              >
+                Inscribirme
+              </Button>
+            )}
           </Stack>
         </Box>
         <InscripcionDialog

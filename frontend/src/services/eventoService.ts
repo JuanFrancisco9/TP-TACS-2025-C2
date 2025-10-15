@@ -50,8 +50,13 @@ export class EventoService {
       (response) => response,
       (error) => {
         if (axios.isAxiosError(error) && error.response?.status === 401) {
-          authService.logout();
-          window.location.href = '/login';
+          const requestHeaders = AxiosHeaders.from(error.config?.headers ?? {});
+          const hasAuthHeader = requestHeaders.has('Authorization') || requestHeaders.has('authorization');
+          const currentUser = authService.getCurrentUser();
+
+          if (hasAuthHeader || currentUser) {
+            authService.handleUnauthorized('session-expired');
+          }
         }
         return Promise.reject(error);
       }
@@ -313,7 +318,7 @@ static async buscarEventosConFiltros(filtros: {
   }
 
   // Inscribirse a un evento usando el usuario del localStorage
-  static async inscribirseAEvento(eventoId: string): Promise<boolean> {
+  static async inscribirseAEvento(eventoId: string): Promise<Inscripcion> {
     try {
       const storedUser = localStorage.getItem('currentUser');
       const user = storedUser ? JSON.parse(storedUser) as { id: number; username: string; rol?: string; actorId?: string} : null;
@@ -336,8 +341,8 @@ static async buscarEventosConFiltros(filtros: {
         participante,
         evento_id: String(eventoId),
       };
-      await this.api.post('/inscripciones', body);
-      return true;
+      const response = await this.api.post<Inscripcion>('/inscripciones', body);
+      return response.data;
     } catch (error) {
       console.error('Error inscribi�ndose al evento:', error);
       let message = 'Error al inscribirse al evento';
