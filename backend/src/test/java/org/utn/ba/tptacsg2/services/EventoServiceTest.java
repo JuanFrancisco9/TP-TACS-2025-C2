@@ -6,6 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.utn.ba.tptacsg2.dtos.EventoDTO;
 import org.utn.ba.tptacsg2.dtos.FiltrosDTO;
@@ -25,6 +27,7 @@ import org.utn.ba.tptacsg2.models.location.Localidad;
 import org.utn.ba.tptacsg2.services.UbicacionCatalogService;
 
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -36,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class EventoServiceTest {
 
     @Mock
@@ -54,6 +58,8 @@ public class EventoServiceTest {
     private R2StorageService r2StorageService;
     @Mock
     private UbicacionCatalogService ubicacionCatalogService;
+    @Mock
+    private RedisCacheService redisCacheService;
 
     @InjectMocks
     private EventoService eventoService;
@@ -121,6 +127,8 @@ public class EventoServiceTest {
                         )));
 
         lenient().when(eventoRepository.findAll()).thenReturn(Arrays.asList(eventoValido1, eventoValido2));
+        doNothing().when(redisCacheService)
+                .crearEventoConCupos(anyString(), anyInt(), any(Duration.class));
 
         ReflectionTestUtils.setField(eventoService, "tamanioPagina", 20);
     }

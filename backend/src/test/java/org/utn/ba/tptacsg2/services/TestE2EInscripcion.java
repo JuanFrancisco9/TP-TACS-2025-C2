@@ -6,6 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.utn.ba.tptacsg2.dtos.SolicitudInscripcion;
 import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.actors.Organizador;
@@ -41,26 +43,22 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class TestE2EInscripcion {
 
     @InjectMocks
     private InscripcionService inscripcionService;
 
-    @Mock
-    private EventoRepositoryDB eventoRepository;
-    @Mock
-    private InscripcionRepositoryDB inscripcionRepository;
-    @Mock
-    private WaitlistService waitlistService;
-    @Mock
-    private GeneradorIDService generadorIDService;
-    @Mock
-    private EventoService eventoService;
-    @Mock
-    private EstadoInscripcionRepositoryDB estadoInscripcionRepository;
-    @Mock
-    private EventoLockService eventoLockService;
+    @Mock private EventoRepositoryDB eventoRepository;
+    @Mock private InscripcionRepositoryDB inscripcionRepository;
+    @Mock private WaitlistService waitlistService;
+    @Mock private GeneradorIDService generadorIDService;
+    @Mock private EventoService eventoService;
+    @Mock private EstadoInscripcionRepositoryDB estadoInscripcionRepository;
+    @Mock private EventoLockService eventoLockService;
+    @Mock private RedisCacheService redisCacheService;
 
+    // estructuras simuladas
     private ConcurrentMap<String, Evento> eventos;
     private ConcurrentMap<String, Inscripcion> inscripciones;
     private AtomicInteger sequence;
@@ -73,6 +71,7 @@ public class TestE2EInscripcion {
         sequence = new AtomicInteger(1);
         locks = new ConcurrentHashMap<>();
 
+        // Mocks base
         when(generadorIDService.generarID()).thenAnswer(invocation -> "ID-" + sequence.getAndIncrement());
         when(estadoInscripcionRepository.save(any(EstadoInscripcion.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -92,10 +91,10 @@ public class TestE2EInscripcion {
         when(eventoService.cuposDisponibles(any(Evento.class))).thenAnswer(invocation -> {
             Evento evento = invocation.getArgument(0);
             long aceptadas = inscripciones.values().stream()
-                    .filter(inscripcion -> inscripcion.evento() != null
-                            && evento.id().equals(inscripcion.evento().id())
-                            && inscripcion.estado() != null
-                            && inscripcion.estado().getTipoEstado() == TipoEstadoInscripcion.ACEPTADA)
+                    .filter(i -> i.evento() != null &&
+                            evento.id().equals(i.evento().id()) &&
+                            i.estado() != null &&
+                            i.estado().getTipoEstado() == TipoEstadoInscripcion.ACEPTADA)
                     .count();
             return Math.toIntExact(evento.cupoMaximo() - aceptadas);
         });
@@ -113,10 +112,10 @@ public class TestE2EInscripcion {
                 .thenAnswer(invocation -> {
                     String eventoId = invocation.getArgument(0);
                     return inscripciones.values().stream()
-                            .filter(inscripcion -> inscripcion.evento() != null
-                                    && eventoId.equals(inscripcion.evento().id())
-                                    && inscripcion.estado() != null
-                                    && inscripcion.estado().getTipoEstado() == TipoEstadoInscripcion.PENDIENTE)
+                            .filter(i -> i.evento() != null &&
+                                    eventoId.equals(i.evento().id()) &&
+                                    i.estado() != null &&
+                                    i.estado().getTipoEstado() == TipoEstadoInscripcion.PENDIENTE)
                             .sorted(Comparator.comparing(Inscripcion::fechaRegistro))
                             .findFirst();
                 });
@@ -125,18 +124,27 @@ public class TestE2EInscripcion {
                 .thenAnswer(invocation -> {
                     String eventoId = invocation.getArgument(0);
                     return inscripciones.values().stream()
-                            .filter(inscripcion -> inscripcion.evento() != null
-                                    && eventoId.equals(inscripcion.evento().id())
-                                    && inscripcion.estado() != null
-                                    && inscripcion.estado().getTipoEstado() == TipoEstadoInscripcion.PENDIENTE)
+                            .filter(i -> i.evento() != null &&
+                                    eventoId.equals(i.evento().id()) &&
+                                    i.estado() != null &&
+                                    i.estado().getTipoEstado() == TipoEstadoInscripcion.PENDIENTE)
                             .sorted(Comparator.comparing(Inscripcion::fechaRegistro))
                             .toList();
                 });
 
+
+        // Redis: primera llamada hay cupo, segunda no
+        when(redisCacheService.reservarCupo(anyString()))
+                .thenReturn(true)   // primer inscripto
+                .thenReturn(false); // segundo inscripto, sin cupo
+
+
+        // Mock de waitlist
         when(waitlistService.inscribirAWaitlist(any(SolicitudInscripcion.class))).thenAnswer(invocation -> {
             SolicitudInscripcion solicitud = invocation.getArgument(0);
             Evento evento = eventos.get(solicitud.evento_id());
-            EstadoInscripcion estadoPendiente = new EstadoInscripcion("EST-P-" + sequence.getAndIncrement(), TipoEstadoInscripcion.PENDIENTE, LocalDateTime.now());
+            EstadoInscripcion estadoPendiente = new EstadoInscripcion("EST-P-" + sequence.getAndIncrement(),
+                    TipoEstadoInscripcion.PENDIENTE, LocalDateTime.now());
             Inscripcion inscripcionPendiente = new Inscripcion(
                     "INS-P-" + sequence.getAndIncrement(),
                     solicitud.participante(),
