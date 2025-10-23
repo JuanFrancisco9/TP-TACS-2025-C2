@@ -215,7 +215,8 @@ public class TestE2EInscripcion {
                 new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
                 new Categoria("Test"),
                 List.of(),
-                null
+                null,
+                LocalDateTime.now()
         );
     }
 

@@ -92,7 +92,8 @@ public class EventoServiceTest {
                 new Precio("ARS", 5000f),
                 null,
                 new EstadoEvento("1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.of(2025, 9, 1, 12, 0))
-                , null, new ArrayList<>(), null);
+                , null, new ArrayList<>(), null,
+                LocalDateTime.now());
 
         solicitudEvento = new SolicitudEvento(idOrganizadorMock,
                 "Fiesta UTN",
@@ -111,8 +112,8 @@ public class EventoServiceTest {
         Categoria categoria1 = new Categoria("MUSICA");
         Categoria categoria2 = new Categoria("TECNOLOGIA");
 
-        eventoValido1 = new Evento("E1", "Concierto de rock vivo", "Musica", LocalDateTime.of(2025, 9, 10, 20, 0), "20:00", 2f, new Ubicacion("", "", "Buenos Aires", "La Plata", "Teatro Argentino", false, null), 100, 0, new Precio("ARS", 1000f), organizadorMock, new EstadoEvento("2", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria1, new ArrayList<>(), null);
-        eventoValido2 = new Evento("E2", "Charla", "Tecnologia", LocalDateTime.of(2025, 10, 10, 18, 0), "18:00", 1.5f, new Ubicacion("", "", "Ciudad Autónoma de Buenos Aires", "CABA", "Centro Cultural", false, null), 50, 0, new Precio("ARS", 500f), organizadorMock, new EstadoEvento("3", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria2, new ArrayList<>(), null);
+        eventoValido1 = new Evento("E1", "Concierto de rock vivo", "Musica", LocalDateTime.of(2025, 9, 10, 20, 0), "20:00", 2f, new Ubicacion("", "", "Buenos Aires", "La Plata", "Teatro Argentino", false, null), 100, 0, new Precio("ARS", 1000f), organizadorMock, new EstadoEvento("2", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria1, new ArrayList<>(), null, LocalDateTime.now());
+        eventoValido2 = new Evento("E2", "Charla", "Tecnologia", LocalDateTime.of(2025, 10, 10, 18, 0), "18:00", 1.5f, new Ubicacion("", "", "Ciudad Autónoma de Buenos Aires", "CABA", "Centro Cultural", false, null), 50, 0, new Precio("ARS", 500f), organizadorMock, new EstadoEvento("3", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), categoria2, new ArrayList<>(), null, LocalDateTime.now());
 
         when(ubicacionCatalogService.buscarProvinciaPorNombre(anyString()))
                 .thenAnswer(invocation -> java.util.Optional.of(new Provincia((String) invocation.getArgument(0), invocation.getArgument(0))));
@@ -276,7 +277,8 @@ public class EventoServiceTest {
                 new EstadoEvento("4", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
                 new Categoria("TEST"),
                 new ArrayList<>(),
-                null
+                null,
+                LocalDateTime.now()
         );
 
         Evento eventoLejano = new Evento(
@@ -294,7 +296,8 @@ public class EventoServiceTest {
                 new EstadoEvento("5", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
                 new Categoria("TEST"),
                 new ArrayList<>(),
-                null
+                null,
+                LocalDateTime.now()
         );
 
         List<Evento> eventos = Arrays.asList(eventoProximo, eventoLejano);
@@ -332,7 +335,8 @@ public class EventoServiceTest {
                 new EstadoEvento("6", TipoEstadoEvento.NO_ACEPTA_INSCRIPCIONES, LocalDateTime.now()),
                 new Categoria("TEST"),
                 new ArrayList<>(),
-                null
+                null,
+                LocalDateTime.now()
         );
 
         when(eventoRepository.findAll()).thenReturn(Arrays.asList(eventoCerrado));
@@ -362,7 +366,8 @@ public class EventoServiceTest {
                 new EstadoEvento("7", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
                 new Categoria("TEST"),
                 new ArrayList<>(),
-                null
+                null,
+                LocalDateTime.now()
         );
 
         when(eventoRepository.findAll()).thenReturn(Arrays.asList(eventoHoy));
