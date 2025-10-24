@@ -44,8 +44,8 @@ class ParticipanteServiceTest {
 
         Evento evento1 = mock(Evento.class);
         Evento evento2 = mock(Evento.class);
-        EventoDTO eventoDTO1 = new EventoDTO("evento1", null, null, null, null, null, null, null, null, null, null, null, null, null, null);
-        EventoDTO eventoDTO2 = new EventoDTO("evento2", null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        EventoDTO eventoDTO1 = new EventoDTO("evento1", null, null, null, null, null, null, null, null, null, null, null, null, null, null,null);
+        EventoDTO eventoDTO2 = new EventoDTO("evento2", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
         LocalDateTime fechaRegistro1 = LocalDateTime.now();
         LocalDateTime fechaRegistro2 = fechaRegistro1.plusDays(1);
 

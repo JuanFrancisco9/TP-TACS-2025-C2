@@ -374,7 +374,7 @@ public class EventoService {
                 categoriaFinal,
                 eventoUpdate.etiquetas(),
                 eventoUpdate.imagenKey(),
-                LocalDateTime.now()
+                eventoExistente.fechaCreacion()
         );
 
         // Si se creó un nuevo estado, asociarlo con el evento
@@ -557,7 +557,8 @@ public class EventoService {
                 evento.estado(),
                 evento.categoria(),
                 imagenUrl,
-                evento.imagenKey()
+                evento.imagenKey(),
+                evento.fechaCreacion()
         );
     }
 }

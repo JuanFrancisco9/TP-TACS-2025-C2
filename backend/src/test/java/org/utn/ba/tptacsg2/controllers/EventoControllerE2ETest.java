@@ -98,7 +98,8 @@ public class EventoControllerE2ETest {
                 eventoCreado.estado(),
                 eventoCreado.categoria(),
                 null,
-                eventoCreado.imagenKey()
+                eventoCreado.imagenKey(),
+                eventoCreado.fechaCreacion()
         );
 
         when(eventoService.registrarEventoConImagen(any(SolicitudEvento.class), any()))
@@ -155,7 +156,8 @@ public class EventoControllerE2ETest {
                 eventoCreado.estado(),
                 eventoCreado.categoria(),
                 null,
-                eventoCreado.imagenKey()
+                eventoCreado.imagenKey(),
+                eventoCreado.fechaCreacion()
         );
 
         when(eventoService.registrarEventoConImagen(any(SolicitudEvento.class), any()))
@@ -234,7 +236,8 @@ public class EventoControllerE2ETest {
                 evento.estado(),
                 evento.categoria(),
                 null,
-                evento.imagenKey()
+                evento.imagenKey(),
+                evento.fechaCreacion()
         );
 
         when(eventoService.buscarEventos(any(FiltrosDTO.class)))
@@ -282,7 +285,8 @@ public class EventoControllerE2ETest {
                 evento.estado(),
                 evento.categoria(),
                 "https://example.com/imagen.jpg",
-                evento.imagenKey()
+                evento.imagenKey(),
+                evento.fechaCreacion()
         );
 
         when(eventoService.obtenerEventoPorId(evento.id())).thenReturn(eventoDto);

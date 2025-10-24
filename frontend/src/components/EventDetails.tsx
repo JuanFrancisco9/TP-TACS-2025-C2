@@ -29,6 +29,7 @@ import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import type { AlertColor } from '@mui/material/Alert';
 import type { Evento } from '../types/evento.ts';
 import { formatFecha } from '../utils/formatFecha';
+import authService from "../services/authService.ts";
 
 interface DetallesEventoProps {
   evento: Evento;
@@ -50,6 +51,7 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
   const [snackbarSeverity, setSnackbarSeverity] = React.useState<AlertColor>('success');
   const [loading, setLoading] = React.useState(false);
   const imageSrc = evento.imagenUrl ?? evento.imagen ?? `https://picsum.photos/seed/${encodeURIComponent(evento.id)}/1200/600`;
+  const currentUser = authService.getCurrentUser();
 
   const handleInscribirse = () => (onInscribirse ? onInscribirse() : setShowDialog(true));
 
@@ -187,6 +189,15 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
                       <strong>Organizador:</strong> {evento.organizador.nombre} {evento.organizador.apellido}
                     </Typography>
                   </Stack>
+                )}
+
+                {currentUser?.rol == "ROLE_ADMIN" || currentUser?.rol == "ROLE_ORGANIZER" && (
+                     <Stack direction="row" spacing={1} alignItems="center">
+                        <EventIcon color="action" fontSize="small" />
+                        <Typography variant="body2">
+                            <strong>Fecha Creacion:</strong> {formatFecha(evento.fechaCreacion)}
+                        </Typography>
+                     </Stack>
                 )}
 
                 {evento.precio && (

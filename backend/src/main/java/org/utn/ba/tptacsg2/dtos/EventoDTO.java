@@ -23,5 +23,6 @@ public record EventoDTO(
     EstadoEvento estado,
     Categoria categoria,
     String imagenUrl,
-    String imagenKey
+    String imagenKey,
+    LocalDateTime fechaCreacion
 ){}
