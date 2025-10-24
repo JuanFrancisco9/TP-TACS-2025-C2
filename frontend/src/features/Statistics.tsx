@@ -131,7 +131,7 @@ function Statistics() {
                                                 dateFormat="dd/MM/yyyy"
                                                 placeholderText="Seleccionar fecha de inicio"
                                                 className="form-control"
-                                                maxDate={fechaHasta || undefined}
+                                                maxDate={fechaHasta || new Date()}
                                                 showMonthDropdown
                                                 showYearDropdown
                                                 dropdownMode="select"
@@ -147,7 +147,6 @@ function Statistics() {
                                                 placeholderText="Seleccionar fecha de fin"
                                                 className="form-control"
                                                 minDate={fechaDesde || undefined}
-                                                maxDate={new Date()}
                                                 showMonthDropdown
                                                 showYearDropdown
                                                 dropdownMode="select"
