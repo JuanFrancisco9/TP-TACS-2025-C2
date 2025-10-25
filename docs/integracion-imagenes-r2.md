@@ -68,13 +68,24 @@ Requiere autenticación y ser propietario de la imagen
 
 ## Configuración
 
+### Variables de entorno requeridas
+Defin� los siguientes valores (por ejemplo en un archivo `.env` cargado por docker compose):
+```env
+CLOUDFLARE_R2_ENDPOINT=https://<tu-cuenta>.r2.cloudflarestorage.com/images
+CLOUDFLARE_R2_BUCKET=images
+CLOUDFLARE_R2_ACCESS_KEY=<tu-access-key>
+CLOUDFLARE_R2_SECRET_KEY=<tu-secret-key>
+CLOUDFLARE_R2_PUBLIC_BASE_URL=https://<tu-cuenta>.r2.dev/images
+```
+
 ### application.properties
 ```properties
 # Cloudflare R2
-cloudflare.r2.endpoint=https://cf3e92705ed9dff7747f837a3fcc0d82.r2.cloudflarestorage.com/images
-cloudflare.r2.bucket=images
-cloudflare.r2.access-key=c036b5dfa1ef00c140c54bd2bbb65ee0
-cloudflare.r2.secret-key=8985cc297a7e9bf330a38259959bad265a12f27ab195432baec10b3c97a6b534
+cloudflare.r2.endpoint=${CLOUDFLARE_R2_ENDPOINT}
+cloudflare.r2.bucket=${CLOUDFLARE_R2_BUCKET:images}
+cloudflare.r2.access-key=${CLOUDFLARE_R2_ACCESS_KEY}
+cloudflare.r2.secret-key=${CLOUDFLARE_R2_SECRET_KEY}
+cloudflare.r2.public-base-url=${CLOUDFLARE_R2_PUBLIC_BASE_URL}
 ```
 
 ## Uso en el Frontend
