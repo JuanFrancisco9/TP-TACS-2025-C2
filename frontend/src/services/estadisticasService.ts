@@ -25,6 +25,11 @@ class EstadisticasService {
             headers: this.getAuthHeaders(),
         });
 
+        if (response.status === 401) {
+            authService.handleUnauthorized('session-expired');
+            throw new Error('No autorizado');
+        }
+
         if (!response.ok) {
             throw new Error(`Error al obtener estadísticas: ${response.status} - ${response.statusText}`);
         }
@@ -53,6 +58,11 @@ class EstadisticasService {
             method: 'GET',
             headers: this.getAuthHeaders(),
         });
+
+        if (response.status === 401) {
+            authService.handleUnauthorized('session-expired');
+            throw new Error('No autorizado');
+        }
 
         if (!response.ok) {
             throw new Error(`Error al obtener estadísticas: ${response.status} - ${response.statusText}`);
