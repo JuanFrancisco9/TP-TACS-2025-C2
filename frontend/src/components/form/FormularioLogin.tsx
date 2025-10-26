@@ -40,6 +40,10 @@ export default function FormularioLogin() {
     const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
     const [successMsg, setSuccessMsg] = React.useState<string | null>(null);
 
+    const contraseniasCoinciden = contrasenia === comprobarContrasenia;
+    const contraseniasNoCoinciden = comprobarContrasenia.length > 0 && !contraseniasCoinciden;
+    const dniInvalido = dni.length > 0 && dni.length !== 8;
+
     const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
         setTabValue(newValue);
         setErrorMsg(null);
@@ -96,6 +100,11 @@ export default function FormularioLogin() {
 
         if (!selectedRol) {
             setErrorMsg("Por favor selecciona un tipo de usuario");
+            return;
+        }
+
+        if (dni.length !== 8) {
+            setErrorMsg("El DNI debe tener 8 caracteres");
             return;
         }
 
@@ -233,6 +242,9 @@ export default function FormularioLogin() {
                         label="DNI"
                         value={dni}
                         onChange={(e) => setDNI(e.target.value)}
+                        error={dniInvalido}
+                        helperText={dniInvalido ? "El DNI debe tener 8 caracteres" : undefined}
+                        inputProps={{ maxLength: 8 }}
                         fullWidth
                         required
                     />
@@ -263,6 +275,8 @@ export default function FormularioLogin() {
                         type="password"
                         value={comprobarContrasenia}
                         onChange={(e) => setComprobarContrasenia(e.target.value)}
+                        error={contraseniasNoCoinciden}
+                        helperText={contraseniasNoCoinciden ? "Las contraseñas no coinciden" : undefined}
                         fullWidth
                         required
                     />
@@ -270,7 +284,7 @@ export default function FormularioLogin() {
                     <Button
                         type="submit"
                         variant="contained"
-                        disabled={submitting}
+                        disabled={submitting || contraseniasNoCoinciden || dniInvalido}
                         fullWidth
                     >
                         {submitting ? "Registrando..." : "Registrarse"}
