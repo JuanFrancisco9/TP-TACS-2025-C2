@@ -11,6 +11,7 @@ import org.utn.ba.tptacsg2.dtos.EventoDTO;
 import org.utn.ba.tptacsg2.dtos.FiltrosDTO;
 import org.utn.ba.tptacsg2.dtos.ParticipanteDTO;
 import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
+import org.utn.ba.tptacsg2.dtos.output.CuposDisponiblesDTO;
 import org.utn.ba.tptacsg2.dtos.output.ResultadoBusquedaEvento;
 import org.utn.ba.tptacsg2.exceptions.InscripcionNoEncontradaException;
 import org.utn.ba.tptacsg2.models.events.Evento;
@@ -84,6 +85,13 @@ public class EventoController {
            throw new InscripcionNoEncontradaException("No se encontraron participantes para el evento",e);
         }
         return ResponseEntity.status(HttpStatus.OK).body(participantesDTO);
+    }
+
+    @PreAuthorize("hasAnyRole('USER', 'ORGANIZER', 'ADMIN')")
+    @GetMapping("/{eventoId}/cupos-disponibles")
+    public ResponseEntity<CuposDisponiblesDTO> obtenerCuposDisponibles(@PathVariable("eventoId") String eventoId) {
+        Integer cuposDisponibles = eventoService.cuposDisponibles(eventoId);
+        return ResponseEntity.ok(new CuposDisponiblesDTO(cuposDisponibles));
     }
 
 
