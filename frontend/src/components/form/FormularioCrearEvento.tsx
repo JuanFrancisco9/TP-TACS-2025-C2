@@ -118,6 +118,7 @@ export default function FormularioCrearEvento() {
     const [submitting, setSubmitting] = React.useState(false);
     const [errorMsg, setErrorMsg] = React.useState<string >("");
     const [successMsg, setSuccessMsg] = React.useState<string>("");
+    const topRef = React.useRef<HTMLDivElement | null>(null);
 
     React.useEffect(() => {
         if (successMsg) {
@@ -452,6 +453,7 @@ export default function FormularioCrearEvento() {
             }
 
             setSuccessMsg("¡Evento creado con éxito!");
+            topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             // Reset rápido
             setTitulo("");
             setDescripcion("");
@@ -501,7 +503,7 @@ export default function FormularioCrearEvento() {
 
     return (
         <Box component="form" onSubmit={handleSubmit} sx={{ p: 2, maxWidth: 800 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>Crear evento</Typography>
+            <Typography ref={topRef} variant="h6" sx={{ mb: 2 }}>Crear evento</Typography>
 
             {errorMsg && <Alert severity="error" sx={{ mb: 2 }}>{errorMsg}</Alert>}
             {successMsg && <Alert severity="success" sx={{ mb: 2 }}>{successMsg}</Alert>}
