@@ -75,6 +75,7 @@ export default function PerfilOrganizador() {
                 if (currentUser?.id) {
                     const eventos = await EventoService.obtenerEventosParaOrganizador(currentUser.actorId);
                     setEvents(eventos);
+                    console.log(eventos)
                 }
             } catch (error) {
                 console.error("Error al cargar los eventos:", error);
@@ -136,7 +137,6 @@ export default function PerfilOrganizador() {
                                 <TableRow
                                     key={e.id}
                                     hover
-                                    onClick={() => setDetailEvent(e)}
                                     sx={{ cursor: 'pointer' }}
                                 >
                                     <TableCell>
@@ -150,7 +150,15 @@ export default function PerfilOrganizador() {
                                         />
                                     </TableCell>
                                     <TableCell>{e.titulo}</TableCell>
-                                    <TableCell>{e.fecha}</TableCell>
+                                    <TableCell>
+                                        {new Date(e.fecha).toLocaleString('es-AR', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                        }).replace(',', ' -')}
+                                    </TableCell>
                                     <TableCell>
                                         {e.ubicacion.esVirtual
                                             ? 'Virtual'

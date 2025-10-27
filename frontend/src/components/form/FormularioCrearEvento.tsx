@@ -20,8 +20,9 @@ import { getCategoryIconComponent, inferIconName } from "../../utils/categoryIco
 import LocationPickerMap from "./LocationPickerMap";
 import { PROVINCIAS, getDefaultCoordenadas, getLocalidades } from "../../utils/locationData";
 import type { CategoriaDTO, CategoriaIconRule } from "../../types/evento";
+import { getApiBaseUrl } from "../../config/runtimeEnv";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = getApiBaseUrl();
 
 type Ubicacion = {
     latitud: string | null;
@@ -115,8 +116,16 @@ export default function FormularioCrearEvento() {
     const [imagen, setImagen] = React.useState<File | null>(null);
 
     const [submitting, setSubmitting] = React.useState(false);
-    const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
-    const [successMsg, setSuccessMsg] = React.useState<string | null>(null);
+    const [errorMsg, setErrorMsg] = React.useState<string >("");
+    const [successMsg, setSuccessMsg] = React.useState<string>("");
+    const topRef = React.useRef<HTMLDivElement | null>(null);
+
+    React.useEffect(() => {
+        if (successMsg) {
+            const timer = setTimeout(() => setSuccessMsg(""), 4000); // 4 segundos
+            return () => clearTimeout(timer); // limpia el timeout si cambia antes
+        }
+    }, [successMsg]);
 
     const localidadesDisponibles = React.useMemo(
         () => (modalidad === "PRESENCIAL" ? getLocalidades(provincia) : []),
@@ -302,8 +311,8 @@ export default function FormularioCrearEvento() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setErrorMsg(null);
-        setSuccessMsg(null);
+        setErrorMsg("");
+        setSuccessMsg("");
 
         if (!titulo || !fecha || !horaInicio) {
             setErrorMsg("Completá título, fecha y hora de inicio.");
@@ -444,6 +453,7 @@ export default function FormularioCrearEvento() {
             }
 
             setSuccessMsg("¡Evento creado con éxito!");
+            topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             // Reset rápido
             setTitulo("");
             setDescripcion("");
@@ -493,7 +503,7 @@ export default function FormularioCrearEvento() {
 
     return (
         <Box component="form" onSubmit={handleSubmit} sx={{ p: 2, maxWidth: 800 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>Crear evento</Typography>
+            <Typography ref={topRef} variant="h6" sx={{ mb: 2 }}>Crear evento</Typography>
 
             {errorMsg && <Alert severity="error" sx={{ mb: 2 }}>{errorMsg}</Alert>}
             {successMsg && <Alert severity="success" sx={{ mb: 2 }}>{successMsg}</Alert>}

@@ -130,11 +130,19 @@ const EventOverview: React.FC = () => {
       .finally(() => setLoading(false));
   };
 
+  // ---------- auto-refetch when filters change ----------
+  useEffect(() => {
+    const isInitialMount = !eventos.length && !loading;
+    if (isInitialMount) return;
+
+    refetch();
+  }, [selectedCategory]);
+
   // ---------- handlers ----------
   const handleToggleCategory = (tipo: string) => {
     const updated = selectedCategory === tipo ? '' : tipo;
     setSelectedCategory(updated);
-    refetch();
+    //Ahora se actualiza automaticamente al detectar un cambio en el estado de la categoría seleccioanda
   };
 
   const handlePriceChange = (_: Event, v: number | number[]) => {

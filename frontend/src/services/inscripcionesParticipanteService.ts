@@ -1,7 +1,8 @@
 import type { Inscripcion } from '../types/inscripciones';
 import authService from './authService';
+import { getApiBaseUrl } from '../config/runtimeEnv';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = getApiBaseUrl();
 
 class InscripcionesParticipanteService {
     private getAuthHeaders() {

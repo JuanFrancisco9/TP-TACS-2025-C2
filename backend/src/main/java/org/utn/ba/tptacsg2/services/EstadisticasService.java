@@ -189,7 +189,7 @@ public class EstadisticasService {
         
         return eventos.stream()
                 .filter(evento -> {
-                    LocalDate fechaEvento = evento.fecha().toLocalDate();
+                    LocalDate fechaEvento = evento.fechaCreacion().toLocalDate();
                     boolean despuesDeFechaDesde = fechaDesde == null || !fechaEvento.isBefore(fechaDesde);
                     boolean antesDeFechaHasta = fechaHasta == null || !fechaEvento.isAfter(fechaHasta);
                     return despuesDeFechaDesde && antesDeFechaHasta;

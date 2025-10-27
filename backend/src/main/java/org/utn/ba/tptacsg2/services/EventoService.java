@@ -93,9 +93,21 @@ public class EventoService {
     }
 
     public Integer cuposDisponibles(Evento evento) {
-        return evento.cupoMaximo() -  inscripcionRepository.findByEvento_Id(evento.id())
-                .stream().filter(inscripcion -> inscripcion.estado().getTipoEstado().equals(TipoEstadoInscripcion.ACEPTADA))
-                .toList().size();
+        if (evento == null || evento.cupoMaximo() == null) {
+            return null;
+        }
+
+        long aceptadas = inscripcionRepository.findByEvento_Id(evento.id())
+                .stream()
+                .filter(inscripcion -> inscripcion.estado().getTipoEstado().equals(TipoEstadoInscripcion.ACEPTADA))
+                .count();
+
+        return Math.max(evento.cupoMaximo() - (int) aceptadas, 0);
+    }
+
+    public Integer cuposDisponibles(String eventoId) {
+        Evento evento = getEvento(eventoId);
+        return cuposDisponibles(evento);
     }
 
     public Evento registrarEvento(SolicitudEvento solicitud) {
@@ -124,7 +136,8 @@ public class EventoService {
                 estadoInicial,
                 categoria,
                 solicitud.etiquetas(),
-                null
+                null,
+                LocalDateTime.now()
         );
 
         estadoInicial.setEvento(evento);
@@ -197,7 +210,8 @@ public class EventoService {
                 estadoInicial,
                 categoria,
                 solicitud.etiquetas(),
-                imagenKey
+                imagenKey,
+                LocalDateTime.now()
         );
 
         estadoInicial.setEvento(evento);
@@ -367,7 +381,8 @@ public class EventoService {
                 estadoFinal,
                 categoriaFinal,
                 eventoUpdate.etiquetas(),
-                eventoUpdate.imagenKey()
+                eventoUpdate.imagenKey(),
+                eventoExistente.fechaCreacion()
         );
 
         // Si se creó un nuevo estado, asociarlo con el evento
@@ -413,7 +428,8 @@ public class EventoService {
                 estadoEvento,
                 evento.categoria(),
                 evento.etiquetas(),
-                evento.imagenKey()
+                evento.imagenKey(),
+                LocalDateTime.now()
         );
 
         actualizarInscripciones(eventoActualizado, eventoActualizado.estado().getTipoEstado());
@@ -549,7 +565,8 @@ public class EventoService {
                 evento.estado(),
                 evento.categoria(),
                 imagenUrl,
-                evento.imagenKey()
+                evento.imagenKey(),
+                evento.fechaCreacion()
         );
     }
 }

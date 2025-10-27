@@ -2,6 +2,7 @@ package org.utn.ba.tptacsg2.config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -19,9 +20,22 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
+
+    private final List<String> allowedCorsEntries;
+
+    public SecurityConfig(@Value("${app.security.cors.allowed-origins}") String allowedCorsOrigins) {
+        this.allowedCorsEntries = Arrays.stream(allowedCorsOrigins.split(","))
+                .map(String::trim)
+                .filter(entry -> !entry.isEmpty())
+                .toList();
+    }
+
     /**
      * Password encoder bean using Argon2 algorithm.
      */
@@ -53,10 +67,20 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("http://localhost:5173");
-        configuration.addAllowedOrigin("http://127.0.0.1:5173");
-        configuration.addAllowedOriginPattern("http://localhost:*");
-        configuration.addAllowedOriginPattern("http://127.0.0.1:*");
+        if (allowedCorsEntries.isEmpty()) {
+            configuration.addAllowedOrigin("http://localhost:5173");
+            configuration.addAllowedOrigin("http://127.0.0.1:5173");
+            configuration.addAllowedOriginPattern("http://localhost:*");
+            configuration.addAllowedOriginPattern("http://127.0.0.1:*");
+        } else {
+            allowedCorsEntries.forEach(origin -> {
+                if (origin.contains("*")) {
+                    configuration.addAllowedOriginPattern(origin);
+                } else {
+                    configuration.addAllowedOrigin(origin);
+                }
+            });
+        }
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");
         // CRÍTICO para Basic Auth
