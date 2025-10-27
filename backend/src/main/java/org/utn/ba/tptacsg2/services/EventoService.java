@@ -27,15 +27,11 @@ import org.utn.ba.tptacsg2.repositories.db.EstadoEventoRepositoryDB;
 import org.utn.ba.tptacsg2.repositories.db.EventoRepositoryDB;
 import org.utn.ba.tptacsg2.repositories.db.InscripcionRepositoryDB;
 import org.utn.ba.tptacsg2.repositories.db.OrganizadorRepositoryDB;
-import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
 import org.utn.ba.tptacsg2.repositories.db.*;
-import org.w3c.dom.events.EventException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.*;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;

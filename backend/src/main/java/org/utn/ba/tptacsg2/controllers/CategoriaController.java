@@ -11,7 +11,6 @@ import org.utn.ba.tptacsg2.services.CategoriaService;
 
 import java.util.List;
 
-@PreAuthorize("hasAnyRole('USER','ADMIN','ORGANIZER')")
 @RestController
 @RequestMapping("/categorias")
 public class CategoriaController {
