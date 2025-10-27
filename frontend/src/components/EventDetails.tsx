@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import InscripcionDialog from './InscripcionDialog';
 import { EventoService } from '../services/eventoService';
+import authService from '../services/authService';
 import Grid from '@mui/material/Grid';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
@@ -23,6 +24,7 @@ import PlaceIcon from '@mui/icons-material/Place';
 import LanguageIcon from '@mui/icons-material/Language';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import PersonIcon from '@mui/icons-material/Person';
+import GroupsIcon from '@mui/icons-material/Groups';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
@@ -30,6 +32,8 @@ import type { AlertColor } from '@mui/material/Alert';
 import type { Evento } from '../types/evento.ts';
 import { formatFecha } from '../utils/formatFecha';
 import authService from "../services/authService.ts";
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Rol, type Usuario } from '../types/auth';
 
 interface DetallesEventoProps {
   evento: Evento;
@@ -50,17 +54,99 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
   const [snackbarMsg, setSnackbarMsg] = React.useState('');
   const [snackbarSeverity, setSnackbarSeverity] = React.useState<AlertColor>('success');
   const [loading, setLoading] = React.useState(false);
+  const [cuposDisponibles, setCuposDisponibles] = React.useState<number | null>(null);
+  const [calculandoCupo, setCalculandoCupo] = React.useState(false);
+  const [cuposError, setCuposError] = React.useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [currentUser, setCurrentUser] = React.useState<Usuario | null>(authService.getCurrentUser());
+
+  React.useEffect(() => {
+    const handleAuthChange = (event: Event) => {
+      const detail = (event as CustomEvent<Usuario | null>).detail;
+      setCurrentUser(detail ?? authService.getCurrentUser());
+    };
+
+    window.addEventListener('authStateChanged', handleAuthChange as EventListener);
+    return () => {
+      window.removeEventListener('authStateChanged', handleAuthChange as EventListener);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    let isActive = true;
+
+    const cargarCupoDisponible = async () => {
+      if (!evento.id || evento.cupoMaximo == null) {
+        if (isActive) {
+          setCuposDisponibles(null);
+          setCalculandoCupo(false);
+          setCuposError(false);
+        }
+        return;
+      }
+
+      if (isActive) {
+        setCalculandoCupo(true);
+        setCuposError(false);
+      }
+
+      try {
+        const cupos = await EventoService.obtenerCuposDisponibles(evento.id);
+        if (!isActive) return;
+
+        setCuposDisponibles(cupos != null ? Math.max(cupos, 0) : null);
+      } catch (error) {
+        if (!isActive) return;
+        console.error('Error obteniendo cupos disponibles del evento:', error);
+        setCuposDisponibles(null);
+        setCuposError(true);
+      } finally {
+        if (isActive) {
+          setCalculandoCupo(false);
+        }
+      }
+    };
+
+    cargarCupoDisponible();
+
+    return () => {
+      isActive = false;
+    };
+  }, [evento.id, evento.cupoMaximo]);
+
+  const isOrganizer = currentUser?.rol === Rol.ROLE_ORGANIZER;
   const imageSrc = evento.imagenUrl ?? evento.imagen ?? `https://picsum.photos/seed/${encodeURIComponent(evento.id)}/1200/600`;
   const currentUser = authService.getCurrentUser();
 
-  const handleInscribirse = () => (onInscribirse ? onInscribirse() : setShowDialog(true));
+  const handleInscribirse = () => {
+    const user = authService.getCurrentUser();
+    if (!user) {
+      const currentPath = `${location.pathname}${location.search}`;
+      authService.rememberUnauthorizedOrigin(currentPath);
+      navigate('/login', { state: { from: currentPath } });
+      return;
+    }
+
+    if (user.rol === Rol.ROLE_ORGANIZER) {
+      return;
+    }
+
+    if (onInscribirse) {
+      onInscribirse();
+    } else {
+      setShowDialog(true);
+    }
+  };
 
   const handleConfirmar = async () => {
     setLoading(true);
     try {
-      await EventoService.inscribirseAEvento(evento.id);
-      setSnackbarSeverity('success');
-      setSnackbarMsg(`Inscripción confirmada a: ${evento.titulo}`);
+      const inscripcion = await EventoService.inscribirseAEvento(evento.id);
+      const estado = inscripcion?.estado?.tipoEstado?.toUpperCase?.() ?? '';
+      const esWaitlist = estado === 'PENDIENTE';
+      setSnackbarSeverity(esWaitlist ? 'info' : 'success');
+      setSnackbarMsg(esWaitlist ? `Inscripción en waitlist: ${evento.titulo}` : `Inscripción confirmada a: ${evento.titulo}`);
     } catch (error) {
       const message = error instanceof Error && error.message
         ? error.message
@@ -198,6 +284,18 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
                             <strong>Fecha Creacion:</strong> {formatFecha(evento.fechaCreacion)}
                         </Typography>
                      </Stack>
+                {evento.cupoMaximo != null && (
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <GroupsIcon color="action" fontSize="small" />
+                    <Typography variant="body2">
+                      <strong>Cupos disponibles:</strong>{' '}
+                      {calculandoCupo
+                        ? 'Calculando...'
+                        : cuposError
+                          ? 'No disponible'
+                          : cuposDisponibles}
+                    </Typography>
+                  </Stack>
                 )}
 
                 {evento.precio && (
@@ -230,30 +328,32 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
 
             <Box sx={{ flexGrow: 1 }} />
 
-            <CardActions sx={{ p: 2, pt: 0 }}>
-              <Button
-                variant="contained"
-                color="primary"
-                size="large"
-                disabled={evento.estado?.tipoEstado !== 'CONFIRMADO'}
-                fullWidth
-                startIcon={<HowToRegIcon />}
-                onClick={handleInscribirse}
-                sx={{
-                  borderRadius: 2,
-                  boxShadow: 1,
-                  textTransform: 'none',
-                  fontWeight: 500,
-                  transition: 'box-shadow 0.3s, transform 0.3s',
-                  ':hover': {
-                    boxShadow: 8,
-                    transform: 'translateY(-2px) scale(1.04)'
-                  }
-                }}
-              >
-                Inscribirse al Evento
-              </Button>
-            </CardActions>
+            {!isOrganizer && (
+              <CardActions sx={{ p: 2, pt: 0 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  disabled={evento.estado?.tipoEstado !== 'CONFIRMADO'}
+                  fullWidth
+                  startIcon={<HowToRegIcon />}
+                  onClick={handleInscribirse}
+                  sx={{
+                    borderRadius: 2,
+                    boxShadow: 1,
+                    textTransform: 'none',
+                    fontWeight: 500,
+                    transition: 'box-shadow 0.3s, transform 0.3s',
+                    ':hover': {
+                      boxShadow: 8,
+                      transform: 'translateY(-2px) scale(1.04)'
+                    }
+                  }}
+                >
+                  Inscribirse al Evento
+                </Button>
+              </CardActions>
+            )}
           </Card>
         </Grid>
       </Grid>

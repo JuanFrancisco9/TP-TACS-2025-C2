@@ -1,38 +1,28 @@
 # ----- Build Stage -----
 FROM node:20-alpine AS build
-
 WORKDIR /app
 
-# Copia el package.json
 COPY package.json pnpm-lock.yaml ./
+RUN npm install -g pnpm && pnpm install --frozen-lockfile
 
-# Instala pnpm y las dependencias en un solo paso
-RUN npm install -g pnpm && \
-    pnpm install
-
-# Copia el resto del código fuente
 COPY . .
-
-# Build de la aplicación
 RUN pnpm run build
 
 # ----- Run Stage -----
-FROM nginx:alpine
+FROM nginx:1.29-alpine
 
-# Copia los archivos build al directorio de nginx
+# Script que fija un PORT por defecto antes de renderizar el template
+COPY nginx/10-set-port.envsh /docker-entrypoint.d/10-set-port.envsh
+
+# Script que genera configuracion runtime para el frontend
+COPY nginx/40-generate-app-config.sh /docker-entrypoint.d/40-generate-app-config.sh
+RUN chmod +x /docker-entrypoint.d/40-generate-app-config.sh
+
+# Usar templates del entrypoint oficial
+COPY nginx/default.conf.template /etc/nginx/templates/default.conf.template
+
+RUN rm -f /etc/nginx/conf.d/default.conf || true
+
+# Archivos estaticos de Vite
 COPY --from=build /app/dist /usr/share/nginx/html
-
-# Copia configuración de nginx personalizada para SPA
-RUN echo 'server { \
-    listen 80; \
-    server_name localhost; \
-    root /usr/share/nginx/html; \
-    index index.html; \
-    location / { \
-        try_files $uri $uri/ /index.html; \
-    } \
-}' > /etc/nginx/conf.d/default.conf
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+COPY nginx/app-config.js.template /usr/share/nginx/html/app-config.js.template

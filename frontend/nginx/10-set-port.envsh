@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# Ensure PORT is defined before envsubst runs and log the chosen value.
+if [ -n "${PORT:-}" ]; then
+  echo "10-set-port.envsh: using provided PORT=${PORT}"
+else
+  PORT=80
+  echo "10-set-port.envsh: PORT not provided; defaulting to ${PORT}"
+fi
+
+export PORT

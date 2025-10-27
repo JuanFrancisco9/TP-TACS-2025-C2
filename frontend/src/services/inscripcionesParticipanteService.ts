@@ -1,7 +1,8 @@
 import type { Inscripcion } from '../types/inscripciones';
 import authService from './authService';
+import { getApiBaseUrl } from '../config/runtimeEnv';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = getApiBaseUrl();
 
 class InscripcionesParticipanteService {
     private getAuthHeaders() {
@@ -15,6 +16,11 @@ class InscripcionesParticipanteService {
             method: 'GET',
             headers: this.getAuthHeaders(),
         });
+
+        if (response.status === 401) {
+            authService.handleUnauthorized('session-expired');
+            throw new Error('No autorizado');
+        }
 
         if (response.status === 204) {
             return [];
@@ -34,6 +40,11 @@ class InscripcionesParticipanteService {
             method: 'POST',
             headers: this.getAuthHeaders(),
         });
+
+        if (response.status === 401) {
+            authService.handleUnauthorized('session-expired');
+            throw new Error('No autorizado');
+        }
 
         if (!response.ok) {
             throw new Error(`Error al cancelar inscripción: ${response.status} - ${response.statusText}`);

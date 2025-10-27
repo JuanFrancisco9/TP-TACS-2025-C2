@@ -1,7 +1,8 @@
 import type {EstadisticasUsoDTO, EstadisticasParams} from '../types/estadisticas';
 import authService from './authService';
+import { getApiBaseUrl } from '../config/runtimeEnv';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = getApiBaseUrl();
 
 class EstadisticasService {
     private getAuthHeaders() {
@@ -24,6 +25,11 @@ class EstadisticasService {
             method: 'GET',
             headers: this.getAuthHeaders(),
         });
+
+        if (response.status === 401) {
+            authService.handleUnauthorized('session-expired');
+            throw new Error('No autorizado');
+        }
 
         if (!response.ok) {
             throw new Error(`Error al obtener estadísticas: ${response.status} - ${response.statusText}`);
@@ -53,6 +59,11 @@ class EstadisticasService {
             method: 'GET',
             headers: this.getAuthHeaders(),
         });
+
+        if (response.status === 401) {
+            authService.handleUnauthorized('session-expired');
+            throw new Error('No autorizado');
+        }
 
         if (!response.ok) {
             throw new Error(`Error al obtener estadísticas: ${response.status} - ${response.statusText}`);

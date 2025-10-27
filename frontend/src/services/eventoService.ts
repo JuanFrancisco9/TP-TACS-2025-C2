@@ -3,6 +3,7 @@ import type {Inscripcion} from "../types/inscripciones.ts";
 import authService from "./authService.ts";
 import type {Evento, ResultadoBusquedaEvento, CategoriaDTO, CategoriaIconRule } from "../types/evento.ts";
 import type {Participante} from "../types/auth.ts";
+import { getApiBaseUrl } from "../config/runtimeEnv";
 
 // 👉 helper local
 const toLocalISODate = (d: Date) => {
@@ -16,7 +17,7 @@ export class EventoService {
 
   
   // URL base del backend
-  private static readonly BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  private static readonly BASE_URL = getApiBaseUrl();
 
   // Configuración de axios
   private static readonly api = axios.create({
@@ -50,8 +51,13 @@ export class EventoService {
       (response) => response,
       (error) => {
         if (axios.isAxiosError(error) && error.response?.status === 401) {
-          authService.logout();
-          window.location.href = '/login';
+          const requestHeaders = AxiosHeaders.from(error.config?.headers ?? {});
+          const hasAuthHeader = requestHeaders.has('Authorization') || requestHeaders.has('authorization');
+          const currentUser = authService.getCurrentUser();
+
+          if (hasAuthHeader || currentUser) {
+            authService.handleUnauthorized('session-expired');
+          }
         }
         return Promise.reject(error);
       }
@@ -215,7 +221,7 @@ export class EventoService {
     }
   }
 
-  static async obtenerWaitlistDeEvento(evento: Evento | null): Promise<Inscripcion[]> {
+    static async obtenerWaitlistDeEvento(evento: Evento | null): Promise<Inscripcion[]> {
       try{
           const response = await this.api.get(`/waitlist/${evento?.id}`);
           return response.data.inscripcionesSinConfirmar
@@ -230,6 +236,16 @@ export class EventoService {
             return response.data
         }catch (error){
             throw new Error('Error al obtener participantes del evento');
+        }
+    }
+
+    static async obtenerCuposDisponibles(eventoId: string): Promise<number | null> {
+        try {
+            const response = await this.api.get<{ cuposDisponibles: number | null }>(`/eventos/${eventoId}/cupos-disponibles`);
+            return response.data?.cuposDisponibles ?? null;
+        } catch (error) {
+            console.error('Error al obtener cupos disponibles:', error);
+            throw new Error('Error al obtener cupos disponibles del evento');
         }
     }
 
@@ -313,7 +329,7 @@ static async buscarEventosConFiltros(filtros: {
   }
 
   // Inscribirse a un evento usando el usuario del localStorage
-  static async inscribirseAEvento(eventoId: string): Promise<boolean> {
+  static async inscribirseAEvento(eventoId: string): Promise<Inscripcion> {
     try {
       const storedUser = localStorage.getItem('currentUser');
       const user = storedUser ? JSON.parse(storedUser) as { id: number; username: string; rol?: string; actorId?: string} : null;
@@ -336,8 +352,8 @@ static async buscarEventosConFiltros(filtros: {
         participante,
         evento_id: String(eventoId),
       };
-      await this.api.post('/inscripciones', body);
-      return true;
+      const response = await this.api.post<Inscripcion>('/inscripciones', body);
+      return response.data;
     } catch (error) {
       console.error('Error inscribi�ndose al evento:', error);
       let message = 'Error al inscribirse al evento';

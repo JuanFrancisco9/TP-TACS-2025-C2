@@ -97,9 +97,21 @@ public class EventoService {
     }
 
     public Integer cuposDisponibles(Evento evento) {
-        return evento.cupoMaximo() -  inscripcionRepository.findByEvento_Id(evento.id())
-                .stream().filter(inscripcion -> inscripcion.estado().getTipoEstado().equals(TipoEstadoInscripcion.ACEPTADA))
-                .toList().size();
+        if (evento == null || evento.cupoMaximo() == null) {
+            return null;
+        }
+
+        long aceptadas = inscripcionRepository.findByEvento_Id(evento.id())
+                .stream()
+                .filter(inscripcion -> inscripcion.estado().getTipoEstado().equals(TipoEstadoInscripcion.ACEPTADA))
+                .count();
+
+        return Math.max(evento.cupoMaximo() - (int) aceptadas, 0);
+    }
+
+    public Integer cuposDisponibles(String eventoId) {
+        Evento evento = getEvento(eventoId);
+        return cuposDisponibles(evento);
     }
 
     public Evento registrarEvento(SolicitudEvento solicitud) {
