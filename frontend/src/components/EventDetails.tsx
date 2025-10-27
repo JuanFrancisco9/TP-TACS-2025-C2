@@ -15,7 +15,6 @@ import {
 } from '@mui/material';
 import InscripcionDialog from './InscripcionDialog';
 import { EventoService } from '../services/eventoService';
-import authService from '../services/authService';
 import Grid from '@mui/material/Grid';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
@@ -117,7 +116,6 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
 
   const isOrganizer = currentUser?.rol === Rol.ROLE_ORGANIZER;
   const imageSrc = evento.imagenUrl ?? evento.imagen ?? `https://picsum.photos/seed/${encodeURIComponent(evento.id)}/1200/600`;
-  const currentUser = authService.getCurrentUser();
 
   const handleInscribirse = () => {
     const user = authService.getCurrentUser();
@@ -203,159 +201,190 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
           )}
         </Grid>
 
-        {/* Información principal */}
-        <Grid size={{ xs: 12, lg: 6 }}>
-          <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', boxShadow: 4, border: '1px solid #e0e0e0', borderRadius: 3 }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2, gap: 2 }}>
-                <Typography variant="h4" component="h1">
-                  {evento.titulo}
-                </Typography>
-                {evento.categoria?.tipo && <Chip label={evento.categoria.tipo} color="primary" />}
-              </Box>
-
-              <Typography variant="subtitle1" sx={{ mb: 3 }}>
-                {evento.descripcion}
-              </Typography>
-
-              <Stack spacing={1.5} divider={<Divider flexItem />} sx={{ mb: 3 }}>
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <EventIcon color="action" fontSize="small" />
-                  <Typography variant="body2">
-                    <strong>Fecha:</strong> {formatFecha(evento.fecha)}
-                  </Typography>
-                </Stack>
-
-                <Stack direction="row" spacing={1} alignItems="center">
-                  {evento.ubicacion.esVirtual ? (
-                    <>
-                      <LanguageIcon color="action" fontSize="small" />
-                      <Typography variant="body2">
-                        <strong>Modalidad:</strong> Virtual
-                        {evento.ubicacion.enlaceVirtual && (
-                          <>
-                            {' – '}
-                            <a
-                              href={evento.ubicacion.enlaceVirtual}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              Ingresar al enlace
-                            </a>
-                          </>
-                        )}
-                      </Typography>
-                    </>
-                  ) : (
-                    <>
-                      <PlaceIcon color="action" fontSize="small" />
-                      <Typography variant="body2">
-                        <strong>Ubicación:</strong>{' '}
-                        {[evento.ubicacion.provincia, evento.ubicacion.localidad, evento.ubicacion.direccion]
-                          .filter(Boolean)
-                          .join(', ')}
-                      </Typography>
-                    </>
-                  )}
-                </Stack>
-
-                {evento.duracion && (
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <ScheduleIcon color="action" fontSize="small" />
-                    <Typography variant="body2">
-                      <strong>Duración:</strong> {evento.duracion} hs
-                    </Typography>
-                  </Stack>
-                )}
-
-                {evento.organizador && (
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <PersonIcon color="action" fontSize="small" />
-                    <Typography variant="body2">
-                      <strong>Organizador:</strong> {evento.organizador.nombre} {evento.organizador.apellido}
-                    </Typography>
-                  </Stack>
-                )}
-
-                {currentUser?.rol == "ROLE_ADMIN" || currentUser?.rol == "ROLE_ORGANIZER" && (
-                     <Stack direction="row" spacing={1} alignItems="center">
-                        <EventIcon color="action" fontSize="small" />
-                        <Typography variant="body2">
-                            <strong>Fecha Creacion:</strong> {formatFecha(evento.fechaCreacion)}
-                        </Typography>
-                     </Stack>
-                {evento.cupoMaximo != null && (
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <GroupsIcon color="action" fontSize="small" />
-                    <Typography variant="body2">
-                      <strong>Cupos disponibles:</strong>{' '}
-                      {calculandoCupo
-                        ? 'Calculando...'
-                        : cuposError
-                          ? 'No disponible'
-                          : cuposDisponibles}
-                    </Typography>
-                  </Stack>
-                )}
-
-                {evento.precio && (
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <AttachMoneyIcon color="success" fontSize="small" />
-                    <Typography variant="body2" color="success.main" fontWeight="bold">
-                      <strong>Precio:</strong> {renderPrecio(evento.precio)}
-                    </Typography>
-                  </Stack>
-                )}
-              </Stack>
-
-              {(evento.cupoMinimo || evento.cupoMaximo) && (
-                <Alert icon={<InfoOutlinedIcon />} severity="info" sx={{ mb: 3 }}>
-                  <Stack direction="row" justifyContent="space-between" flexWrap="wrap" gap={2}>
-                    {evento.cupoMinimo != null && (
-                      <span>
-                        Cupo Mínimo: <strong>{evento.cupoMinimo}</strong>
-                      </span>
-                    )}
-                    {evento.cupoMaximo != null && (
-                      <span>
-                        Cupo Máximo: <strong>{evento.cupoMaximo}</strong>
-                      </span>
-                    )}
-                  </Stack>
-                </Alert>
-              )}
-            </CardContent>
-
-            <Box sx={{ flexGrow: 1 }} />
-
-            {!isOrganizer && (
-              <CardActions sx={{ p: 2, pt: 0 }}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="large"
-                  disabled={evento.estado?.tipoEstado !== 'CONFIRMADO'}
-                  fullWidth
-                  startIcon={<HowToRegIcon />}
-                  onClick={handleInscribirse}
+          {/* Información principal */}
+          <Grid size={{ xs: 12, lg: 6 }}>
+              <Card
                   sx={{
-                    borderRadius: 2,
-                    boxShadow: 1,
-                    textTransform: 'none',
-                    fontWeight: 500,
-                    transition: 'box-shadow 0.3s, transform 0.3s',
-                    ':hover': {
-                      boxShadow: 8,
-                      transform: 'translateY(-2px) scale(1.04)'
-                    }
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      boxShadow: 4,
+                      border: '1px solid #e0e0e0',
+                      borderRadius: 3,
                   }}
-                >
-                  Inscribirse al Evento
-                </Button>
-              </CardActions>
-            )}
-          </Card>
-        </Grid>
+              >
+                  <CardContent>
+                      {/* Título y categoría */}
+                      <Box
+                          sx={{
+                              display: 'flex',
+                              alignItems: 'flex-start',
+                              justifyContent: 'space-between',
+                              mb: 2,
+                              gap: 2,
+                          }}
+                      >
+                          <Typography variant="h4" component="h1">
+                              {evento.titulo}
+                          </Typography>
+                          {evento.categoria?.tipo && <Chip label={evento.categoria.tipo} color="primary" />}
+                      </Box>
+
+                      {/* Descripción */}
+                      <Typography variant="subtitle1" sx={{ mb: 3 }}>
+                          {evento.descripcion}
+                      </Typography>
+
+                      {/* Datos principales */}
+                      <Stack spacing={1.5} divider={<Divider flexItem />} sx={{ mb: 3 }}>
+                          {/* Fecha */}
+                          <Stack direction="row" spacing={1} alignItems="center">
+                              <EventIcon color="action" fontSize="small" />
+                              <Typography variant="body2">
+                                  <strong>Fecha:</strong> {formatFecha(evento.fecha)}
+                              </Typography>
+                          </Stack>
+
+                          {/* Ubicación o modalidad */}
+                          <Stack direction="row" spacing={1} alignItems="center">
+                              {evento.ubicacion.esVirtual ? (
+                                  <>
+                                      <LanguageIcon color="action" fontSize="small" />
+                                      <Typography variant="body2">
+                                          <strong>Modalidad:</strong> Virtual
+                                          {evento.ubicacion.enlaceVirtual && (
+                                              <>
+                                                  {' – '}
+                                                  <a
+                                                      href={evento.ubicacion.enlaceVirtual}
+                                                      target="_blank"
+                                                      rel="noopener noreferrer"
+                                                  >
+                                                      Ingresar al enlace
+                                                  </a>
+                                              </>
+                                          )}
+                                      </Typography>
+                                  </>
+                              ) : (
+                                  <>
+                                      <PlaceIcon color="action" fontSize="small" />
+                                      <Typography variant="body2">
+                                          <strong>Ubicación:</strong>{' '}
+                                          {[evento.ubicacion.provincia, evento.ubicacion.localidad, evento.ubicacion.direccion]
+                                              .filter(Boolean)
+                                              .join(', ')}
+                                      </Typography>
+                                  </>
+                              )}
+                          </Stack>
+
+                          {/* Duración */}
+                          {evento.duracion && (
+                              <Stack direction="row" spacing={1} alignItems="center">
+                                  <ScheduleIcon color="action" fontSize="small" />
+                                  <Typography variant="body2">
+                                      <strong>Duración:</strong> {evento.duracion} hs
+                                  </Typography>
+                              </Stack>
+                          )}
+
+                          {/* Organizador */}
+                          {evento.organizador && (
+                              <Stack direction="row" spacing={1} alignItems="center">
+                                  <PersonIcon color="action" fontSize="small" />
+                                  <Typography variant="body2">
+                                      <strong>Organizador:</strong> {evento.organizador.nombre}{' '}
+                                      {evento.organizador.apellido}
+                                  </Typography>
+                              </Stack>
+                          )}
+
+                          {/* Fecha de creación - solo visible para admin u organizador */}
+                          {(currentUser?.rol === "ROLE_ADMIN" || currentUser?.rol === "ROLE_ORGANIZER") && (
+                              <Stack direction="row" spacing={1} alignItems="center">
+                                  <EventIcon color="action" fontSize="small" />
+                                  <Typography variant="body2">
+                                      <strong>Fecha Creación:</strong> {formatFecha(evento.fechaCreacion)}
+                                  </Typography>
+                              </Stack>
+                          )}
+
+                          {/* Cupos disponibles */}
+                          {evento.cupoMaximo != null && (
+                              <Stack direction="row" spacing={1} alignItems="center">
+                                  <GroupsIcon color="action" fontSize="small" />
+                                  <Typography variant="body2">
+                                      <strong>Cupos disponibles:</strong>{' '}
+                                      {calculandoCupo
+                                          ? 'Calculando...'
+                                          : cuposError
+                                              ? 'No disponible'
+                                              : cuposDisponibles}
+                                  </Typography>
+                              </Stack>
+                          )}
+
+                          {/* Precio */}
+                          {evento.precio && (
+                              <Stack direction="row" spacing={1} alignItems="center">
+                                  <AttachMoneyIcon color="success" fontSize="small" />
+                                  <Typography variant="body2" color="success.main" fontWeight="bold">
+                                      <strong>Precio:</strong> {renderPrecio(evento.precio)}
+                                  </Typography>
+                              </Stack>
+                          )}
+                      </Stack>
+
+                      {/* Info cupos mínimos/máximos */}
+                      {(evento.cupoMinimo || evento.cupoMaximo) && (
+                          <Alert icon={<InfoOutlinedIcon />} severity="info" sx={{ mb: 3 }}>
+                              <Stack direction="row" justifyContent="space-between" flexWrap="wrap" gap={2}>
+                                  {evento.cupoMinimo != null && (
+                                      <span>
+                Cupo Mínimo: <strong>{evento.cupoMinimo}</strong>
+              </span>
+                                  )}
+                                  {evento.cupoMaximo != null && (
+                                      <span>
+                Cupo Máximo: <strong>{evento.cupoMaximo}</strong>
+              </span>
+                                  )}
+                              </Stack>
+                          </Alert>
+                      )}
+                  </CardContent>
+
+                  {/* Botón de inscripción (solo para no organizadores) */}
+                  <Box sx={{ flexGrow: 1 }} />
+                  {!isOrganizer && (
+                      <CardActions sx={{ p: 2, pt: 0 }}>
+                          <Button
+                              variant="contained"
+                              color="primary"
+                              size="large"
+                              disabled={evento.estado?.tipoEstado !== 'CONFIRMADO'}
+                              fullWidth
+                              startIcon={<HowToRegIcon />}
+                              onClick={handleInscribirse}
+                              sx={{
+                                  borderRadius: 2,
+                                  boxShadow: 1,
+                                  textTransform: 'none',
+                                  fontWeight: 500,
+                                  transition: 'box-shadow 0.3s, transform 0.3s',
+                                  ':hover': {
+                                      boxShadow: 8,
+                                      transform: 'translateY(-2px) scale(1.04)',
+                                  },
+                              }}
+                          >
+                              Inscribirse al Evento
+                          </Button>
+                      </CardActions>
+                  )}
+              </Card>
+          </Grid>
       </Grid>
 
       <Grid container spacing={3} sx={{ mt: 1 }}>

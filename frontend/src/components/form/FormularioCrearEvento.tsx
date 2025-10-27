@@ -116,8 +116,15 @@ export default function FormularioCrearEvento() {
     const [imagen, setImagen] = React.useState<File | null>(null);
 
     const [submitting, setSubmitting] = React.useState(false);
-    const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
-    const [successMsg, setSuccessMsg] = React.useState<string | null>(null);
+    const [errorMsg, setErrorMsg] = React.useState<string >("");
+    const [successMsg, setSuccessMsg] = React.useState<string>("");
+
+    React.useEffect(() => {
+        if (successMsg) {
+            const timer = setTimeout(() => setSuccessMsg(""), 4000); // 4 segundos
+            return () => clearTimeout(timer); // limpia el timeout si cambia antes
+        }
+    }, [successMsg]);
 
     const localidadesDisponibles = React.useMemo(
         () => (modalidad === "PRESENCIAL" ? getLocalidades(provincia) : []),
@@ -303,8 +310,8 @@ export default function FormularioCrearEvento() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setErrorMsg(null);
-        setSuccessMsg(null);
+        setErrorMsg("");
+        setSuccessMsg("");
 
         if (!titulo || !fecha || !horaInicio) {
             setErrorMsg("Completá título, fecha y hora de inicio.");
