@@ -9,6 +9,7 @@ El objetivo del TP es desarrollar una aplicación que permita a los usuarios pub
 <img width="1064" height="574" alt="image" src="https://github.com/user-attachments/assets/b5709a62-aea6-432e-a342-6513ae6aac21" />
 
 ## URL: 
+https://tp-tacs-2025-c2-frontend-production.up.railway.app/ 
 
 ## Stack Tecnológico
 - Backend: Java 21, SpringBoot 3.5.4, Maven
