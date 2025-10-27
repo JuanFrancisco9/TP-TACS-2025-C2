@@ -4,11 +4,17 @@ El objetivo del TP es desarrollar una aplicación que permita a los usuarios pub
 
 [Enunciado](https://docs.google.com/document/d/e/2PACX-1vRKgz7eEA1fIByKMtXKxA6-Vs1rSst8cwUeTkMnZyYrDPkzkUECyK7WXqXWFSh5jwnxJMdanffdyWzB/pub)
 
+## Arquitectura
+
+<img width="1064" height="574" alt="image" src="https://github.com/user-attachments/assets/b5709a62-aea6-432e-a342-6513ae6aac21" />
+
+## URL: 
+https://tp-tacs-2025-c2-frontend-production.up.railway.app/ 
 
 ## Stack Tecnológico
 - Backend: Java 21, SpringBoot 3.5.4, Maven
 - Frontend: React, TypeScript Vite
-- Base de datos: -
+- Base de datos: MongoDB y Redis
 
 
 ## Ejecutar en Local
