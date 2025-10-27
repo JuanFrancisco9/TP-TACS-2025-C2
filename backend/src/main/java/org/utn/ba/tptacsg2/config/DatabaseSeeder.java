@@ -165,7 +165,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                 estadoEvento,
                 categoria,
                 Arrays.asList("Java", "Spring", "Microservicios"),
-                null
+                null,
+                LocalDateTime.now()
         );
 
         evento = eventoRepositoryDB.save(evento);
@@ -194,7 +195,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                 estadoEvento2,
                 categoria2,
                 Arrays.asList("Familia", "Comedia", "Entretenimiento"),
-                null
+                null,
+                LocalDateTime.now()
         );
 
         evento2 = eventoRepositoryDB.save(evento2);
@@ -220,7 +222,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                 estadoEvento3,
                 categoria3,
                 Arrays.asList("Luz", "Velas", "Caminata"),
-                null
+                null,
+                LocalDateTime.now()
         );
 
         evento3 = eventoRepositoryDB.save(evento3);

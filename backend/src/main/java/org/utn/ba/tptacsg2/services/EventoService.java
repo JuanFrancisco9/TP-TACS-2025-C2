@@ -140,7 +140,8 @@ public class EventoService {
                 estadoInicial,
                 categoria,
                 solicitud.etiquetas(),
-                null
+                null,
+                LocalDateTime.now()
         );
 
         estadoInicial.setEvento(evento);
@@ -213,7 +214,8 @@ public class EventoService {
                 estadoInicial,
                 categoria,
                 solicitud.etiquetas(),
-                imagenKey
+                imagenKey,
+                LocalDateTime.now()
         );
 
         estadoInicial.setEvento(evento);
@@ -383,7 +385,8 @@ public class EventoService {
                 estadoFinal,
                 categoriaFinal,
                 eventoUpdate.etiquetas(),
-                eventoUpdate.imagenKey()
+                eventoUpdate.imagenKey(),
+                eventoExistente.fechaCreacion()
         );
 
         // Si se creó un nuevo estado, asociarlo con el evento
@@ -429,7 +432,8 @@ public class EventoService {
                 estadoEvento,
                 evento.categoria(),
                 evento.etiquetas(),
-                evento.imagenKey()
+                evento.imagenKey(),
+                LocalDateTime.now()
         );
 
         actualizarInscripciones(eventoActualizado, eventoActualizado.estado().getTipoEstado());
@@ -565,7 +569,8 @@ public class EventoService {
                 evento.estado(),
                 evento.categoria(),
                 imagenUrl,
-                evento.imagenKey()
+                evento.imagenKey(),
+                evento.fechaCreacion()
         );
     }
 }

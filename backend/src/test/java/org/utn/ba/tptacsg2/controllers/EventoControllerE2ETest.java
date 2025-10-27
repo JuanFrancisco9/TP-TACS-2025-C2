@@ -79,7 +79,8 @@ public class EventoControllerE2ETest {
                 new EstadoEvento("EST-1", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
                 solicitud.categoria(),
                 solicitud.etiquetas(),
-                null
+                null,
+                LocalDateTime.now()
         );
 
         EventoDTO eventoRespuesta = new EventoDTO(
@@ -97,7 +98,8 @@ public class EventoControllerE2ETest {
                 eventoCreado.estado(),
                 eventoCreado.categoria(),
                 null,
-                eventoCreado.imagenKey()
+                eventoCreado.imagenKey(),
+                eventoCreado.fechaCreacion()
         );
 
         when(eventoService.registrarEventoConImagen(any(SolicitudEvento.class), any()))
@@ -135,7 +137,8 @@ public class EventoControllerE2ETest {
                 new EstadoEvento("EST-10", TipoEstadoEvento.PENDIENTE, LocalDateTime.now()),
                 solicitud.categoria(),
                 solicitud.etiquetas(),
-                null
+                null,
+                LocalDateTime.now()
         );
 
         EventoDTO eventoCreadoDTO = new EventoDTO(
@@ -153,7 +156,8 @@ public class EventoControllerE2ETest {
                 eventoCreado.estado(),
                 eventoCreado.categoria(),
                 null,
-                eventoCreado.imagenKey()
+                eventoCreado.imagenKey(),
+                eventoCreado.fechaCreacion()
         );
 
         when(eventoService.registrarEventoConImagen(any(SolicitudEvento.class), any()))
@@ -174,7 +178,8 @@ public class EventoControllerE2ETest {
                 new EstadoEvento("EST-11", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
                 eventoCreado.categoria(),
                 eventoCreado.etiquetas(),
-                null
+                null,
+                LocalDateTime.now()
         );
 
         when(eventoService.cambiarEstado(eq(eventoCreado.id()), eq(TipoEstadoEvento.CONFIRMADO)))
@@ -212,7 +217,8 @@ public class EventoControllerE2ETest {
                 new EstadoEvento("EST-100", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
                 new Categoria("TECNOLOGIA"),
                 new ArrayList<>(),
-                null
+                null,
+                LocalDateTime.now()
         );
 
         EventoDTO eventoDto = new EventoDTO(
@@ -230,7 +236,8 @@ public class EventoControllerE2ETest {
                 evento.estado(),
                 evento.categoria(),
                 null,
-                evento.imagenKey()
+                evento.imagenKey(),
+                evento.fechaCreacion()
         );
 
         when(eventoService.buscarEventos(any(FiltrosDTO.class)))
@@ -259,7 +266,8 @@ public class EventoControllerE2ETest {
                 new EstadoEvento("EST-555", TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()),
                 new Categoria("TECNOLOGIA"),
                 List.of("tech", "foro"),
-                "imagen-key"
+                "imagen-key",
+                LocalDateTime.now()
         );
 
         EventoDTO eventoDto = new EventoDTO(
@@ -277,7 +285,8 @@ public class EventoControllerE2ETest {
                 evento.estado(),
                 evento.categoria(),
                 "https://example.com/imagen.jpg",
-                evento.imagenKey()
+                evento.imagenKey(),
+                evento.fechaCreacion()
         );
 
         when(eventoService.obtenerEventoPorId(evento.id())).thenReturn(eventoDto);

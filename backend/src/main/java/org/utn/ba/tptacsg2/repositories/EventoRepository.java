@@ -66,12 +66,12 @@ public class EventoRepository {
         Evento evento1 = new Evento("0", "Seminario de Mocks", "Mocks", LocalDateTime.now(),
                 "19:00",5F, Ubicacion.presencial("-32.05322857239074", "-58.61824002335356","Buenos Aires","CABA", "Av. Pres. Figueroa Alcorta 2099"), 10, 0,
                 new Precio("Pesos", 100F), new Organizador("1","Juan","Pérez","12345678", new Usuario("organizador1", "organizador1","password3", null)),
-                estadoEvento1 ,new Categoria("Educativo"),new ArrayList<String>(), null);
+                estadoEvento1 ,new Categoria("Educativo"),new ArrayList<String>(), null, LocalDateTime.now());
 
         Evento evento2 = new Evento("2", "Workshop de Testing", "Testing", LocalDateTime.now().plusDays(7),
                 "10:00", 3F, Ubicacion.presencial("-32.05322857239074", "-58.61824002335356","Buenos Aires","CABA", "Av. Pres. Figueroa Alcorta 2099"), 20, 0,
                 new Precio("Pesos", 150F), new Organizador("2","María","González","87654321",  new Usuario("organizador2", "organizador2","password3", null)),
-                estadoEvento2, new Categoria("Tecnología"), new ArrayList<String>(), null);
+                estadoEvento2, new Categoria("Tecnología"), new ArrayList<String>(), null, LocalDateTime.now());
 
         this.guardarEvento(evento1);
         this.guardarEvento(evento2);

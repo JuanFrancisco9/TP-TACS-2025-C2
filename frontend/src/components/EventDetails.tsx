@@ -31,6 +31,7 @@ import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import type { AlertColor } from '@mui/material/Alert';
 import type { Evento } from '../types/evento.ts';
 import { formatFecha } from '../utils/formatFecha';
+import authService from "../services/authService.ts";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Rol, type Usuario } from '../types/auth';
 
@@ -116,6 +117,7 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
 
   const isOrganizer = currentUser?.rol === Rol.ROLE_ORGANIZER;
   const imageSrc = evento.imagenUrl ?? evento.imagen ?? `https://picsum.photos/seed/${encodeURIComponent(evento.id)}/1200/600`;
+  const currentUser = authService.getCurrentUser();
 
   const handleInscribirse = () => {
     const user = authService.getCurrentUser();
@@ -275,6 +277,13 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
                   </Stack>
                 )}
 
+                {currentUser?.rol == "ROLE_ADMIN" || currentUser?.rol == "ROLE_ORGANIZER" && (
+                     <Stack direction="row" spacing={1} alignItems="center">
+                        <EventIcon color="action" fontSize="small" />
+                        <Typography variant="body2">
+                            <strong>Fecha Creacion:</strong> {formatFecha(evento.fechaCreacion)}
+                        </Typography>
+                     </Stack>
                 {evento.cupoMaximo != null && (
                   <Stack direction="row" spacing={1} alignItems="center">
                     <GroupsIcon color="action" fontSize="small" />
