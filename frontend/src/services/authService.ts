@@ -1,6 +1,7 @@
 import type { Usuario, LoginRequest } from '../types/auth';
+import { getApiBaseUrl } from '../config/runtimeEnv';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = getApiBaseUrl();
 
 export type UnauthorizedReason = 'session-expired' | 'forbidden' | 'unknown';
 
@@ -24,6 +25,7 @@ class AuthService {
 
 
     async login(loginData: LoginRequest): Promise<Usuario> {
+        console.log(API_BASE_URL);
         const response = await fetch(`${API_BASE_URL}/login`, {
             method: 'POST',
             headers: {

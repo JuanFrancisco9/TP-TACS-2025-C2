@@ -4,9 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import authService from '../../services/authService';
 import type { LoginRequest } from '../../types/auth';
 import { Rol } from '../../types/auth';
+import { getApiBaseUrl } from '../../config/runtimeEnv';
 
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = getApiBaseUrl();
 
 
 type InputRegistroDto = {

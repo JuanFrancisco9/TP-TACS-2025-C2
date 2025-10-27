@@ -20,8 +20,9 @@ import { getCategoryIconComponent, inferIconName } from "../../utils/categoryIco
 import LocationPickerMap from "./LocationPickerMap";
 import { PROVINCIAS, getDefaultCoordenadas, getLocalidades } from "../../utils/locationData";
 import type { CategoriaDTO, CategoriaIconRule } from "../../types/evento";
+import { getApiBaseUrl } from "../../config/runtimeEnv";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = getApiBaseUrl();
 
 type Ubicacion = {
     latitud: string | null;
