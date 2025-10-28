@@ -2,7 +2,6 @@ package org.utn.ba.tptacsg2.services;
 
 import org.springframework.stereotype.Service;
 import org.utn.ba.tptacsg2.models.users.Usuario;
-import org.utn.ba.tptacsg2.repositories.UsuarioRepository;
 import org.springframework.security.core.userdetails.*;
 import org.utn.ba.tptacsg2.repositories.db.UsuarioRepositoryDB;
 

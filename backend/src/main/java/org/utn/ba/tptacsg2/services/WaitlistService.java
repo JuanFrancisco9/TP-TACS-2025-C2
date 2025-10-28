@@ -8,8 +8,6 @@ import org.utn.ba.tptacsg2.models.inscriptions.EstadoInscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.dtos.SolicitudInscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
-import org.utn.ba.tptacsg2.repositories.EstadoInscripcionRepository;
-import org.utn.ba.tptacsg2.repositories.EventoRepository;
 import org.utn.ba.tptacsg2.repositories.db.EstadoInscripcionRepositoryDB;
 import org.utn.ba.tptacsg2.repositories.db.EventoRepositoryDB;
 
