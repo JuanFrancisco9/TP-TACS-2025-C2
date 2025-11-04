@@ -331,8 +331,8 @@ bot.onText(/\/eventos/, async (msg) => {
   }
 });
 
-// My events command - Get user's inscriptions
-bot.onText(/\/miseventos/, async (msg) => {
+//Get user's inscriptions
+bot.onText(/\/inscripciones/, async (msg) => {
   const chatId = msg.chat.id;
 
   if (!isUserLoggedIn(chatId)) {
@@ -343,31 +343,7 @@ bot.onText(/\/miseventos/, async (msg) => {
   //console.log(user)
   try {
     bot.sendMessage(chatId, '🔍 Buscando tus inscripciones...');
-    
-    if (config.data.useJsonFile) {
-      const data = await readJsonData();
-      const currentUser = getCurrentUser(chatId);
-      const inscripciones = data.inscripciones.filter(insc => insc.participanteId === currentUser.id);
-      const eventos = data.eventos;
-      const usuarios = data.usuarios;
-      
-      if (!inscripciones || inscripciones.length === 0) {
-        bot.sendMessage(chatId, 'No tienes inscripciones registradas.');
-        return;
-      }
-      
-      // Show user's inscriptions
-      inscripciones.forEach((inscripcion, index) => {
-        setTimeout(() => {
-          const evento = eventos.find(e => e.id === inscripcion.eventoId);
-          const participante = usuarios.find(u => u.id === inscripcion.participanteId);
-          
-          if (evento && participante) {
-            bot.sendMessage(chatId, formatInscription(inscripcion, evento, participante), { parse_mode: 'Markdown' });
-          }
-        }, index * 1000);
-      });
-    } else {
+
       // API mode - for now, show a message that this feature needs API enhancement
       endpoint = `${config.api.endpoints.participantes}/inscripciones/${user.actorId}`
       const response = await apiClient.get(endpoint, {chatId})
@@ -376,13 +352,11 @@ bot.onText(/\/miseventos/, async (msg) => {
           bot.sendMessage(chatId, config.messages.noData);
           return;
       }
-        // Send all events (since we only have 1 for now)
-        inscripciones.forEach((inscripcion, index) => {
-            setTimeout(() => {
-                bot.sendMessage(chatId, formatInscription(inscripcion, inscripcion.evento, inscripcion.participante), { parse_mode: 'Markdown' });
-            }, index * 1000); // Delay between messages
-        });
-    }
+      inscripciones.forEach((inscripcion, index) => {
+          setTimeout(() => {
+              bot.sendMessage(chatId, formatInscription(inscripcion, inscripcion.evento, inscripcion.participante), { parse_mode: 'Markdown' });
+          }, index * 1000); // Delay between messages
+      });
     
   } catch (error) {
     console.log(error)
@@ -390,44 +364,41 @@ bot.onText(/\/miseventos/, async (msg) => {
   }
 });
 
-// Inscriptions command - Get all inscriptions
-bot.onText(/\/inscripciones/, async (msg) => {
-  const chatId = msg.chat.id;
-  
-  try {
-    bot.sendMessage(chatId, '🔍 Buscando inscripciones...');
-    
-    if (config.data.useJsonFile) {
-      const data = await readJsonData();
-      const inscripciones = data.inscripciones;
-      const eventos = data.eventos;
-      const usuarios = data.usuarios;
-      
-      if (!inscripciones || inscripciones.length === 0) {
-        bot.sendMessage(chatId, 'No hay inscripciones registradas.');
+bot.onText(/\/confirmadas/, async (msg) => {
+    const chatId = msg.chat.id;
+
+    if (!isUserLoggedIn(chatId)) {
+        bot.sendMessage(chatId, config.messages.notLoggedIn);
         return;
-      }
-      
-      // Show all inscriptions
-      inscripciones.forEach((inscripcion, index) => {
-        setTimeout(() => {
-          const evento = eventos.find(e => e.id === inscripcion.eventoId);
-          const participante = usuarios.find(u => u.id === inscripcion.participanteId);
-          
-          if (evento && participante) {
-            bot.sendMessage(chatId, formatInscription(inscripcion, evento, participante), { parse_mode: 'Markdown' });
-          }
-        }, index * 1000);
-      });
-    } else {
-      // API mode - the inscriptions endpoint doesn't return all inscriptions, 
-      // it's for creating inscriptions. For now, show a message.
-      bot.sendMessage(chatId, 'El endpoint de inscripciones del backend está diseñado para crear inscripciones, no para listarlas. Esta funcionalidad requiere un endpoint adicional en el backend.');
     }
-    
-  } catch (error) {
-    bot.sendMessage(chatId, config.messages.error);
-  }
+    const user = activeSessions.get(chatId);
+    //console.log(user)
+    try {
+        bot.sendMessage(chatId, '🔍 Buscando tus inscripciones confirmadas...');
+
+        // API mode - for now, show a message that this feature needs API enhancement
+        endpoint = `${config.api.endpoints.participantes}/inscripciones/${user.actorId}`
+        const response = await apiClient.get(endpoint, {chatId})
+        const inscripciones = response.data
+        if(!inscripciones){
+            bot.sendMessage(chatId, config.messages.noData);
+            return;
+        }
+        const inscripcionesConfirmadas = inscripciones.filter(i => i.estado.tipoEstado === 'ACEPTADA')
+        if(inscripcionesConfirmadas.length === 0){
+            bot.sendMessage(chatId, config.messages.noData);
+            return;
+        }
+        inscripcionesConfirmadas.forEach((inscripcion, index) => {
+            setTimeout(() => {
+                bot.sendMessage(chatId, formatInscription(inscripcion, inscripcion.evento, inscripcion.participante), { parse_mode: 'Markdown' });
+            }, index * 1000); // Delay between messages
+        });
+
+    } catch (error) {
+        console.log(error)
+        bot.sendMessage(chatId, config.messages.error);
+    }
 });
 
 // Statistics command
