@@ -220,22 +220,28 @@ function formatStatistics(stats) {
 
 // Helper function to format inscription data
 function formatInscription(inscription, evento, participante) {
-  const fechaInscripcion = new Date(inscription.fechaInscripcion).toLocaleDateString('es-ES', {
+  const fechaInscripcion = new Date(inscription.fechaRegistro).toLocaleDateString('es-ES', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit'
   });
-  
+
+  const fechaUltimaModificacion =  new Date(inscription.estado.fechaDeCambio).toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+  });
   return `📝 *Inscripción*
-🎯 Evento: ${evento.nombre}
+🎯 Evento: ${evento.titulo}
 👤 Participante: ${participante.nombre}
 📅 Fecha de Inscripción: ${fechaInscripcion}
-✅ Estado: ${inscription.estado}
-📄 Notas: ${inscription.notas || 'Sin notas'}
+✅ Estado: ${inscription.estado.tipoEstado}
 
-ID: ${inscription.id}`;
+Ultima Modificación: ${fechaUltimaModificacion}`;
 }
 
 // Start command
@@ -351,8 +357,12 @@ bot.onText(/\/miseventos/, async (msg) => {
           bot.sendMessage(chatId, config.messages.noData);
           return;
       }
-      console.log(inscripciones)
-      bot.sendMessage(chatId, "Encontramos tus inscripciones")
+        // Send all events (since we only have 1 for now)
+        inscripciones.forEach((inscripcion, index) => {
+            setTimeout(() => {
+                bot.sendMessage(chatId, formatInscription(inscripcion, inscripcion.evento, inscripcion.participante), { parse_mode: 'Markdown' });
+            }, index * 1000); // Delay between messages
+        });
     }
     
   } catch (error) {
