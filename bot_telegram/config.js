@@ -24,7 +24,8 @@ const config = {
       eventos: '/eventos',
       inscripciones: '/inscripciones',
       estadisticas: '/estadisticas/completas',
-      usuarios: '/user'
+      usuarios: '/user',
+      participantes: '/participantes'
     }
   },
   

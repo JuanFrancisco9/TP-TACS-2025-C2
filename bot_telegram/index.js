@@ -6,10 +6,15 @@ const config = require('./config');
 // Initialize bot
 const bot = new TelegramBot(config.telegram.token, { polling: true });
 
-// Store active sessions (chatId -> userId)
+// Store active sessions (chatId -> user)
 const activeSessions = new Map();
 
 // API client configuration
+function getAuthToken(chatId) {
+    const session = activeSessions.get(chatId);
+    return session ? session.authToken : null;
+}
+
 const apiClient = axios.create({
   baseURL: config.api.baseUrl,
   timeout: config.api.timeout,
@@ -17,6 +22,27 @@ const apiClient = axios.create({
     'Content-Type': 'application/json'
   }
 });
+
+apiClient.interceptors.request.use(
+    (config) => {
+        const chatId = config.chatId; // propiedad personalizada
+
+        if (chatId) {
+            const token = getAuthToken(chatId);
+            if (token) {
+                config.headers = config.headers || {};
+                config.headers['Authorization'] = `Basic ${token}`;
+            }
+        }
+
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
+function makeBasicAuthHeader(username, password) {
+    return btoa(`${username}:${password}`);
+}
 
 // Helper function to read JSON data
 async function readJsonData() {
@@ -81,13 +107,14 @@ async function authenticateUser(username, password) {
         username: username,
         password: password
       });
-      
+      const authToken = makeBasicAuthHeader(username,password)
       return {
         id: response.data.id,
         username: response.data.username,
         nombre: response.data.username, // API doesn't return nombre, using username
         tipo: response.data.rol,
-        actorId: response.data.actorId
+        actorId: response.data.actorId,
+        authToken
       };
     } catch (error) {
       if (error.response && error.response.status === 401) {
@@ -282,12 +309,13 @@ bot.onText(/\/eventos/, async (msg) => {
 // My events command - Get user's inscriptions
 bot.onText(/\/miseventos/, async (msg) => {
   const chatId = msg.chat.id;
-  
+
   if (!isUserLoggedIn(chatId)) {
     bot.sendMessage(chatId, config.messages.notLoggedIn);
     return;
   }
-  
+  const user = activeSessions.get(chatId);
+  //console.log(user)
   try {
     bot.sendMessage(chatId, '🔍 Buscando tus inscripciones...');
     
@@ -316,10 +344,19 @@ bot.onText(/\/miseventos/, async (msg) => {
       });
     } else {
       // API mode - for now, show a message that this feature needs API enhancement
-      bot.sendMessage(chatId, 'Esta funcionalidad requiere que el backend implemente un endpoint para obtener inscripciones por usuario. Por ahora, usa /inscripciones para ver todas las inscripciones.');
+      endpoint = `${config.api.endpoints.participantes}/inscripciones/${user.actorId}`
+      const response = await apiClient.get(endpoint, {chatId})
+      const inscripciones = response.data
+      if(!inscripciones){
+          bot.sendMessage(chatId, config.messages.noData);
+          return;
+      }
+      console.log(inscripciones)
+      bot.sendMessage(chatId, "Encontramos tus inscripciones")
     }
     
   } catch (error) {
+    console.log(error)
     bot.sendMessage(chatId, config.messages.error);
   }
 });
