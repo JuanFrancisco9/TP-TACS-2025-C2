@@ -173,7 +173,7 @@ function formatEvent(event) {
 👥 Participantes: ${event.cupoMaximo || 'N/A'}
 📝 Descripción: ${event.descripcion || 'Sin descripción'}
 🏷️ Categoría: ${event.categoria?.nombre || 'Sin categoría'}
-✅ Estado: ${event.estado}
+✅ Estado: ${event.estado.tipoEstado}
 💰 Precio: ${event.precio?.monto || 'Gratis'} ${event.precio?.moneda || ''}`;
 }
 
