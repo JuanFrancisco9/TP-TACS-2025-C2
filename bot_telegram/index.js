@@ -174,9 +174,7 @@ function formatEvent(event) {
 📝 Descripción: ${event.descripcion || 'Sin descripción'}
 🏷️ Categoría: ${event.categoria?.nombre || 'Sin categoría'}
 ✅ Estado: ${event.estado}
-💰 Precio: ${event.precio?.monto || 'Gratis'} ${event.precio?.moneda || ''}
-
-ID: ${event.id}`;
+💰 Precio: ${event.precio?.monto || 'Gratis'} ${event.precio?.moneda || ''}`;
 }
 
 // Helper function to format statistics
@@ -260,7 +258,8 @@ bot.onText(/\/eventos/, async (msg) => {
   try {
     bot.sendMessage(chatId, '🔍 Buscando eventos disponibles...');
     
-    const eventos = await getData('eventos');
+    const data = await getData('eventos');
+    const eventos = data.eventos
     
     if (!eventos || eventos.length === 0) {
       bot.sendMessage(chatId, config.messages.noData);
@@ -275,7 +274,8 @@ bot.onText(/\/eventos/, async (msg) => {
     });
     
   } catch (error) {
-    bot.sendMessage(chatId, config.messages.error);
+      console.log(error)
+      bot.sendMessage(chatId, config.messages.error);
   }
 });
 
