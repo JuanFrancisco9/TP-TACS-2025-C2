@@ -38,21 +38,26 @@ const config = {
     eventos: '/eventos',
     mis_eventos: '/miseventos',
     inscripciones: '/inscripciones',
-    estadisticas: '/estadisticas'
+    estadisticas: '/estadisticas',
   },
   
   // Messages
   messages: {
     welcome: '¡Hola! Soy el bot de TP-TACS. Puedo ayudarte a gestionar eventos y consultar información.',
-    help: `Comandos disponibles:
+    help: `Comandos basicos:
 /start - Iniciar el bot
 /help - Mostrar esta ayuda
 /login - Iniciar sesión
 /logout - Cerrar sesión
-/eventos - Ver eventos disponibles
-/miseventos - Ver mis eventos
-/inscripciones - Ver todas las inscripciones
-/estadisticas - Ver estadísticas`,
+/eventos - Ver eventos disponibles`,
+    helpUser: `Comandos adicionales:
+/inscripciones - Ver todas tus inscripciones
+/confirmadas - Ver las inscripciones confirmadas
+/pendientes - Ver las inscripciones pendientes`,
+    helpOrg: `Comandos adicionales: 
+/miseventos - Ver todos tus eventos`,
+    helpAdmin: `Comandos adicionales:
+/estadisticas`,
     error: 'Lo siento, ocurrió un error. Por favor intenta de nuevo.',
     noData: 'No hay datos disponibles en este momento.',
     loginPrompt: '🔐 Para iniciar sesión, envía tu usuario y contraseña en el formato:\n`usuario:contraseña`\n\nEjemplo: `admin:admin123`',

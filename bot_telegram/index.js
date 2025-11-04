@@ -253,7 +253,26 @@ bot.onText(/\/start/, (msg) => {
 // Help command
 bot.onText(/\/help/, (msg) => {
   const chatId = msg.chat.id;
-  bot.sendMessage(chatId, config.messages.help);
+  const user = activeSessions.get(chatId);
+
+  if(user){
+      switch (user.tipo) {
+          case 'ROLE_USER' :
+              bot.sendMessage(chatId, `${config.messages.help}\n\n${config.messages.helpUser}`);
+              break
+          case 'ROLE_ORGANIZER':
+              bot.sendMessage(chatId, `${config.messages.help}\n\n${config.messages.helpOrg}`);
+              break
+          case 'ROLE_ADMIN':
+              bot.sendMessage(chatId, `${config.messages.help}\n\n${config.messages.helpAdmin}`);
+              break
+          default:
+              bot.sendMessage(chatId, config.messages.help);
+              break
+      }
+  }else{
+      bot.sendMessage(chatId, config.messages.help);
+  }
 });
 
 // Login command
