@@ -7,8 +7,6 @@ import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.models.inscriptions.TipoEstadoInscripcion;
-import org.utn.ba.tptacsg2.repositories.EventoRepository;
-import org.utn.ba.tptacsg2.repositories.InscripcionRepository;
 import org.utn.ba.tptacsg2.repositories.db.EventoRepositoryDB;
 import org.utn.ba.tptacsg2.repositories.db.InscripcionRepositoryDB;
 
@@ -191,7 +189,7 @@ public class EstadisticasService {
         
         return eventos.stream()
                 .filter(evento -> {
-                    LocalDate fechaEvento = evento.fecha().toLocalDate();
+                    LocalDate fechaEvento = evento.fechaCreacion().toLocalDate();
                     boolean despuesDeFechaDesde = fechaDesde == null || !fechaEvento.isBefore(fechaDesde);
                     boolean antesDeFechaHasta = fechaHasta == null || !fechaEvento.isAfter(fechaHasta);
                     return despuesDeFechaDesde && antesDeFechaHasta;

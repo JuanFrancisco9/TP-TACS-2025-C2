@@ -3,6 +3,7 @@ import type {Inscripcion} from "../types/inscripciones.ts";
 import authService from "./authService.ts";
 import type {Evento, ResultadoBusquedaEvento, CategoriaDTO, CategoriaIconRule } from "../types/evento.ts";
 import type {Participante} from "../types/auth.ts";
+import { getApiBaseUrl } from "../config/runtimeEnv";
 
 // 👉 helper local
 const toLocalISODate = (d: Date) => {
@@ -16,7 +17,7 @@ export class EventoService {
 
   
   // URL base del backend
-  private static readonly BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  private static readonly BASE_URL = getApiBaseUrl();
 
   // Configuración de axios
   private static readonly api = axios.create({
@@ -220,7 +221,7 @@ export class EventoService {
     }
   }
 
-  static async obtenerWaitlistDeEvento(evento: Evento | null): Promise<Inscripcion[]> {
+    static async obtenerWaitlistDeEvento(evento: Evento | null): Promise<Inscripcion[]> {
       try{
           const response = await this.api.get(`/waitlist/${evento?.id}`);
           return response.data.inscripcionesSinConfirmar
@@ -235,6 +236,16 @@ export class EventoService {
             return response.data
         }catch (error){
             throw new Error('Error al obtener participantes del evento');
+        }
+    }
+
+    static async obtenerCuposDisponibles(eventoId: string): Promise<number | null> {
+        try {
+            const response = await this.api.get<{ cuposDisponibles: number | null }>(`/eventos/${eventoId}/cupos-disponibles`);
+            return response.data?.cuposDisponibles ?? null;
+        } catch (error) {
+            console.error('Error al obtener cupos disponibles:', error);
+            throw new Error('Error al obtener cupos disponibles del evento');
         }
     }
 

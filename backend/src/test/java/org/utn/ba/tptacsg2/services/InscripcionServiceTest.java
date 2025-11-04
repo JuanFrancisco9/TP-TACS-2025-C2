@@ -7,6 +7,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.utn.ba.tptacsg2.dtos.SolicitudInscripcion;
 import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.dtos.output.Waitlist;
@@ -32,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class InscripcionServiceTest {
 
     @Mock private EventoRepositoryDB eventoRepository;
@@ -41,6 +44,7 @@ public class InscripcionServiceTest {
     @Mock private GeneradorIDService generadorIDService;
     @Mock private EventoService eventoService;
     @Mock private EventoLockService eventoLockService;
+    @Mock private RedisCacheService redisCacheService;
 
     @InjectMocks
     private InscripcionService inscripcionService;
@@ -52,7 +56,7 @@ public class InscripcionServiceTest {
     @BeforeEach
     public void setUp() {
         participante = new Participante("1", "Pepito", "Pépez", "123456789", null);
-        evento = new Evento(ID_EVENTO_VALIDO, "Evento mock", "", LocalDateTime.now(), "1900", 5F, new Ubicacion("", "", "Buenos Aires", "CABA", "Lugar genérico", false, null), 3,0, new Precio("ARS", 10F), new Organizador("1","","","",null), new EstadoEvento("1",TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null, new ArrayList<>(), null);
+        evento = new Evento(ID_EVENTO_VALIDO, "Evento mock", "", LocalDateTime.now(), "1900", 5F, new Ubicacion("", "", "Buenos Aires", "CABA", "Lugar genérico", false, null), 3,0, new Precio("ARS", 10F), new Organizador("1","","","",null), new EstadoEvento("1",TipoEstadoEvento.CONFIRMADO, LocalDateTime.now()), null, new ArrayList<>(), null, LocalDateTime.now());
         lenient().when(eventoLockService.getLock(ID_EVENTO_VALIDO)).thenReturn(new ReentrantLock());
         lenient().when(eventoRepository.findById(ID_EVENTO_VALIDO)).thenReturn(Optional.of(evento));
 
@@ -62,6 +66,7 @@ public class InscripcionServiceTest {
     public void inscripcionSaleBien() {
 
         when(eventoService.cuposDisponibles(evento)).thenReturn(1);
+        when(redisCacheService.reservarCupo(anyString())).thenReturn(true);
 
         SolicitudInscripcion solicitudInscripcion = new SolicitudInscripcion(participante, ID_EVENTO_VALIDO);
         Inscripcion inscripcion = inscripcionService.inscribir(solicitudInscripcion);
@@ -82,6 +87,8 @@ public class InscripcionServiceTest {
 
     @Test
     void inscribirParticipanteYaInscripto_deberiaFallar() {
+        when(redisCacheService.reservarCupo(anyString())).thenReturn(false);
+
         EstadoInscripcion estadoActual = new EstadoInscripcion("estado-aceptada", TipoEstadoInscripcion.ACEPTADA, LocalDateTime.now());
         Inscripcion inscripcionExistente = new Inscripcion("insc-existente", participante, LocalDateTime.now(), estadoActual, evento);
         when(inscripcionRepository.findByParticipante_Id(participante.id())).thenReturn(List.of(inscripcionExistente));

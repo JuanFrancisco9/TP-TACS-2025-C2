@@ -15,13 +15,12 @@ import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
+
     /**
      * Password encoder bean using Argon2 algorithm.
      */
@@ -49,24 +48,6 @@ public class SecurityConfig {
         };
     }
 
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("http://localhost:5173");
-        configuration.addAllowedOrigin("http://127.0.0.1:5173");
-        configuration.addAllowedOriginPattern("http://localhost:*");
-        configuration.addAllowedOriginPattern("http://127.0.0.1:*");
-        configuration.addAllowedHeader("*");
-        configuration.addAllowedMethod("*");
-        // CRÍTICO para Basic Auth
-        configuration.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
-
     /**
      * Security filter chain configuration.
      * Disables CSRF, sets session management to stateless, and configures endpoint access rules.
@@ -74,9 +55,11 @@ public class SecurityConfig {
      * Uses HTTP Basic authentication with a custom entry point for handling unauthorized access.
      */
     @Bean
-    SecurityFilterChain security(HttpSecurity http, AuthenticationEntryPoint basicEntryPoint) throws Exception {
+    SecurityFilterChain security(HttpSecurity http,
+                                 AuthenticationEntryPoint basicEntryPoint,
+                                 CorsConfigurationSource corsConfigurationSource) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
@@ -84,6 +67,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user").permitAll()
                         .requestMatchers(HttpMethod.GET, "/eventos").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/categorias").permitAll()
                         .anyRequest().authenticated()
                 )
                 .httpBasic(hb -> hb.authenticationEntryPoint(basicEntryPoint));

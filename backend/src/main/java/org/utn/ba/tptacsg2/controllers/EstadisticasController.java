@@ -16,6 +16,7 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/estadisticas")
+@PreAuthorize("hasRole('ADMIN')")
 public class EstadisticasController {
 
     private final EstadisticasService estadisticasService;
@@ -24,7 +25,6 @@ public class EstadisticasController {
         this.estadisticasService = estadisticasService;
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping()
     public ResponseEntity<EstadisticasUsoDTO> obtenerEstadisticasUso(
             @RequestParam(required = false) 

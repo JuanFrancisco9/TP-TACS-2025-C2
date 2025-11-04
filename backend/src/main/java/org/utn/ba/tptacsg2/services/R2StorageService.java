@@ -1,11 +1,12 @@
 package org.utn.ba.tptacsg2.services;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.utn.ba.tptacsg2.models.events.Imagen;
 import org.utn.ba.tptacsg2.repositories.db.ImagenRepository;
-
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
@@ -19,6 +20,8 @@ import java.util.UUID;
 
 @Service
 public class R2StorageService {
+
+    private static final Logger log = LoggerFactory.getLogger(R2StorageService.class);
 
     private final S3Client s3Client;
     private final ImagenRepository imagenRepository;
@@ -38,6 +41,18 @@ public class R2StorageService {
     }
 
     public Imagen upload(MultipartFile file, Long ownerUserId) throws IOException {
+        String sanitizedPublicBaseUrl = (publicBaseUrl == null || publicBaseUrl.isBlank()) ? "<none>" : publicBaseUrl;
+        log.info(
+                "R2 upload requested with bucket='{}', endpoint='{}', publicBaseUrl='{}'",
+                bucket,
+                endpoint,
+                sanitizedPublicBaseUrl
+        );
+
+        if (bucket == null || bucket.isBlank() || endpoint == null || endpoint.isBlank()) {
+            log.warn("R2 configuration may be incomplete. bucket='{}', endpoint='{}'", bucket, endpoint);
+        }
+
         String extension = obtenerExtension(file.getOriginalFilename());
         String key = "imagenes/%s/%s/%s%s".formatted(
                 Year.now(),

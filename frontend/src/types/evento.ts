@@ -28,6 +28,7 @@ export interface Evento {
     imagen?: string;
     imagenUrl?: string;
     imagenKey?: string;
+    fechaCreacion: string;
 }
 
 export interface Precio {

@@ -30,6 +30,7 @@ public record Evento (
      @DBRef
      Categoria categoria,
      List<String> etiquetas,
-     String imagenKey
+     String imagenKey,
+     LocalDateTime fechaCreacion
 ) {
 }
