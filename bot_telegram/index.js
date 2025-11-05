@@ -197,7 +197,7 @@ function formatEvent(event) {
   return `🎯 *${event.titulo}*
 📅 Fecha: ${fechaInicio}
 📍 Ubicación: ${event.ubicacion.esVirtual? event.ubicacion.enlaceVirtual : event.ubicacion.direccion}
-👥 Participantes: ${event.cupoMaximo || 'N/A'}
+👥 Cupo: ${event.cupoMaximo || 'N/A'}
 📝 Descripción: ${event.descripcion || 'Sin descripción'}
 🏷️ Categoría: ${event.categoria?.nombre || 'Sin categoría'}
 ✅ Estado: ${event.estado.tipoEstado}
