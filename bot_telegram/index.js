@@ -245,6 +245,25 @@ function formatInscription(inscription, evento, participante) {
 Ultima Modificación: ${fechaUltimaModificacion}`;
 }
 
+// Helper: valida si el usuario tiene el rol correcto para el comando
+function authorisedRole(command, role) {
+    switch (command) {
+        case "inscripciones":
+        case "confirmadas":
+        case "pendientes":
+            return role === "ROLE_USER"
+
+        // Comandos de organizador
+        case "miseventos":
+            return role === "ROLE_ORGANIZER"
+
+        // Comandos de administrador
+        case "estadisticas":
+            return role === "ROLE_ADMIN";
+        default:
+            return false;
+    }
+}
 // Start command
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
@@ -341,7 +360,10 @@ bot.onText(/\/inscripciones/, async (msg) => {
     return;
   }
   const user = activeSessions.get(chatId);
-  //console.log(user)
+  if(!authorisedRole("inscripciones",user.tipo)){
+      bot.sendMessage(chatId, config.messages.noPermission);
+      return;
+  }
   try {
     bot.sendMessage(chatId, '🔍 Buscando tus inscripciones...');
 
@@ -373,7 +395,10 @@ bot.onText(/\/confirmadas/, async (msg) => {
         return;
     }
     const user = activeSessions.get(chatId);
-    //console.log(user)
+    if(!authorisedRole("confirmadas",user.tipo)){
+        bot.sendMessage(chatId, config.messages.noPermission);
+        return;
+    }
     try {
         bot.sendMessage(chatId, '🔍 Buscando tus inscripciones confirmadas...');
 
@@ -409,7 +434,10 @@ bot.onText(/\/pendientes/, async (msg) => {
         return;
     }
     const user = activeSessions.get(chatId);
-    //console.log(user)
+    if(!authorisedRole("pendientes",user.tipo)){
+        bot.sendMessage(chatId, config.messages.noPermission);
+        return;
+    }
     try {
         bot.sendMessage(chatId, '🔍 Buscando tus inscripciones pendientes...');
 
@@ -446,7 +474,10 @@ bot.onText(/\/miseventos/, async (msg) => {
         return;
     }
     const user = activeSessions.get(chatId);
-    //console.log(user)
+    if(!authorisedRole("miseventos",user.tipo)){
+        bot.sendMessage(chatId, config.messages.noPermission);
+        return;
+    }
     try {
         bot.sendMessage(chatId, '🔍 Buscando tus eventos...');
 
@@ -478,7 +509,11 @@ bot.onText(/\/estadisticas/, async (msg) => {
     bot.sendMessage(chatId, config.messages.notLoggedIn);
     return;
   }
-
+  const user = getCurrentUser(chatId)
+  if(!authorisedRole("estadisticas",user.tipo)){
+     bot.sendMessage(chatId, config.messages.noPermission);
+     return;
+  }
   try {
     bot.sendMessage(chatId, '📊 Obteniendo estadísticas...');
 

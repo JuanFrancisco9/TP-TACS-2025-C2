@@ -58,7 +58,7 @@ const config = {
     helpOrg: `Comandos adicionales: 
 /miseventos - Ver todos tus eventos`,
     helpAdmin: `Comandos adicionales:
-/estadisticas`,
+/estadisticas - Ver estadísticas completas`,
     error: 'Lo siento, ocurrió un error. Por favor intenta de nuevo.',
     noData: 'No hay datos disponibles en este momento.',
     loginPrompt: '🔐 Para iniciar sesión, envía tu usuario y contraseña en el formato:\n`usuario:contraseña`\n\nEjemplo: `admin:admin123`',
@@ -67,7 +67,8 @@ const config = {
     logoutSuccess: '👋 Sesión cerrada exitosamente.',
     notLoggedIn: '🔒 Debes iniciar sesión primero. Usa /login',
     alreadyLoggedIn: 'ℹ️ Ya tienes una sesión activa. Usa /logout para cerrar sesión.',
-    userAlreadyLoggedIn: '⚠️ Este usuario ya tiene una sesión activa en otro chat.'
+    userAlreadyLoggedIn: '⚠️ Este usuario ya tiene una sesión activa en otro chat.',
+    noPermission: '⚠️ No tienes permisos para ejecutar ese comando'
   }
 };
 
