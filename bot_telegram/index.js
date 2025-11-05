@@ -196,7 +196,7 @@ function formatEvent(event) {
   
   return `🎯 *${event.titulo}*
 📅 Fecha: ${fechaInicio}
-📍 Ubicación: ${event.ubicacion?.nombre || 'No especificada'}
+📍 Ubicación: ${event.ubicacion.esVirtual? event.ubicacion.enlaceVirtual : event.ubicacion.direccion}
 👥 Participantes: ${event.cupoMaximo || 'N/A'}
 📝 Descripción: ${event.descripcion || 'Sin descripción'}
 🏷️ Categoría: ${event.categoria?.nombre || 'Sin categoría'}
@@ -240,6 +240,7 @@ function formatInscription(inscription, evento, participante) {
 👤 Participante: ${participante.nombre}
 📅 Fecha de Inscripción: ${fechaInscripcion}
 ✅ Estado: ${inscription.estado.tipoEstado}
+📍 Ubicación: ${evento.ubicacion.esVirtual? evento.ubicacion.enlaceVirtual : evento.ubicacion.direccion}
 
 Ultima Modificación: ${fechaUltimaModificacion}`;
 }
