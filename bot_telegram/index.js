@@ -438,6 +438,38 @@ bot.onText(/\/pendientes/, async (msg) => {
     }
 });
 
+bot.onText(/\/miseventos/, async (msg) => {
+    const chatId = msg.chat.id;
+
+    if (!isUserLoggedIn(chatId)) {
+        bot.sendMessage(chatId, config.messages.notLoggedIn);
+        return;
+    }
+    const user = activeSessions.get(chatId);
+    //console.log(user)
+    try {
+        bot.sendMessage(chatId, '🔍 Buscando tus eventos...');
+
+        // API mode - for now, show a message that this feature needs API enhancement
+        endpoint = `${config.api.endpoints.organizadores}/eventos/${user.actorId}`
+        const response = await apiClient.get(endpoint, {chatId})
+        const eventos = response.data
+        if(!eventos){
+            bot.sendMessage(chatId, config.messages.noData);
+            return;
+        }
+        eventos.forEach((evento, index) => {
+            setTimeout(() => {
+                bot.sendMessage(chatId, formatEvent(evento), { parse_mode: 'Markdown' });
+            }, index * 1000); // Delay between messages
+        });
+
+    } catch (error) {
+        console.log(error)
+        bot.sendMessage(chatId, config.messages.error);
+    }
+});
+
 
 // Statistics command
 bot.onText(/\/estadisticas/, async (msg) => {
