@@ -23,7 +23,7 @@ const config = {
       login: '/login',
       eventos: '/eventos',
       inscripciones: '/inscripciones',
-      estadisticas: '/estadisticas/completas',
+      estadisticas: '/estadisticas',
       usuarios: '/user',
       participantes: '/participantes',
       organizadores: '/organizadores'

@@ -208,14 +208,14 @@ function formatEvent(event) {
 function formatStatistics(stats) {
   return `📊 *Estadísticas del Sistema*
 
-🎯 Total Eventos: ${stats.cantidadEventos || 0}
-✅ Eventos Activos: ${stats.cantidadEventosActivos || 0}
-📝 Total Inscripciones: ${stats.cantidadInscripcionesTotales || 0}
-✅ Inscripciones Confirmadas: ${stats.cantidadInscripcionesConfirmadas || 0}
-⏳ Inscripciones en Waitlist: ${stats.cantidadInscripcionesWaitlist || 0}
-📈 Tasa Conversión Waitlist: ${(stats.tasaConversionWaitlist || 0).toFixed(2)}%
-🏆 Evento Más Popular: ${stats.eventoMasPopular || 'N/A'}
-📊 Promedio Inscripciones/Evento: ${(stats.promedioInscripcionesPorEvento || 0).toFixed(2)}`;
+🎯 Total Eventos: ${stats.cantidad_eventos || 0}
+✅ Eventos Activos: ${stats.cantidad_eventos_activos || 0}
+📝 Total Inscripciones: ${stats.cantidad_inscripciones_totales || 0}
+✅ Inscripciones Confirmadas: ${stats.cantidad_inscripciones_confirmadas || 0}
+⏳ Inscripciones en Waitlist: ${stats.cantidad_inscripciones_waitlist || 0}
+📈 Tasa Conversión Waitlist: ${(stats.tasa_conversion_waitlist || 0).toFixed(2)}%
+🏆 Evento Más Popular: ${stats.evento_mas_popular || 'N/A'}
+📊 Promedio Inscripciones/Evento: ${(stats.promedio_inscripciones_por_evento || 0).toFixed(2)}`;
 }
 
 // Helper function to format inscription data
@@ -474,20 +474,27 @@ bot.onText(/\/miseventos/, async (msg) => {
 // Statistics command
 bot.onText(/\/estadisticas/, async (msg) => {
   const chatId = msg.chat.id;
-  
+  if (!isUserLoggedIn(chatId)) {
+    bot.sendMessage(chatId, config.messages.notLoggedIn);
+    return;
+  }
+
   try {
     bot.sendMessage(chatId, '📊 Obteniendo estadísticas...');
-    
-    const estadisticas = await getData('estadisticas');
+
+    endpoint = `${config.api.endpoints.estadisticas}/completas`
+    const response = await apiClient.get(endpoint, {chatId})
+    const estadisticas = response.data
     
     if (!estadisticas) {
       bot.sendMessage(chatId, config.messages.noData);
       return;
     }
-    
+
     bot.sendMessage(chatId, formatStatistics(estadisticas), { parse_mode: 'Markdown' });
     
   } catch (error) {
+      console.log(error)
     bot.sendMessage(chatId, config.messages.error);
   }
 });
