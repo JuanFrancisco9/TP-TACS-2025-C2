@@ -400,6 +400,43 @@ bot.onText(/\/confirmadas/, async (msg) => {
         bot.sendMessage(chatId, config.messages.error);
     }
 });
+bot.onText(/\/pendientes/, async (msg) => {
+    const chatId = msg.chat.id;
+
+    if (!isUserLoggedIn(chatId)) {
+        bot.sendMessage(chatId, config.messages.notLoggedIn);
+        return;
+    }
+    const user = activeSessions.get(chatId);
+    //console.log(user)
+    try {
+        bot.sendMessage(chatId, '🔍 Buscando tus inscripciones pendientes...');
+
+        // API mode - for now, show a message that this feature needs API enhancement
+        endpoint = `${config.api.endpoints.participantes}/inscripciones/${user.actorId}`
+        const response = await apiClient.get(endpoint, {chatId})
+        const inscripciones = response.data
+        if(!inscripciones){
+            bot.sendMessage(chatId, config.messages.noData);
+            return;
+        }
+        const inscripcionesPendientes = inscripciones.filter(i => i.estado.tipoEstado === 'PENDIENTE')
+        if(inscripcionesPendientes.length === 0){
+            bot.sendMessage(chatId, config.messages.noData);
+            return;
+        }
+        inscripcionesPendientes.forEach((inscripcion, index) => {
+            setTimeout(() => {
+                bot.sendMessage(chatId, formatInscription(inscripcion, inscripcion.evento, inscripcion.participante), { parse_mode: 'Markdown' });
+            }, index * 1000); // Delay between messages
+        });
+
+    } catch (error) {
+        console.log(error)
+        bot.sendMessage(chatId, config.messages.error);
+    }
+});
+
 
 // Statistics command
 bot.onText(/\/estadisticas/, async (msg) => {
