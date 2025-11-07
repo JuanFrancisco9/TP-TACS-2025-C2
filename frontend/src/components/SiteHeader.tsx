@@ -190,7 +190,7 @@ const SiteHeader: React.FC = () => {
                           <MenuItem
                               onClick={() => {
                                   handleUserMenuClose();
-                                  navigate('/perfil'); // 👈 usa el hook useNavigate de react-router-dom
+                                  navigate('/perfil');
                               }}
                           >
                               <PersonIcon sx={{ mr: 1 }} />
