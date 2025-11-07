@@ -1,43 +1,58 @@
 // Mock data service using the same data structure as ParticipanteRepository
-import type {Participante} from "../types/auth.ts";
-
+import authService from "./authService.ts";
+import {getApiBaseUrl} from "../config/runtimeEnv.ts";
+const API_BASE_URL = getApiBaseUrl();
 export class ParticipanteApiService {
-  // Mock data based on ParticipanteRepository.initializeData()
-  private mockParticipantes: Participante[] = [
-    {
-      id: "1",
-      nombre: "Carlos",
-      apellido: "López", 
-      dni: "11111111",
-      usuario: null
-    },
-    {
-      id: "2", 
-      nombre: "Ana",
-      apellido: "Martínez",
-      dni: "22222222",
-      usuario: null
+    private getAuthHeaders() {
+        return authService.getAuthHeaders();
     }
-  ];
+    async getParticipante(id: string) {
+        const url = `${API_BASE_URL}/participantes/${id}`;
 
-  async getParticipante(id: string): Promise<Participante> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    const participante = this.mockParticipantes.find(p => p.id === id);
-    if (!participante) {
-      throw new Error('Participante no encontrado');
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: this.getAuthHeaders(),
+        });
+
+        console.log("Respuesta del backend:", response.status);
+
+        // Manejo de sesión expirada
+        if (response.status === 401) {
+            authService.handleUnauthorized('session-expired');
+            throw new Error('No autorizado');
+        }
+
+        // Manejo de caso sin contenido
+        if (response.status === 204) {
+            console.warn("No se encontró el participante con ID:", id);
+            return null;
+        }
+
+        if (!response.ok) {
+            throw new Error(`Error al obtener el perfil del participante: ${response.status} - ${response.statusText}`);
+        }
+
+        return await response.json();
     }
-    
-    return participante;
-  }
+    async updateParticipante(id: any, participante: any) {
+        const url = `${API_BASE_URL}/participantes/${id}`;
+        const response = await fetch(url, {
+            method: "PUT",
+            headers: this.getAuthHeaders(),
+            body: JSON.stringify(participante),
+        });
 
-  async getAllParticipantes(): Promise<Participante[]> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    return [...this.mockParticipantes];
-  }
+        if (response.status === 401) {
+            authService.handleUnauthorized("session-expired");
+            throw new Error("No autorizado");
+        }
+
+        if (!response.ok) {
+            throw new Error(`Error al actualizar participante: ${response.statusText}`);
+        }
+
+        return response.json();
+    }
 }
 
 // Export a default instance

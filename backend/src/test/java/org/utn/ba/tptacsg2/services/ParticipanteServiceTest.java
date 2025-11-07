@@ -10,6 +10,7 @@ import org.utn.ba.tptacsg2.dtos.InscripcionDTO;
 import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.models.inscriptions.Inscripcion;
 import org.utn.ba.tptacsg2.repositories.db.InscripcionRepositoryDB;
+import org.utn.ba.tptacsg2.repositories.db.ParticipanteRepositoryDB;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -27,11 +28,12 @@ class ParticipanteServiceTest {
     private EventoService eventoService;
 
     private ParticipanteService participanteService;
+    private ParticipanteRepositoryDB participanteRepository;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        participanteService = new ParticipanteService(inscripcionRepository, eventoService);
+        participanteService = new ParticipanteService(inscripcionRepository, eventoService, participanteRepository);
     }
 
     @Test
