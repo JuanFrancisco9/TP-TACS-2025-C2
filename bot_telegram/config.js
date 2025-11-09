@@ -44,7 +44,7 @@ const config = {
   
   // Messages
   messages: {
-    welcome: '¡Hola! Soy el bot de TP-TACS. Puedo ayudarte a gestionar eventos y consultar información.',
+    welcome: '¡Hola! Soy el bot del grupo 2 del TP-TACS. Puedo ayudarte a consultar información sobre eventos e inscripciones.\n\n Para ver los comandos disponibles utiliza /help',
     help: `Comandos basicos:
 /start - Iniciar el bot
 /help - Mostrar esta ayuda
