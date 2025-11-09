@@ -35,7 +35,10 @@ const EventCard: React.FC<EventCardProps> = ({ item, onVerDetalle }) => {
   const location = useLocation();
   const [currentUser, setCurrentUser] = React.useState<Usuario | null>(authService.getCurrentUser());
 
-  React.useEffect(() => {
+  const fechaCompleta = new Date(`${item.fecha}T${item.horaInicio}`);
+
+
+    React.useEffect(() => {
     const handleAuthChange = (event: Event) => {
       const detail = (event as CustomEvent<Usuario | null>).detail;
       setCurrentUser(detail ?? authService.getCurrentUser());
@@ -166,7 +169,7 @@ const EventCard: React.FC<EventCardProps> = ({ item, onVerDetalle }) => {
               <Button
                 size="small"
                 variant="contained"
-                disabled={item.estado?.tipoEstado !== 'CONFIRMADO'}
+                disabled={item.estado?.tipoEstado !== 'CONFIRMADO' || fechaCompleta < new Date()}
                 color="primary"
                 startIcon={<HowToRegIcon />}
                 onClick={e => { e.stopPropagation(); handleInscribirme(); }}

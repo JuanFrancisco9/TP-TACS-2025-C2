@@ -42,7 +42,7 @@ function Login() {
                 navigate('/crear-evento')
             }
             if (usuario.rol === 'ROLE_USER') {
-                navigate('/mis-eventos')
+                navigate('/eventos')
             }else {
                 navigate('/');
             }

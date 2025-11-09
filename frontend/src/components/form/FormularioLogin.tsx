@@ -78,7 +78,7 @@ export default function FormularioLogin() {
                 navigate('/crear-evento')
             }
             if (usuario.rol === 'ROLE_USER') {
-                navigate('/mis-eventos')
+                navigate('/eventos')
             }else {
                 navigate('/');
             }

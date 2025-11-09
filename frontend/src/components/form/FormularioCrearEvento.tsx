@@ -1,4 +1,5 @@
 import * as React from "react";
+import {useNavigate} from 'react-router-dom';
 import {
     Box,
     Grid,
@@ -83,7 +84,10 @@ const validarEnlaceVirtual = (enlace: string): { ok: boolean; mensaje: string | 
     return { ok: true, mensaje: null };
 };
 
+
+
 export default function FormularioCrearEvento() {
+    const navigate = useNavigate();
     const [titulo, setTitulo] = React.useState("");
     const [descripcion, setDescripcion] = React.useState("");
 
@@ -119,6 +123,24 @@ export default function FormularioCrearEvento() {
     const [errorMsg, setErrorMsg] = React.useState<string >("");
     const [successMsg, setSuccessMsg] = React.useState<string>("");
     const topRef = React.useRef<HTMLDivElement | null>(null);
+
+    const [fechaHoraError, setFechaHoraError] = React.useState<string | null>(null);
+
+    const hoyISO = () => {
+        const d = new Date();
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`; // YYYY-MM-DD
+    };
+
+    const ahoraHHmm = () => {
+        const d = new Date();
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mm = String(d.getMinutes()).padStart(2, '0');
+        return `${hh}:${mm}`;
+    };
+
 
     React.useEffect(() => {
         if (successMsg) {
@@ -210,6 +232,28 @@ export default function FormularioCrearEvento() {
             setLongitud(objetivo.longitud.toFixed(6));
         }
     }, [provincia, modalidad, localidad, coordsAjustadasManualmente]);
+
+    React.useEffect(() => {
+        if (!fecha || !horaInicio) {
+            setFechaHoraError(null);
+            return;
+        }
+
+        // Construye fecha/hora local (sin Z)
+        const candidate = new Date(`${fecha}T${horaInicio}:00`);
+        const now = new Date();
+
+        if (isNaN(candidate.getTime())) {
+            setFechaHoraError("Fecha u hora inválidas.");
+            return;
+        }
+
+        if (candidate.getTime() < now.getTime()) {
+            setFechaHoraError("La fecha y hora del evento no pueden ser pasadas.");
+        } else {
+            setFechaHoraError(null);
+        }
+    }, [fecha, horaInicio]);
 
     React.useEffect(() => {
         if (modalidad !== "PRESENCIAL") {
@@ -479,6 +523,7 @@ export default function FormularioCrearEvento() {
             setCategoriaSeleccionada(categoriasDisponibles[0] ?? null);
             setEtiquetasCSV("");
             setImagen(null);
+            navigate('/mis-eventos');
             void (async () => {
                 try {
                     const [categoriasActualizadas, reglasActualizadas] = await Promise.all([
@@ -531,7 +576,6 @@ export default function FormularioCrearEvento() {
                         disabled={submitting}
                     />
                 </Grid>
-
                 <Grid size={{xs:12,sm:6}}>
                     <TextField
                         type="date"
@@ -542,6 +586,9 @@ export default function FormularioCrearEvento() {
                         required
                         disabled={submitting}
                         InputLabelProps={{ shrink: true }}
+                        inputProps={{ min: hoyISO() }}      // ← no permite fechas anteriores a hoy
+                        error={Boolean(fechaHoraError)}
+                        helperText={fechaHoraError ?? undefined}
                     />
                 </Grid>
 
@@ -555,6 +602,11 @@ export default function FormularioCrearEvento() {
                         required
                         disabled={submitting}
                         InputLabelProps={{ shrink: true }}
+                        inputProps={{
+                            min: fecha === hoyISO() ? ahoraHHmm() : undefined, // ← si es hoy, limita hora
+                        }}
+                        error={Boolean(fechaHoraError)}
+                        helperText={fechaHoraError ?? undefined}
                     />
                 </Grid>
 
