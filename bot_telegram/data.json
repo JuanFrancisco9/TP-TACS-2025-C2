@@ -1,0 +1,93 @@
+{
+  "usuarios": [
+    {
+      "id": "admin-001",
+      "nombre": "Admin Sistema",
+      "email": "admin@tptacs.com",
+      "username": "admin",
+      "password": "admin123",
+      "tipo": "ADMIN",
+      "telegramId": null
+    },
+    {
+      "id": "org-001",
+      "nombre": "Juan Organizador",
+      "email": "juan.organizador@email.com",
+      "username": "juan_org",
+      "password": "organizador123",
+      "tipo": "ORGANIZADOR",
+      "telegramId": null
+    },
+    {
+      "id": "part-001",
+      "nombre": "María Participante",
+      "email": "maria.participante@email.com",
+      "username": "maria_part",
+      "password": "participante123",
+      "tipo": "PARTICIPANTE",
+      "telegramId": null
+    },
+    {
+      "id": "part-002",
+      "nombre": "Carlos Participante",
+      "email": "carlos.participante@email.com",
+      "username": "carlos_part",
+      "password": "participante456",
+      "tipo": "PARTICIPANTE",
+      "telegramId": null
+    }
+  ],
+  "eventos": [
+    {
+      "id": "event-001",
+      "nombre": "Workshop de Desarrollo Web",
+      "descripcion": "Taller práctico sobre desarrollo web moderno con React y Node.js",
+      "fechaInicio": "2024-02-15T10:00:00",
+      "fechaFin": "2024-02-15T18:00:00",
+      "cantidadParticipantes": 2,
+      "cantidadMaximaParticipantes": 20,
+      "estado": "CONFIRMADO",
+      "organizadorId": "org-001",
+      "ubicacion": {
+        "id": "loc-001",
+        "nombre": "Aula Magna - Universidad",
+        "direccion": "Av. Corrientes 1234, Buenos Aires",
+        "latitud": -34.6037,
+        "longitud": -58.3816
+      },
+      "categoria": {
+        "id": "cat-001",
+        "nombre": "Tecnología",
+        "icono": "💻"
+      }
+    }
+  ],
+  "inscripciones": [
+    {
+      "id": "insc-001",
+      "eventoId": "event-001",
+      "participanteId": "part-001",
+      "fechaInscripcion": "2024-01-20T14:30:00",
+      "estado": "CONFIRMADA",
+      "notas": "Muy interesada en aprender React"
+    },
+    {
+      "id": "insc-002",
+      "eventoId": "event-001",
+      "participanteId": "part-002",
+      "fechaInscripcion": "2024-01-21T09:15:00",
+      "estado": "CONFIRMADA",
+      "notas": "Esperando aprender sobre Node.js"
+    }
+  ],
+  "estadisticas": {
+    "totalUsuarios": 4,
+    "totalEventos": 1,
+    "totalInscripciones": 2,
+    "eventosConfirmados": 1,
+    "eventosPendientes": 0,
+    "eventosCancelados": 0,
+    "participantesActivos": 2,
+    "organizadoresActivos": 1
+  }
+}

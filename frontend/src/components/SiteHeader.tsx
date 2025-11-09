@@ -18,6 +18,7 @@ import authService from '../services/authService';
 import { Rol } from '../types/auth';
 import type { Usuario } from '../types/auth';
 import ListAltIcon from "@mui/icons-material/ListAlt";
+import PersonIcon from "@mui/icons-material/Person";
 
 const SiteHeader: React.FC = () => {
   const theme = useTheme();
@@ -171,24 +172,37 @@ const SiteHeader: React.FC = () => {
                   {currentUser.username}
                 </Button>
 
-                <Menu
-                  anchorEl={userMenuAnchor}
-                  open={Boolean(userMenuAnchor)}
-                  onClose={handleUserMenuClose}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'right',
-                  }}
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                  }}
-                >
-                  <MenuItem onClick={handleLogout}>
-                    <LogoutIcon sx={{ mr: 1 }} />
-                    Cerrar Sesión
-                  </MenuItem>
-                </Menu>
+                  <Menu
+                      anchorEl={userMenuAnchor}
+                      open={Boolean(userMenuAnchor)}
+                      onClose={handleUserMenuClose}
+                      anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'right',
+                      }}
+                      transformOrigin={{
+                          vertical: 'top',
+                          horizontal: 'right',
+                      }}
+                  >
+                      {/* Mostrar solo si el usuario es ROLE_USER */}
+                      {currentUser?.rol === 'ROLE_USER' && (
+                          <MenuItem
+                              onClick={() => {
+                                  handleUserMenuClose();
+                                  navigate('/perfil');
+                              }}
+                          >
+                              <PersonIcon sx={{ mr: 1 }} />
+                              Perfil
+                          </MenuItem>
+                      )}
+
+                      <MenuItem onClick={handleLogout}>
+                          <LogoutIcon sx={{ mr: 1 }} />
+                          Cerrar Sesión
+                      </MenuItem>
+                  </Menu>
               </>
             ) : (
               // Usuario no autenticado
