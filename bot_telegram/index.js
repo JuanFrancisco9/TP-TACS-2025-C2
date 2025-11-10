@@ -389,8 +389,23 @@ bot.onText(/\/inscripciones/, async (msg) => {
       }
       inscripciones.forEach((inscripcion, index) => {
           setTimeout(() => {
-              bot.sendMessage(chatId, formatInscription(inscripcion, inscripcion.evento, inscripcion.participante), { parse_mode: 'Markdown' });
-          }, index * 1000); // Delay between messages
+              const texto = formatInscription(inscripcion, inscripcion.evento, inscripcion.participante);
+              const botones = [];
+
+              if (inscripcion.estado?.tipoEstado === 'ACEPTADA') {
+                  botones.push([
+                      {
+                          text: '❌ Cancelar inscripción',
+                          callback_data: `cancelar_${inscripcion.id}`,
+                      },
+                  ]);
+              }
+
+              bot.sendMessage(chatId, texto, {
+                  parse_mode: 'Markdown',
+                  reply_markup: { inline_keyboard: botones },
+              });
+          }, index * 1000);
       });
     
   } catch (error) {
@@ -429,8 +444,22 @@ bot.onText(/\/confirmadas/, async (msg) => {
         }
         inscripcionesConfirmadas.forEach((inscripcion, index) => {
             setTimeout(() => {
-                bot.sendMessage(chatId, formatInscription(inscripcion, inscripcion.evento, inscripcion.participante), { parse_mode: 'Markdown' });
-            }, index * 1000); // Delay between messages
+                const texto = formatInscription(inscripcion, inscripcion.evento, inscripcion.participante);
+
+                const botones = [
+                    [
+                        {
+                            text: '❌ Cancelar inscripción',
+                            callback_data: `cancelar_${inscripcion.id}`,
+                        },
+                    ],
+                ];
+
+                bot.sendMessage(chatId, texto, {
+                    parse_mode: 'Markdown',
+                    reply_markup: { inline_keyboard: botones },
+                });
+            }, index * 1000);
         });
 
     } catch (error) {
@@ -599,6 +628,10 @@ bot.on('callback_query', async (query) => {
         const eventoId = data.split('_')[1]; // obtenemos el ID del evento
         await handleInscripcion(bot, chatId, eventoId, query);
     }
+    if (data.startsWith('cancelar_')) {
+        const inscripcionId = data.split('_')[1];
+        await handleCancelarInscripcion(bot, chatId, inscripcionId, query);
+    }
 });
 const handleInscripcion = async (bot, chatId, eventoId, query) => {
     try {
@@ -641,6 +674,34 @@ const handleInscripcion = async (bot, chatId, eventoId, query) => {
     }
 };
 
+const handleCancelarInscripcion = async (bot, chatId, inscripcionId, query) => {
+    try {
+        const user = activeSessions.get(chatId);
+        if (!user) {
+            bot.answerCallbackQuery(query.id, { text: '🔒 No estás autenticado' });
+            bot.sendMessage(chatId, '⚠️ Usa /login para acceder.');
+            return;
+        }
+
+        const endpoint = `${config.api.endpoints.inscripciones}/${inscripcionId}`;
+        console.log(endpoint)
+        await apiClient.post(endpoint, null,{ chatId });
+
+        bot.answerCallbackQuery(query.id, { text: '✅ Inscripción cancelada' });
+        bot.sendMessage(
+            chatId,
+            `❌ Cancelaste tu inscripción correctamente.`,
+            { parse_mode: 'Markdown' }
+        );
+    } catch (error) {
+        console.error('Error al cancelar inscripción:', error.response?.data || error.message);
+        bot.answerCallbackQuery(query.id, { text: '❌ Error al cancelar' });
+        bot.sendMessage(
+            chatId,
+            '⚠️ Ocurrió un error al cancelar la inscripción. Intenta nuevamente.'
+        );
+    }
+};
 // Graceful shutdown
 process.on('SIGINT', () => {
   bot.stopPolling();
