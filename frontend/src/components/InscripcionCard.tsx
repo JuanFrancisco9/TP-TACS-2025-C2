@@ -18,6 +18,7 @@ import {
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CancelIcon from '@mui/icons-material/Cancel';
 import type { Inscripcion } from '../types/inscripciones';
+import { isEventInPast } from '../utils/eventDate';
 
 interface InscripcionCardProps {
   inscripcion: Inscripcion;
@@ -35,6 +36,10 @@ const InscripcionCard: React.FC<InscripcionCardProps> = ({
   const [snackbarMsg, setSnackbarMsg] = React.useState('');
   const [snackbarSeverity, setSnackbarSeverity] = React.useState<'success' | 'error'>('success');
   const [loading, setLoading] = React.useState(false);
+  const eventoFinalizado = React.useMemo(
+    () => isEventInPast(inscripcion.evento),
+    [inscripcion.evento.fecha, inscripcion.evento.horaInicio]
+  );
 
   const handleCancelarInscripcion = () => setShowCancelDialog(true);
 
@@ -71,6 +76,11 @@ const InscripcionCard: React.FC<InscripcionCardProps> = ({
       default: return estado;
     }
   };
+
+  const estadoOriginal = inscripcion.estado.tipoEstado;
+  const estadoFinalizado = eventoFinalizado && (estadoOriginal === 'ACEPTADA' || estadoOriginal === 'PENDIENTE');
+  const estadoChipColor = estadoFinalizado ? 'default' : getEstadoColor(estadoOriginal);
+  const estadoChipLabel = estadoFinalizado ? 'Finalizada' : getEstadoLabel(estadoOriginal);
 
   return (
     <>
@@ -113,8 +123,9 @@ const InscripcionCard: React.FC<InscripcionCardProps> = ({
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
             <Chip
               size="small"
-              color={getEstadoColor(inscripcion.estado.tipoEstado)}
-              label={getEstadoLabel(inscripcion.estado.tipoEstado)}
+              color={estadoChipColor}
+              variant={estadoFinalizado ? 'outlined' : 'filled'}
+              label={estadoChipLabel}
             />
           </Stack>
 
@@ -171,7 +182,7 @@ const InscripcionCard: React.FC<InscripcionCardProps> = ({
               Ver más
             </Button>
 
-            {(inscripcion.estado.tipoEstado === 'ACEPTADA' || inscripcion.estado.tipoEstado === 'PENDIENTE') && (
+            {(estadoOriginal === 'ACEPTADA' || estadoOriginal === 'PENDIENTE') && !eventoFinalizado && (
               <Button
                 size="small"
                 variant="outlined"

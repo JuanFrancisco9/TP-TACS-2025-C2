@@ -16,6 +16,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import type { AlertColor } from '@mui/material/Alert';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { isEventInPast } from '../utils/eventDate';
 
 interface EventCardProps {
   item: Evento;
@@ -35,7 +36,10 @@ const EventCard: React.FC<EventCardProps> = ({ item, onVerDetalle }) => {
   const location = useLocation();
   const [currentUser, setCurrentUser] = React.useState<Usuario | null>(authService.getCurrentUser());
 
-  const fechaCompleta = new Date(`${item.fecha}T${item.horaInicio}`);
+  const eventoFinalizado = React.useMemo(
+    () => isEventInPast(item),
+    [item.fecha, item.horaInicio]
+  );
 
 
     React.useEffect(() => {
@@ -166,27 +170,40 @@ const EventCard: React.FC<EventCardProps> = ({ item, onVerDetalle }) => {
               Ver más
             </Button>
             {!isOrganizer && (
-              <Button
-                size="small"
-                variant="contained"
-                disabled={item.estado?.tipoEstado !== 'CONFIRMADO' || fechaCompleta < new Date()}
-                color="primary"
-                startIcon={<HowToRegIcon />}
-                onClick={e => { e.stopPropagation(); handleInscribirme(); }}
-                sx={{
-                  borderRadius: 2,
-                  boxShadow: 1,
-                  textTransform: 'none',
-                  fontWeight: 500,
-                  transition: 'box-shadow 0.3s, transform 0.3s',
-                  ':hover': {
-                    boxShadow: 8,
-                    transform: 'translateY(-2px) scale(1.04)'
-                  }
-                }}
-              >
-                Inscribirme
-              </Button>
+              eventoFinalizado ? (
+                <Chip
+                  label="Evento finalizado"
+                  color="default"
+                  variant="outlined"
+                  sx={{
+                    borderRadius: 2,
+                    fontWeight: 600,
+                    alignSelf: 'center'
+                  }}
+                />
+              ) : (
+                <Button
+                  size="small"
+                  variant="contained"
+                  disabled={item.estado?.tipoEstado !== 'CONFIRMADO'}
+                  color="primary"
+                  startIcon={<HowToRegIcon />}
+                  onClick={e => { e.stopPropagation(); handleInscribirme(); }}
+                  sx={{
+                    borderRadius: 2,
+                    boxShadow: 1,
+                    textTransform: 'none',
+                    fontWeight: 500,
+                    transition: 'box-shadow 0.3s, transform 0.3s',
+                    ':hover': {
+                      boxShadow: 8,
+                      transform: 'translateY(-2px) scale(1.04)'
+                    }
+                  }}
+                >
+                  Inscribirme
+                </Button>
+              )
             )}
           </Stack>
         </Box>
