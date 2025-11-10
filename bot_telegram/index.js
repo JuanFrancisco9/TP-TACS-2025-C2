@@ -325,30 +325,42 @@ bot.onText(/\/logout/, async (msg) => {
 
 // Events command - Get all events
 bot.onText(/\/eventos/, async (msg) => {
-  const chatId = msg.chat.id;
-  
-  try {
-    bot.sendMessage(chatId, '🔍 Buscando eventos disponibles...');
-    
-    const data = await getData('eventos');
-    const eventos = data.eventos
-    
-    if (!eventos || eventos.length === 0) {
-      bot.sendMessage(chatId, config.messages.noData);
-      return;
+    const chatId = msg.chat.id;
+
+    try {
+        bot.sendMessage(chatId, '🔍 Buscando eventos disponibles...');
+
+        const data = await getData('eventos');
+        const eventos = data.eventos;
+
+        if (!eventos || eventos.length === 0) {
+            bot.sendMessage(chatId, config.messages.noData);
+            return;
+        }
+
+        eventos.forEach((evento, index) => {
+            setTimeout(() => {
+                const message = formatEvent(evento);
+
+                bot.sendMessage(chatId, message, {
+                    parse_mode: 'Markdown',
+                    reply_markup: {
+                        inline_keyboard: [
+                            [
+                                {
+                                    text: '📝 Inscribirme',
+                                    callback_data: `inscribirme_${evento.id}`,
+                                },
+                            ],
+                        ],
+                    },
+                });
+            }, index * 800); // leve delay entre eventos
+        });
+    } catch (error) {
+        console.error(error);
+        bot.sendMessage(chatId, config.messages.error);
     }
-    
-    // Send all events (since we only have 1 for now)
-    eventos.forEach((evento, index) => {
-      setTimeout(() => {
-        bot.sendMessage(chatId, formatEvent(evento), { parse_mode: 'Markdown' });
-      }, index * 1000); // Delay between messages
-    });
-    
-  } catch (error) {
-      console.log(error)
-      bot.sendMessage(chatId, config.messages.error);
-  }
 });
 
 //Get user's inscriptions
@@ -578,6 +590,56 @@ bot.on('error', (error) => {
   // Silent error handling
 });
 
+bot.on('callback_query', async (query) => {
+    const chatId = query.message.chat.id;
+    const data = query.data;
+
+    // Ej: data = "inscribirme_12345"
+    if (data.startsWith('inscribirme_')) {
+        const eventoId = data.split('_')[1]; // obtenemos el ID del evento
+        await handleInscripcion(bot, chatId, eventoId, query);
+    }
+});
+const handleInscripcion = async (bot, chatId, eventoId, query) => {
+    try {
+        const user = activeSessions.get(chatId);
+
+        if (!user) {
+            bot.answerCallbackQuery(query.id, { text: '🔒 No estás autenticado' });
+            bot.sendMessage(chatId, '⚠️ Debes iniciar sesión con /login antes de inscribirte.');
+            return;
+        }
+
+        const endpoint = `${config.api.endpoints.inscripciones}`;
+        const payload = {
+            participante: {
+                id: String(user.actorId),
+                nombre: '',
+                apellido: '',
+                dni: '',
+                usuario: { id: user.id, username: user.username },
+            },
+            evento_id: eventoId,
+        };
+
+        await apiClient.post(endpoint, payload, { chatId });
+
+        bot.answerCallbackQuery(query.id, { text: '✅ Inscripción exitosa' });
+        bot.sendMessage(
+            chatId,
+            `🎉 Te inscribiste correctamente al evento`,
+            { parse_mode: 'Markdown' }
+        );
+    } catch (error) {
+        console.error('Error al inscribirse:', error.response?.data || error.message);
+
+        bot.answerCallbackQuery(query.id, { text: '❌ Error al inscribirte' });
+        bot.sendMessage(
+            chatId,
+            '⚠️ Ocurrió un error al intentar inscribirte. Por favor, intenta nuevamente.'
+        );
+    }
+};
 // Graceful shutdown
 process.on('SIGINT', () => {
   bot.stopPolling();
