@@ -523,7 +523,7 @@ export default function FormularioCrearEvento() {
             setCategoriaSeleccionada(categoriasDisponibles[0] ?? null);
             setEtiquetasCSV("");
             setImagen(null);
-            navigate('/mis-eventos');
+            navigate('/organizador/eventos');
             void (async () => {
                 try {
                     const [categoriasActualizadas, reglasActualizadas] = await Promise.all([
