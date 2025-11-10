@@ -640,6 +640,7 @@ const handleInscripcion = async (bot, chatId, eventoId, query) => {
         );
     }
 };
+
 // Graceful shutdown
 process.on('SIGINT', () => {
   bot.stopPolling();
