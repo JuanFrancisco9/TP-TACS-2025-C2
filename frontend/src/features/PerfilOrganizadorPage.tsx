@@ -17,6 +17,7 @@ import authService from "../services/authService.ts";
 import type { Evento } from "../types/evento.ts";
 import type {Participante, Usuario} from "../types/auth.ts";
 import DetallesEvento from '../components/EventDetails';
+import { isEventInPast } from '../utils/eventDate';
 
 interface EditEvent {
     event: Evento | null;
@@ -132,6 +133,9 @@ export default function PerfilOrganizador() {
                         <TableBody>
                             {events.map((e) => {
                                 const imageSrc = e.imagenUrl ?? e.imagen ?? `/logo.PNG`;
+                                const eventoFinalizado = isEventInPast(e) ||
+                                    e.estado?.tipoEstado === 'NO_ACEPTA_INSCRIPCIONES' ||
+                                    e.estado?.tipoEstado === 'CANCELADO';
                                 return (
                                 <TableRow
                                     key={e.id}
@@ -171,7 +175,9 @@ export default function PerfilOrganizador() {
                                             : e.estado.tipoEstado}
                                     </TableCell>
                                     <TableCell>
-                                        <Button onClick={(ev) => { ev.stopPropagation(); setEditEvent(e); }}><EditIcon /></Button>
+                                        {!eventoFinalizado && (
+                                            <Button onClick={(ev) => { ev.stopPropagation(); setEditEvent(e); }}><EditIcon /></Button>
+                                        )}
                                         <Button onClick={(ev) => { ev.stopPropagation(); setDetailEvent(e); }}><VisibilityIcon /></Button>
                                         <Button onClick={(ev) => { ev.stopPropagation(); setViewEvent(e); }}><GroupIcon /></Button>
                                         <Button onClick={(ev) => { ev.stopPropagation(); setWaitlistEvent(e); }}><ListAltIcon /></Button>
