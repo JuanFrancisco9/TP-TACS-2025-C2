@@ -2,7 +2,8 @@ import {useEffect, useState} from "react";
 import {
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
     Paper, Button, Dialog, DialogTitle, DialogContent, DialogActions,
-    TextField, Typography, Select, MenuItem, InputLabel, CircularProgress
+    TextField, Typography, Select, MenuItem, InputLabel, CircularProgress,
+    Tooltip
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import ListAltIcon from "@mui/icons-material/ListAlt";
@@ -176,12 +177,32 @@ export default function PerfilOrganizador() {
                                     </TableCell>
                                     <TableCell>
                                         {!eventoFinalizado && (
-                                            <Button onClick={(ev) => { ev.stopPropagation(); setEditEvent(e); }}><EditIcon /></Button>
+                                            <Tooltip title="Editar" arrow>
+                                                <Button onClick={(ev) => { ev.stopPropagation(); setEditEvent(e); }} aria-label="Editar evento">
+                                                    <EditIcon />
+                                                </Button>
+                                            </Tooltip>
                                         )}
-                                        <Button onClick={(ev) => { ev.stopPropagation(); setDetailEvent(e); }}><VisibilityIcon /></Button>
-                                        <Button onClick={(ev) => { ev.stopPropagation(); setViewEvent(e); }}><GroupIcon /></Button>
-                                        <Button onClick={(ev) => { ev.stopPropagation(); setWaitlistEvent(e); }}><ListAltIcon /></Button>
-                                        <Button onClick={(ev) => { ev.stopPropagation(); handelCloseInscriptions(e); }}><BlockIcon /></Button>
+                                        <Tooltip title="Ver detalle" arrow>
+                                            <Button onClick={(ev) => { ev.stopPropagation(); setDetailEvent(e); }} aria-label="Ver detalle">
+                                                <VisibilityIcon />
+                                            </Button>
+                                        </Tooltip>
+                                        <Tooltip title="Ver lista de inscriptos" arrow>
+                                            <Button onClick={(ev) => { ev.stopPropagation(); setViewEvent(e); }} aria-label="Ver lista de inscriptos">
+                                                <GroupIcon />
+                                            </Button>
+                                        </Tooltip>
+                                        <Tooltip title="Ver waitlist" arrow>
+                                            <Button onClick={(ev) => { ev.stopPropagation(); setWaitlistEvent(e); }} aria-label="Ver waitlist">
+                                                <ListAltIcon />
+                                            </Button>
+                                        </Tooltip>
+                                        <Tooltip title="Cerrar inscripciones" arrow>
+                                            <Button onClick={(ev) => { ev.stopPropagation(); handelCloseInscriptions(e); }} aria-label="Cerrar inscripciones">
+                                                <BlockIcon />
+                                            </Button>
+                                        </Tooltip>
                                     </TableCell>
                                 </TableRow>
                             );})}

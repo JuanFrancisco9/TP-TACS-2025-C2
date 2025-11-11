@@ -70,14 +70,15 @@ export default function FormularioLogin() {
 
             const usuario = await authService.login(loginData);
 
+
             // Redirigir según el rol
             if (usuario.rol === 'ROLE_ADMIN') {
                 navigate('/estadisticas');
             }
-            if (usuario.rol === 'ROLE_ORGANIZER') {
-                navigate('/crear-evento')
+            else if (usuario.rol === Rol.ROLE_ORGANIZER) {
+                navigate('/organizador/eventos')
             }
-            if (usuario.rol === 'ROLE_USER') {
+            else if (usuario.rol === 'ROLE_USER') {
                 navigate('/eventos')
             }else {
                 navigate('/');

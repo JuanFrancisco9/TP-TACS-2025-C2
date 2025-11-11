@@ -153,6 +153,10 @@ public class EventoService {
         Organizador organizador = organizadorRepository.findById(solicitud.organizadorId())
                 .orElseThrow(() -> new RuntimeException("Organizador no encontrado"));
 
+        if(solicitud.fecha().isBefore(LocalDateTime.now())) {
+            throw new EventoUpdateInvalidoException("No se puede crear un evento con fecha actual o pasada");
+        }
+
         EstadoEvento estadoInicial = new EstadoEvento(this.generadorIDService.generarID(), solicitud.estado(), LocalDateTime.now());
 
         String imagenKey = null;

@@ -95,8 +95,8 @@ export default function FormularioCrearEvento() {
     const [horaInicio, setHoraInicio] = React.useState(""); // HH:mm
 
     const [duracion, setDuracion] = React.useState<string>("");
-    const [cupoMaximo, setCupoMaximo] = React.useState<string>("");
-    const [cupoMinimo, setCupoMinimo] = React.useState<string>("0");
+    const [cupoMaximo, setCupoMaximo] = React.useState<string>("1");
+    const [cupoMinimo, setCupoMinimo] = React.useState<string>("1");
 
     const [modalidad, setModalidad] = React.useState<ModalidadEvento>("PRESENCIAL");
     const [enlaceVirtual, setEnlaceVirtual] = React.useState("");

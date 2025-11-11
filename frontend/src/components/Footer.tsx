@@ -38,8 +38,7 @@ const Footer: React.FC = () => {
                             TP TACS
                         </Typography>
                         <Typography variant="body2" color="text.secondary" sx={{ m: 0 }}>
-                            Sistema de gestión de eventos desarrollado para el curso de Técnicas Avanzadas de Construcción de Software.
-                        </Typography>
+                            Sistema de Gestión de Eventos desarrollado para la Asignatura de Técnicas Avanzadas de Construcción de Software.                        </Typography>
                     </Grid>
 
                     <Grid size={{ xs: 12, md: 4 }}>
@@ -77,7 +76,7 @@ const Footer: React.FC = () => {
                                 <strong>Universidad:</strong> UTN FRBA
                             </Typography>
                             <Typography variant="body2" color="text.secondary" sx={{ m: 0 }}>
-                                <strong>Materia:</strong> TACS
+                                <strong>Asignatura:</strong> TACS
                             </Typography>
                             <Typography variant="body2" color="text.secondary" sx={{ m: 0 }}>
                                 <strong>Año:</strong> 2025

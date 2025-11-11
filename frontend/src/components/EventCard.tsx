@@ -105,7 +105,11 @@ const EventCard: React.FC<EventCardProps> = ({ item, onVerDetalle }) => {
           ':hover': {
             boxShadow: 12,
             transform: 'translateY(-4px) scale(1.03)'
-          }
+          },
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          flex: 1
         }}
       >
         <Box
@@ -119,7 +123,7 @@ const EventCard: React.FC<EventCardProps> = ({ item, onVerDetalle }) => {
           role="button"
           aria-label={`Ver detalles de ${item.titulo}`}
         />
-        <Box sx={{ p: 1.5 }}>
+        <Box sx={{ p: 1.5, display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
             {item.etiquetas?.map((etiqueta: string) => (
               <Chip key={etiqueta} size="small" color="error" label={etiqueta} />
@@ -127,7 +131,15 @@ const EventCard: React.FC<EventCardProps> = ({ item, onVerDetalle }) => {
           </Stack>
           <Typography
             variant="subtitle1"
-            sx={{ fontWeight: 600, cursor: 'pointer' }}
+            sx={{
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              minHeight: '3.2em'
+            }}
             onClick={onVerDetalle}
             tabIndex={0}
             role="button"
@@ -148,7 +160,7 @@ const EventCard: React.FC<EventCardProps> = ({ item, onVerDetalle }) => {
               {item.precio.cantidad} {item.precio.moneda}
             </Typography>
           )}
-          <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
+          <Stack direction="row" spacing={1} sx={{ mt: 'auto' }}>
             <Button
               size="small"
               variant="outlined"

@@ -3,6 +3,8 @@ package org.utn.ba.tptacsg2.helpers;
 import org.utn.ba.tptacsg2.models.events.Evento;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.chrono.ChronoLocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,6 +22,10 @@ public class EventPredicateBuilder {
 
         if(fechaHasta != null ) {
             predicados.add(evento -> !evento.fecha().toLocalDate().isAfter(fechaHasta));
+        }
+
+        if(fechaDesde != null && fechaHasta != null) {
+            predicados.add(evento -> evento.fecha().toLocalDate().isAfter(ChronoLocalDate.from(LocalDateTime.now())));
         }
 
         return this;

@@ -352,9 +352,9 @@ const EventOverview: React.FC = () => {
 
                     {/* Cards list */}
                     <Grid size={{ xs: 12, md: 8 }}>
-                        <Grid container spacing={2}>
+                        <Grid container spacing={2} alignItems="stretch">
                             {eventos.map((ev) => (
-                                <Grid key={ev.id} size={{ xs: 12, sm: 6 }}>
+                                <Grid key={ev.id} size={{ xs: 12, sm: 6 }} sx={{ display: 'flex' }}>
                                     <EventCard item={ev} onVerDetalle={() => setEventoSeleccionado(ev)} />
                                 </Grid>
                             ))}
