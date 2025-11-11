@@ -62,7 +62,7 @@ const config = {
 /estadisticas - Ver estadísticas completas`,
     error: 'Lo siento, ocurrió un error. Por favor intenta de nuevo.',
     noData: 'No hay datos disponibles en este momento.',
-    loginPrompt: '🔐 Para iniciar sesión, envía tu usuario y contraseña en el formato:\n`usuario:contraseña`\n\nEjemplo: `admin:admin123`',
+    loginPrompt: '🔐 Para iniciar sesión, envía tu usuario y contraseña en el formato:\n`usuario:contraseña`\n\nEjemplo: `pepe:casa123`',
     loginSuccess: '✅ ¡Inicio de sesión exitoso! Bienvenido/a',
     loginError: '❌ Usuario o contraseña incorrectos. Intenta de nuevo.',
     logoutSuccess: '👋 Sesión cerrada exitosamente.',
