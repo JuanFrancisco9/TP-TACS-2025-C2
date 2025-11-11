@@ -57,12 +57,18 @@ const config = {
 /confirmadas - Ver las inscripciones confirmadas
 /pendientes - Ver las inscripciones pendientes`,
     helpOrg: `Comandos adicionales: 
-/miseventos - Ver todos tus eventos`,
+/mis_eventos - Ver todos tus eventos
+/publicar_evento`,
     helpAdmin: `Comandos adicionales:
 /estadisticas - Ver estadísticas completas`,
     error: 'Lo siento, ocurrió un error. Por favor intenta de nuevo.',
     noData: 'No hay datos disponibles en este momento.',
-    loginPrompt: '🔐 Para iniciar sesión, envía tu usuario y contraseña en el formato:\n`usuario:contraseña`\n\nEjemplo: `pepe:casa123`',
+    loginPrompt: `🔐 Para iniciar sesión, enviá tu usuario y contraseña en el formato:
+<code>usuario:contraseña</code>
+
+Ejemplo: <code>pepe:casa123</code>
+
+Si todavía no te registraste, podés hacerlo acá 👉 <a href="${process.env.FRONT_URL}">Registrarme</a>`,
     loginSuccess: '✅ ¡Inicio de sesión exitoso! Bienvenido/a',
     loginError: '❌ Usuario o contraseña incorrectos. Intenta de nuevo.',
     logoutSuccess: '👋 Sesión cerrada exitosamente.',

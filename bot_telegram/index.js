@@ -9,6 +9,9 @@ const bot = new TelegramBot(config.telegram.token, { polling: true });
 // Store active sessions (chatId -> user)
 const activeSessions = new Map();
 
+// Mapa temporal para almacenar la sesión de creación del evento
+const creatingEventSessions = new Map();
+
 // API client configuration
 function getAuthToken(chatId) {
     const session = activeSessions.get(chatId);
@@ -262,7 +265,8 @@ function authorisedRole(command, role) {
             return role === "ROLE_USER"
 
         // Comandos de organizador
-        case "miseventos":
+        case "mis_eventos":
+        case "publicar_evento":
             return role === "ROLE_ORGANIZER"
 
         // Comandos de administrador
@@ -312,7 +316,7 @@ bot.onText(/\/login/, async (msg) => {
     return;
   }
   
-  bot.sendMessage(chatId, config.messages.loginPrompt, { parse_mode: 'Markdown' });
+  bot.sendMessage(chatId, config.messages.loginPrompt, { parse_mode: 'HTML' });
 });
 
 // Logout command
@@ -533,7 +537,7 @@ bot.onText(/\/pendientes/, async (msg) => {
     }
 });
 
-bot.onText(/\/miseventos/, async (msg) => {
+bot.onText(/\/mis_eventos/, async (msg) => {
     const chatId = msg.chat.id;
 
     if (!isUserLoggedIn(chatId)) {
@@ -541,7 +545,7 @@ bot.onText(/\/miseventos/, async (msg) => {
         return;
     }
     const user = activeSessions.get(chatId);
-    if(!authorisedRole("miseventos",user.tipo)){
+    if(!authorisedRole("mis_eventos",user.tipo)){
         bot.sendMessage(chatId, config.messages.noPermission);
         return;
     }
@@ -623,39 +627,229 @@ bot.onText(/\/estadisticas/, async (msg) => {
   }
 });
 
-// Handle any other text messages
-bot.on('message', async (msg) => {
-  const chatId = msg.chat.id;
-  const text = msg.text;
-  
-  // Only respond to text messages that aren't commands
-  if (text && !text.startsWith('/')) {
-    // Check if this looks like login credentials (username:password)
-    if (text.includes(':') && text.split(':').length === 2) {
-      if (isUserLoggedIn(chatId)) {
-        bot.sendMessage(chatId, config.messages.alreadyLoggedIn);
+//Crear evento command
+bot.onText(/\/publicar_evento/, async (msg) => {
+    const chatId = msg.chat.id;
+
+    if (!isUserLoggedIn(chatId)) {
+        bot.sendMessage(chatId, config.messages.notLoggedIn);
         return;
-      }
-      
-      try {
-        const [username, password] = text.split(':');
-        const result = await loginUser(chatId, username.trim(), password.trim());
-        
-        if (result === true) {
-          const user = getCurrentUser(chatId);
-          bot.sendMessage(chatId, `${config.messages.loginSuccess} ${user.nombre}!`);
-        } else if (result === 'already_logged_in') {
-          bot.sendMessage(chatId, config.messages.userAlreadyLoggedIn);
-        } else {
-          bot.sendMessage(chatId, config.messages.loginError);
-        }
-      } catch (error) {
-        bot.sendMessage(chatId, config.messages.error);
-      }
-    } else {
-      bot.sendMessage(chatId, 'No entiendo ese mensaje. Usa /help para ver los comandos disponibles.');
     }
-  }
+
+    const user = activeSessions.get(chatId);
+    if (!authorisedRole("publicar_evento", user.tipo)) {
+        bot.sendMessage(chatId, config.messages.noPermission);
+        return;
+    }
+
+    // Iniciar la sesión
+    creatingEventSessions.set(chatId, {
+        step: 1,
+        data: { organizador_id: user.actorId },
+    });
+
+    bot.sendMessage(chatId, "📝 *Creación de evento iniciada.*\n\nPor favor, indica el *título* del evento:", {
+        parse_mode: "Markdown",
+    });
+});
+
+// Handle any other text messages
+
+bot.on('message', async (msg) => {
+    const chatId = msg.chat.id;
+    const text = msg.text?.trim();
+    if (!text || text.startsWith('/')) return;
+
+    const session = creatingEventSessions.get(chatId);
+    if (session) {
+        const { step, data } = session;
+        try {
+            switch (step) {
+                case 1:
+                    data.titulo = text;
+                    bot.sendMessage(chatId, "📄 Ahora escribí una *descripción* del evento:", { parse_mode: "Markdown" });
+                    session.step++;
+                    break;
+
+                case 2:
+                    data.descripcion = text;
+                    bot.sendMessage(chatId, "📅 Ingresá la *fecha del evento* (YYYY-MM-DD):", { parse_mode: "Markdown" });
+                    session.step++;
+                    break;
+
+                case 3:
+                    if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+                        bot.sendMessage(chatId, "⚠️ Formato inválido. Usá YYYY-MM-DD.");
+                        return;
+                    }
+                    data.fecha = text;
+                    bot.sendMessage(chatId, "🕐 Ingresá la *hora de inicio* (HH:MM):", { parse_mode: "Markdown" });
+                    session.step++;
+                    break;
+
+                case 4:
+                    if (!/^\d{2}:\d{2}$/.test(text)) {
+                        bot.sendMessage(chatId, "⚠️ Formato inválido. Usá HH:MM.");
+                        return;
+                    }
+                    data.horaInicio = text;
+                    bot.sendMessage(chatId, "⏱️ Ingresá la *duración* en minutos:", { parse_mode: "Markdown" });
+                    session.step++;
+                    break;
+
+                case 5:
+                    const duracion = parseFloat(text);
+                    if (isNaN(duracion) || duracion <= 0) {
+                        bot.sendMessage(chatId, "⚠️ Duración inválida. Ingresá un número positivo (en horas o minutos).");
+                        return;
+                    }
+                    data.duracion = duracion;
+
+                    bot.sendMessage(
+                        chatId,
+                        "📍 Ingresá la *ubicación* del evento.\n\n" +
+                        "👉 Puede ser:\n" +
+                        "• Una dirección (Ej: 'Av. Corrientes 1234, CABA')\n" +
+                        "• Un enlace si es online (Ej: 'https://meet.google.com/xyz')",
+                        { parse_mode: "Markdown" }
+                    );
+                    session.step++;
+                    break;
+
+                case 6:
+                    // Guardamos el texto como está — se procesará en handleCrearEvento
+                    data.ubicacion = text.trim();
+
+                    bot.sendMessage(chatId, "👥 Ingresá el *cupo máximo* de participantes:", { parse_mode: "Markdown" });
+                    session.step++;
+                    break;
+
+                case 7:
+                    const cupoMax = parseInt(text);
+                    if (isNaN(cupoMax) || cupoMax <= 0) {
+                        bot.sendMessage(chatId, "⚠️ Cupo inválido. Ingresá un número positivo.");
+                        return;
+                    }
+                    data.cupoMaximo = cupoMax;
+                    bot.sendMessage(chatId, "👥 (Opcional) Ingresá el *cupo mínimo* o escribí 0 si no aplica:", { parse_mode: "Markdown" });
+                    session.step++;
+                    break;
+
+                case 8:
+                    const cupoMin = parseInt(text);
+                    data.cupoMinimo = isNaN(cupoMin) ? 0 : cupoMin;
+                    bot.sendMessage(
+                        chatId,
+                        "💰 Ingresá el *precio* del evento.\n\n" +
+                        "👉 Formatos válidos:\n" +
+                        "• `ARS 1500`\n" +
+                        "• `USD 20`\n" +
+                        "• `Gratis`",
+                        { parse_mode: "Markdown" }
+                    );
+                    session.step++;
+                    break;
+
+                case 9:
+                    const precioInput = text.trim().toUpperCase();
+
+                    // Validación y parseo flexible
+                    if (precioInput === "GRATIS" || precioInput === "0") {
+                        data.precio = "GRATIS";
+                    } else {
+                        const parts = precioInput.split(" ");
+                        if (parts.length === 2 && !isNaN(parseFloat(parts[1]))) {
+                            data.precio = `${parts[0]} ${parts[1]}`;
+                        } else if (!isNaN(parseFloat(precioInput))) {
+                            // Caso en que solo pongan el número (asumimos ARS)
+                            data.precio = `ARS ${precioInput}`;
+                        } else {
+                            bot.sendMessage(
+                                chatId,
+                                "⚠️ Formato de precio inválido. Ejemplos válidos:\n`ARS 1500`, `USD 20`, o `GRATIS`",
+                                { parse_mode: "Markdown" }
+                            );
+                            return;
+                        }
+                    }
+
+                    bot.sendMessage(chatId, "🏷️ Ingresá la *categoría* del evento:", {
+                        parse_mode: "Markdown",
+                    });
+                    session.step++;
+                    break;
+
+                case 10:
+                    data.categoria = text;
+                    bot.sendMessage(chatId, "🔖 (Opcional) Ingresá *etiquetas* separadas por comas, o '-' si no hay:", { parse_mode: "Markdown" });
+                    session.step++;
+                    break;
+
+                case 11:
+                    if (text !== '-') data.etiquetas = text.split(',').map(t => t.trim());
+                    else data.etiquetas = [];
+
+                    // Mostrar resumen para confirmar
+                    const resumen = `📝 *Revisá los datos del evento:*\n
+📌 *Título:* ${data.titulo}
+📄 *Descripción:* ${data.descripcion}
+📅 *Fecha:* ${data.fecha}
+🕐 *Hora inicio:* ${data.horaInicio}
+⏱️ *Duración:* ${data.duracion} min
+📍 *Ubicación:* ${data.ubicacion}
+👥 *Cupo:* ${data.cupoMinimo} - ${data.cupoMaximo}
+💰 *Precio:* ${data.precio}
+🏷️ *Categoría:* ${data.categoria}
+🔖 *Etiquetas:* ${data.etiquetas.join(', ') || 'Ninguna'}
+
+¿Querés confirmar la publicación?`;
+
+                    bot.sendMessage(chatId, resumen, {
+                        parse_mode: "Markdown",
+                        reply_markup: {
+                            inline_keyboard: [
+                                [
+                                    { text: "✅ Confirmar", callback_data: "confirmar_evento" },
+                                    { text: "❌ Cancelar", callback_data: "cancelar_creacion" },
+                                ],
+                            ],
+                        },
+                    });
+
+                    session.step++;
+                    break;
+            }
+        } catch (error) {
+            console.error("Error creando evento:", error);
+            bot.sendMessage(chatId, "❌ Ocurrió un error. Volvé a intentar más tarde.");
+            creatingEventSessions.delete(chatId);
+        }
+        return;
+    }
+
+    // Resto del flujo (login / desconocidos)
+    if (text.includes(':') && text.split(':').length === 2) {
+        if (isUserLoggedIn(chatId)) {
+            bot.sendMessage(chatId, config.messages.alreadyLoggedIn);
+            return;
+        }
+        try {
+            const [username, password] = text.split(':');
+            const result = await loginUser(chatId, username.trim(), password.trim());
+            if (result === true) {
+                const user = getCurrentUser(chatId);
+                bot.sendMessage(chatId, `${config.messages.loginSuccess} ${user.nombre}!`);
+            } else if (result === 'already_logged_in') {
+                bot.sendMessage(chatId, config.messages.userAlreadyLoggedIn);
+            } else {
+                bot.sendMessage(chatId, config.messages.loginError);
+            }
+        } catch (error) {
+            bot.sendMessage(chatId, config.messages.error);
+        }
+    } else {
+        bot.sendMessage(chatId, 'No entiendo ese mensaje. Usa /help para ver los comandos disponibles.');
+    }
 });
 
 // Error handling
@@ -697,6 +891,16 @@ bot.on('callback_query', async (query) => {
     if (data.startsWith('cerrarInscripciones_')) {
         const eventoId = data.split('_')[1];
         await handleCerrarInscripciones(bot, chatId, eventoId);
+    }
+
+    if (data === 'confirmar_evento'){
+        const session = creatingEventSessions.get(chatId);
+        await handleCrearEvento(bot, chatId, session)
+    }
+
+    if (data === 'cancelar_creacion') {
+        bot.sendMessage(chatId, "🚫 Creación de evento cancelada.");
+        creatingEventSessions.delete(chatId);
     }
 });
 const handleInscripcion = async (bot, chatId, eventoId, query) => {
@@ -831,6 +1035,87 @@ const handleCerrarInscripciones = async (bot, chatId, eventoId) => {
     } catch (error) {
         console.error(error);
         bot.sendMessage(chatId, '⚠️ No se pudo cerrar las inscripciones para el evento');
+    }
+};
+
+const handleCrearEvento = async (bot, chatId, session) => {
+    try {
+        const user = activeSessions.get(chatId);
+        // Combinar fecha y hora en formato LocalDateTime válido para Java
+        const fechaEvento = `${session.data.fecha}T${session.data.horaInicio}:00`;
+        const ubicacionInput = session.data.ubicacion.trim();
+        const esVirtual = ubicacionInput.startsWith('http') || ubicacionInput.startsWith('www');
+
+        let ubicacion;
+
+        if (esVirtual) {
+            // Evento online
+            ubicacion = {
+                latitud: null,
+                longitud: null,
+                provincia: null,
+                localidad: null,
+                direccion: null,
+                esVirtual: true,
+                enlaceVirtual: ubicacionInput,
+            };
+        } else {
+            const partes = ubicacionInput.split(',');
+            const direccion = partes[0]?.trim() || null;
+            const localidad = partes[1]?.trim() || null;
+
+            ubicacion = {
+                latitud: null,
+                longitud: null,
+                provincia: null, // podrías agregar un paso más si querés pedirlo
+                localidad,
+                direccion,
+                esVirtual: false,
+                enlaceVirtual: null,
+            };
+        }
+
+        let precioInput = session.data.precio.trim().toUpperCase();
+        let moneda = 'ARS';
+        let cantidad = 0.0;
+
+        if (precioInput !== 'GRATIS') {
+            const parts = precioInput.split(' ');
+            if (parts.length === 2) {
+                moneda = parts[0];
+                cantidad = parseFloat(parts[1]);
+            } else {
+                // Si solo ponen el número
+                cantidad = parseFloat(parts[0]);
+            }
+        }
+
+        const precio = { moneda, cantidad };
+        const eventData = {
+            organizadorId: user.actorId,
+            titulo: session.data.titulo,
+            descripcion: session.data.descripcion,
+            fecha: fechaEvento,
+            horaInicio: session.data.horaInicio,
+            duracion: session.data.duracion,
+            ubicacion,
+            cupoMaximo: session.data.cupoMaximo,
+            cupoMinimo: session.data.cupoMinimo,
+            precio,
+            estado: "CONFIRMADO",
+            categoria: session.data.categoria,
+            etiquetas: session.data.etiquetas,
+        };
+
+        await apiClient.post(`${config.api.endpoints.eventos}`, eventData, { chatId });
+
+        bot.sendMessage(chatId, "🎉 *Evento publicado exitosamente!*", { parse_mode: "Markdown" });
+    } catch (err) {
+        console.error("Error al publicar evento:");
+        console.log(err)
+        bot.sendMessage(chatId, "❌ Error al publicar el evento. Intentalo más tarde.");
+    } finally {
+        creatingEventSessions.delete(chatId);
     }
 };
 
