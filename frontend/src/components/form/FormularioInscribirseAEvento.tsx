@@ -21,7 +21,7 @@ export default function FormularioInscribirseAEvento( { evento }: Props) {
         setInscripcion(null);
 
         const payload = {
-            participante: "", // Aca habria que pasarle el usuario y el ID del evento, no se como podemos hacerlo
+            participante: "",
             evento_id: evento?.id,
         };
 

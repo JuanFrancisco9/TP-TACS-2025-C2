@@ -2,7 +2,8 @@ import {useEffect, useState} from "react";
 import {
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
     Paper, Button, Dialog, DialogTitle, DialogContent, DialogActions,
-    TextField, Typography, Select, MenuItem, InputLabel, CircularProgress
+    TextField, Typography, Select, MenuItem, InputLabel, CircularProgress,
+    Tooltip
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import ListAltIcon from "@mui/icons-material/ListAlt";
@@ -17,6 +18,7 @@ import authService from "../services/authService.ts";
 import type { Evento } from "../types/evento.ts";
 import type {Participante, Usuario} from "../types/auth.ts";
 import DetallesEvento from '../components/EventDetails';
+import { isEventInPast } from '../utils/eventDate';
 
 interface EditEvent {
     event: Evento | null;
@@ -75,7 +77,6 @@ export default function PerfilOrganizador() {
                 if (currentUser?.id) {
                     const eventos = await EventoService.obtenerEventosParaOrganizador(currentUser.actorId);
                     setEvents(eventos);
-                    console.log(eventos)
                 }
             } catch (error) {
                 console.error("Error al cargar los eventos:", error);
@@ -133,6 +134,9 @@ export default function PerfilOrganizador() {
                         <TableBody>
                             {events.map((e) => {
                                 const imageSrc = e.imagenUrl ?? e.imagen ?? `/logo.PNG`;
+                                const eventoFinalizado = isEventInPast(e) ||
+                                    e.estado?.tipoEstado === 'NO_ACEPTA_INSCRIPCIONES' ||
+                                    e.estado?.tipoEstado === 'CANCELADO';
                                 return (
                                 <TableRow
                                     key={e.id}
@@ -172,11 +176,33 @@ export default function PerfilOrganizador() {
                                             : e.estado.tipoEstado}
                                     </TableCell>
                                     <TableCell>
-                                        <Button onClick={(ev) => { ev.stopPropagation(); setEditEvent(e); }}><EditIcon /></Button>
-                                        <Button onClick={(ev) => { ev.stopPropagation(); setDetailEvent(e); }}><VisibilityIcon /></Button>
-                                        <Button onClick={(ev) => { ev.stopPropagation(); setViewEvent(e); }}><GroupIcon /></Button>
-                                        <Button onClick={(ev) => { ev.stopPropagation(); setWaitlistEvent(e); }}><ListAltIcon /></Button>
-                                        <Button onClick={(ev) => { ev.stopPropagation(); handelCloseInscriptions(e); }}><BlockIcon /></Button>
+                                        {!eventoFinalizado && (
+                                            <Tooltip title="Editar" arrow>
+                                                <Button onClick={(ev) => { ev.stopPropagation(); setEditEvent(e); }} aria-label="Editar evento">
+                                                    <EditIcon />
+                                                </Button>
+                                            </Tooltip>
+                                        )}
+                                        <Tooltip title="Ver detalle" arrow>
+                                            <Button onClick={(ev) => { ev.stopPropagation(); setDetailEvent(e); }} aria-label="Ver detalle">
+                                                <VisibilityIcon />
+                                            </Button>
+                                        </Tooltip>
+                                        <Tooltip title="Ver lista de inscriptos" arrow>
+                                            <Button onClick={(ev) => { ev.stopPropagation(); setViewEvent(e); }} aria-label="Ver lista de inscriptos">
+                                                <GroupIcon />
+                                            </Button>
+                                        </Tooltip>
+                                        <Tooltip title="Ver waitlist" arrow>
+                                            <Button onClick={(ev) => { ev.stopPropagation(); setWaitlistEvent(e); }} aria-label="Ver waitlist">
+                                                <ListAltIcon />
+                                            </Button>
+                                        </Tooltip>
+                                        <Tooltip title="Cerrar inscripciones" arrow>
+                                            <Button onClick={(ev) => { ev.stopPropagation(); handelCloseInscriptions(e); }} aria-label="Cerrar inscripciones">
+                                                <BlockIcon />
+                                            </Button>
+                                        </Tooltip>
                                     </TableCell>
                                 </TableRow>
                             );})}

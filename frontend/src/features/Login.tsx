@@ -34,15 +34,16 @@ function Login() {
 
             const usuario = await authService.login(formData);
 
+            console.log(usuario)
             // Redirigir según el rol
             if (usuario.rol === 'ROLE_ADMIN') {
                 navigate('/estadisticas');
             }
             if (usuario.rol === 'ROLE_ORGANIZER') {
-                navigate('/crear-evento')
+                navigate('/organizador/eventos')
             }
             if (usuario.rol === 'ROLE_USER') {
-                navigate('/mis-eventos')
+                navigate('/eventos')
             }else {
                 navigate('/');
             }

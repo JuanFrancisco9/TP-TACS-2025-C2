@@ -5,10 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.utn.ba.tptacsg2.dtos.output.Waitlist;
-import org.utn.ba.tptacsg2.exceptions.EventoNoEncontradoException;
-import org.utn.ba.tptacsg2.exceptions.EventoSinConfirmarException;
-import org.utn.ba.tptacsg2.exceptions.InscripcionNoEncontradaException;
-import org.utn.ba.tptacsg2.exceptions.InscripcionDuplicadaException;
+import org.utn.ba.tptacsg2.exceptions.*;
 import org.utn.ba.tptacsg2.models.events.Evento;
 import org.utn.ba.tptacsg2.dtos.TipoEstadoEvento;
 import org.utn.ba.tptacsg2.models.inscriptions.EstadoInscripcion;
@@ -57,6 +54,12 @@ public class InscripcionService {
                         .orElseThrow(() -> new EventoNoEncontradoException("No se encontró el evento " + solicitud.evento_id()));
         validarParticipanteNoInscripto(solicitud, evento);
 
+        if(evento.fecha().isBefore(LocalDateTime.now())) {
+
+            throw new EventoPrevioException("No se puede inscribir a un evento que ya sucedió");
+
+        }
+
         if(evento.estado().getTipoEstado() == TipoEstadoEvento.CONFIRMADO) {
 
             // Caso en que no hay más cupos, voy a la waitlist
@@ -79,7 +82,6 @@ public class InscripcionService {
             );
 
             estadoInscripcionAceptada.setInscripcion(inscripcionAceptada);
-            //TODO chequear cómo se maneja esto en Mongo
 
             inscripcionRepository.save(inscripcionAceptada);
             this.estadoInscripcionRepository.save(estadoInscripcionAceptada);
@@ -192,9 +194,4 @@ public class InscripcionService {
         return new Waitlist(inscripcionRepository.findWaitlistByEventoOrderByFechaAsc(evento.id(), TipoEstadoInscripcion.PENDIENTE), evento);
     }
 
-    /*
-    public ResponseEntity<List<Inscripcion>> getAll() {
-        return ResponseEntity.ok(inscripcionRepository.findAll());
-    }
-    */
 }

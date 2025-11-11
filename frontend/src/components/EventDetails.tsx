@@ -33,6 +33,7 @@ import { formatFecha } from '../utils/formatFecha';
 import authService from "../services/authService.ts";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Rol, type Usuario } from '../types/auth';
+import { isEventInPast } from '../utils/eventDate';
 
 interface DetallesEventoProps {
   evento: Evento;
@@ -115,6 +116,10 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
   }, [evento.id, evento.cupoMaximo]);
 
   const isOrganizer = currentUser?.rol === Rol.ROLE_ORGANIZER;
+  const eventoFinalizado = React.useMemo(
+    () => isEventInPast(evento),
+    [evento.fecha, evento.horaInicio]
+  );
   const imageSrc = evento.imagenUrl ?? evento.imagen ?? `https://picsum.photos/seed/${encodeURIComponent(evento.id)}/1200/600`;
 
   const handleInscribirse = () => {
@@ -359,28 +364,37 @@ const DetallesEvento: React.FC<DetallesEventoProps> = ({ evento, onVolver, onIns
                   <Box sx={{ flexGrow: 1 }} />
                   {!isOrganizer && (
                       <CardActions sx={{ p: 2, pt: 0 }}>
-                          <Button
-                              variant="contained"
-                              color="primary"
-                              size="large"
-                              disabled={evento.estado?.tipoEstado !== 'CONFIRMADO'}
-                              fullWidth
-                              startIcon={<HowToRegIcon />}
-                              onClick={handleInscribirse}
-                              sx={{
-                                  borderRadius: 2,
-                                  boxShadow: 1,
-                                  textTransform: 'none',
-                                  fontWeight: 500,
-                                  transition: 'box-shadow 0.3s, transform 0.3s',
-                                  ':hover': {
-                                      boxShadow: 8,
-                                      transform: 'translateY(-2px) scale(1.04)',
-                                  },
-                              }}
-                          >
-                              Inscribirse al Evento
-                          </Button>
+                          {eventoFinalizado ? (
+                              <Chip
+                                  label="Evento finalizado"
+                                  color="default"
+                                  variant="outlined"
+                                  sx={{ borderRadius: 2, fontWeight: 600, width: '100%', justifyContent: 'center' }}
+                              />
+                          ) : (
+                              <Button
+                                  variant="contained"
+                                  color="primary"
+                                  size="large"
+                                  disabled={evento.estado?.tipoEstado !== 'CONFIRMADO'}
+                                  fullWidth
+                                  startIcon={<HowToRegIcon />}
+                                  onClick={handleInscribirse}
+                                  sx={{
+                                      borderRadius: 2,
+                                      boxShadow: 1,
+                                      textTransform: 'none',
+                                      fontWeight: 500,
+                                      transition: 'box-shadow 0.3s, transform 0.3s',
+                                      ':hover': {
+                                          boxShadow: 8,
+                                          transform: 'translateY(-2px) scale(1.04)',
+                                      },
+                                  }}
+                              >
+                                  Inscribirse al Evento
+                              </Button>
+                          )}
                       </CardActions>
                   )}
               </Card>

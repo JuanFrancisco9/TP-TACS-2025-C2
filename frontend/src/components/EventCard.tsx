@@ -16,6 +16,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import type { AlertColor } from '@mui/material/Alert';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { isEventInPast } from '../utils/eventDate';
 
 interface EventCardProps {
   item: Evento;
@@ -35,7 +36,13 @@ const EventCard: React.FC<EventCardProps> = ({ item, onVerDetalle }) => {
   const location = useLocation();
   const [currentUser, setCurrentUser] = React.useState<Usuario | null>(authService.getCurrentUser());
 
-  React.useEffect(() => {
+  const eventoFinalizado = React.useMemo(
+    () => isEventInPast(item),
+    [item.fecha, item.horaInicio]
+  );
+
+
+    React.useEffect(() => {
     const handleAuthChange = (event: Event) => {
       const detail = (event as CustomEvent<Usuario | null>).detail;
       setCurrentUser(detail ?? authService.getCurrentUser());
@@ -98,7 +105,11 @@ const EventCard: React.FC<EventCardProps> = ({ item, onVerDetalle }) => {
           ':hover': {
             boxShadow: 12,
             transform: 'translateY(-4px) scale(1.03)'
-          }
+          },
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          flex: 1
         }}
       >
         <Box
@@ -112,7 +123,7 @@ const EventCard: React.FC<EventCardProps> = ({ item, onVerDetalle }) => {
           role="button"
           aria-label={`Ver detalles de ${item.titulo}`}
         />
-        <Box sx={{ p: 1.5 }}>
+        <Box sx={{ p: 1.5, display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
             {item.etiquetas?.map((etiqueta: string) => (
               <Chip key={etiqueta} size="small" color="error" label={etiqueta} />
@@ -120,7 +131,15 @@ const EventCard: React.FC<EventCardProps> = ({ item, onVerDetalle }) => {
           </Stack>
           <Typography
             variant="subtitle1"
-            sx={{ fontWeight: 600, cursor: 'pointer' }}
+            sx={{
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              minHeight: '3.2em'
+            }}
             onClick={onVerDetalle}
             tabIndex={0}
             role="button"
@@ -141,7 +160,7 @@ const EventCard: React.FC<EventCardProps> = ({ item, onVerDetalle }) => {
               {item.precio.cantidad} {item.precio.moneda}
             </Typography>
           )}
-          <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
+          <Stack direction="row" spacing={1} sx={{ mt: 'auto' }}>
             <Button
               size="small"
               variant="outlined"
@@ -163,27 +182,40 @@ const EventCard: React.FC<EventCardProps> = ({ item, onVerDetalle }) => {
               Ver más
             </Button>
             {!isOrganizer && (
-              <Button
-                size="small"
-                variant="contained"
-                disabled={item.estado?.tipoEstado !== 'CONFIRMADO'}
-                color="primary"
-                startIcon={<HowToRegIcon />}
-                onClick={e => { e.stopPropagation(); handleInscribirme(); }}
-                sx={{
-                  borderRadius: 2,
-                  boxShadow: 1,
-                  textTransform: 'none',
-                  fontWeight: 500,
-                  transition: 'box-shadow 0.3s, transform 0.3s',
-                  ':hover': {
-                    boxShadow: 8,
-                    transform: 'translateY(-2px) scale(1.04)'
-                  }
-                }}
-              >
-                Inscribirme
-              </Button>
+              eventoFinalizado ? (
+                <Chip
+                  label="Evento finalizado"
+                  color="default"
+                  variant="outlined"
+                  sx={{
+                    borderRadius: 2,
+                    fontWeight: 600,
+                    alignSelf: 'center'
+                  }}
+                />
+              ) : (
+                <Button
+                  size="small"
+                  variant="contained"
+                  disabled={item.estado?.tipoEstado !== 'CONFIRMADO'}
+                  color="primary"
+                  startIcon={<HowToRegIcon />}
+                  onClick={e => { e.stopPropagation(); handleInscribirme(); }}
+                  sx={{
+                    borderRadius: 2,
+                    boxShadow: 1,
+                    textTransform: 'none',
+                    fontWeight: 500,
+                    transition: 'box-shadow 0.3s, transform 0.3s',
+                    ':hover': {
+                      boxShadow: 8,
+                      transform: 'translateY(-2px) scale(1.04)'
+                    }
+                  }}
+                >
+                  Inscribirme
+                </Button>
+              )
             )}
           </Stack>
         </Box>

@@ -8,6 +8,7 @@ import { Rol } from '../types/auth';
 import DetallesEvento from '../components/EventDetails';
 import { EventoService } from '../services/eventoService';
 import type { Evento } from '../types/evento';
+import { isEventInPast } from '../utils/eventDate';
 
 function UserLanding() {
     const navigate = useNavigate();
@@ -116,8 +117,10 @@ function UserLanding() {
         }
     }, [participanteId]);
 
+    const esEventoFinalizado = (inscripcion: Inscripcion) => isEventInPast(inscripcion.evento);
+
     const inscripcionesActivas = inscripciones.filter(i =>
-        i.estado.tipoEstado === 'ACEPTADA' || i.estado.tipoEstado === 'PENDIENTE'
+        (i.estado.tipoEstado === 'ACEPTADA' || i.estado.tipoEstado === 'PENDIENTE') && !esEventoFinalizado(i)
     );
 
     if (detalleCargando) {
