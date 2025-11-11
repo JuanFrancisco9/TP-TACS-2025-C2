@@ -341,21 +341,28 @@ bot.onText(/\/eventos/, async (msg) => {
         eventos.forEach((evento, index) => {
             setTimeout(() => {
                 const message = formatEvent(evento);
+                const fechaEvento = new Date(evento.fecha);
+                const hoy = new Date();
+
+                // Mostrar botón solo si el evento es futuro
+                const puedeInscribirse = fechaEvento > hoy;
+
+                const botones = [];
+
+                if (puedeInscribirse) {
+                    botones.push([
+                        {
+                            text: '📝 Inscribirme',
+                            callback_data: `inscribirme_${evento.id}`,
+                        },
+                    ]);
+                }
 
                 bot.sendMessage(chatId, message, {
                     parse_mode: 'Markdown',
-                    reply_markup: {
-                        inline_keyboard: [
-                            [
-                                {
-                                    text: '📝 Inscribirme',
-                                    callback_data: `inscribirme_${evento.id}`,
-                                },
-                            ],
-                        ],
-                    },
+                    reply_markup: botones.length ? { inline_keyboard: botones } : undefined,
                 });
-            }, index * 800); // leve delay entre eventos
+            }, index * 1000);
         });
     } catch (error) {
         console.error(error);
