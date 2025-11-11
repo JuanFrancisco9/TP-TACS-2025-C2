@@ -58,7 +58,7 @@ const config = {
 /pendientes - Ver las inscripciones pendientes`,
     helpOrg: `Comandos adicionales: 
 /mis_eventos - Ver todos tus eventos
-/publicar_evento`,
+/publicar_evento - Crea tu propio evento`,
     helpAdmin: `Comandos adicionales:
 /estadisticas - Ver estadísticas completas`,
     error: 'Lo siento, ocurrió un error. Por favor intenta de nuevo.',
