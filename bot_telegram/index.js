@@ -247,7 +247,7 @@ function formatInscription(inscription, evento, participante) {
 🎯 Evento: ${evento.titulo}
 👤 Participante: ${participante.nombre}
 📅 Fecha de Inscripción: ${fechaInscripcion}
-✅ Estado: ${inscription.estado.tipoEstado}
+✅ Estado: ${capitalizarPrimeraLetra(inscription.estado.tipoEstado)}
 📍 Ubicación: ${evento.ubicacion.esVirtual? evento.ubicacion.enlaceVirtual : evento.ubicacion.direccion}
 
 Ultima Modificación: ${fechaUltimaModificacion}`;
