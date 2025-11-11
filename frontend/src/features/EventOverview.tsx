@@ -80,7 +80,6 @@ const EventOverview: React.FC = () => {
     const initialCategoriaRef = useRef(urlCategoria);
 
     // --- búsqueda
-    const [searchText, setSearchText] = useState<string>(urlQ);
     const [committedSearch, setCommittedSearch] = useState<string>(urlQ);
 
     // --- categoría
@@ -113,7 +112,6 @@ const EventOverview: React.FC = () => {
         const stateFilters = locState?.filtros;
         if (stateFilters) {
             if (stateFilters.palabrasClave != null) {
-                setSearchText(stateFilters.palabrasClave);
                 setCommittedSearch(stateFilters.palabrasClave);
                 setSearchParams((prev) => {
                     const p = new URLSearchParams(prev);
@@ -132,7 +130,6 @@ const EventOverview: React.FC = () => {
                 });
             }
         } else {
-            setSearchText(initialQRef.current);
             setCommittedSearch(initialQRef.current);
             setSelectedCategory(initialCategoriaRef.current);
         }
@@ -210,18 +207,7 @@ const EventOverview: React.FC = () => {
         setFechaHasta(value ? new Date(value + 'T00:00:00') : undefined);
     };
 
-    const handleSearchCommit = () => {
-        setCommittedSearch(searchText);
-        setSearchParams((prev) => {
-            const p = new URLSearchParams(prev);
-            if (searchText) p.set('q', searchText);
-            else p.delete('q');
-            return p;
-        });
-    };
-
     const handleClearFilters = () => {
-        setSearchText('');
         setCommittedSearch('');
         setSelectedCategory('');
         setPriceRange([0, 0]);
@@ -277,7 +263,7 @@ const EventOverview: React.FC = () => {
 
                         <Grid container spacing={2} alignItems="stretch">
                             {/* Filtros */}
-                            <Grid item xs={12} md={4}>
+                            <Grid>
                                 <Paper variant="outlined" sx={{ p: 2 }}>
                                     <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
                                         <Typography variant="subtitle2">Filtros</Typography>
@@ -380,7 +366,7 @@ const EventOverview: React.FC = () => {
                             </Grid>
 
                             {/* Cards list */}
-                            <Grid item xs={12} md={8}>
+                            <Grid size = {6}>
                                 {!loading && eventos.length === 0 ? (
                                     <Paper
                                         variant="outlined"
@@ -401,7 +387,7 @@ const EventOverview: React.FC = () => {
                                 ) : (
                                     <Grid container spacing={2} alignItems="stretch">
                                         {eventos.map((ev) => (
-                                            <Grid item key={ev.id} xs={12} sm={4} sx={{ display: 'flex' }}>
+                                            <Grid size = {6} key={ev.id} sx={{ display: 'flex' }}>
                                                 <EventCard item={ev} onVerDetalle={() => setEventoSeleccionado(ev)} />
                                             </Grid>
                                         ))}
