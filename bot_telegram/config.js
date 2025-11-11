@@ -26,7 +26,8 @@ const config = {
       estadisticas: '/estadisticas',
       usuarios: '/user',
       participantes: '/participantes',
-      organizadores: '/organizadores'
+      organizadores: '/organizadores',
+      waitlist: '/waitlist'
     }
   },
   

@@ -200,7 +200,7 @@ function formatEvent(event) {
 👥 Cupo: ${event.cupoMaximo || 'N/A'}
 📝 Descripción: ${event.descripcion || 'Sin descripción'}
 🏷️ Categoría: ${event.categoria?.nombre || 'Sin categoría'}
-✅ Estado: ${event.estado.tipoEstado}
+✅ Estado: ${event.estado.tipoEstado === 'NO_ACEPTA_INSCRIPCIONES' ? 'Inscripciones cerradas': capitalizarPrimeraLetra(event.estado.tipoEstado) }
 💰 Precio: ${event.precio?.monto || 'Gratis'} ${event.precio?.moneda || ''}`;
 }
 
@@ -216,6 +216,14 @@ function formatStatistics(stats) {
 📈 Tasa Conversión Waitlist: ${(stats.tasa_conversion_waitlist || 0).toFixed(2)}%
 🏆 Evento Más Popular: ${stats.evento_mas_popular || 'N/A'}
 📊 Promedio Inscripciones/Evento: ${(stats.promedio_inscripciones_por_evento || 0).toFixed(2)}`;
+}
+
+//Helper funcion modo oracion
+function capitalizarPrimeraLetra(str) {
+    if (!str) return ''; // Manejar cadenas vacías o nulas
+    const primeraLetra = str.charAt(0).toUpperCase();
+    const resto = str.slice(1).toLowerCase();
+    return primeraLetra + resto;
 }
 
 // Helper function to format inscription data
@@ -550,8 +558,30 @@ bot.onText(/\/miseventos/, async (msg) => {
         }
         eventos.forEach((evento, index) => {
             setTimeout(() => {
-                bot.sendMessage(chatId, formatEvent(evento), { parse_mode: 'Markdown' });
-            }, index * 1000); // Delay between messages
+                const texto = formatEvent(evento);
+
+                const fechaEvento = new Date(evento.fecha);
+                const hoy = new Date();
+                const puedeCerrar = fechaEvento > hoy;
+
+                const botones = [
+                    [
+                        { text: '👥 Ver inscriptos', callback_data: `verInscriptos_${evento.id}` },
+                        { text: '🕓 Ver waitlist', callback_data: `verWaitlist_${evento.id}` }
+                    ],
+                ];
+
+                if (puedeCerrar) {
+                    botones.push([
+                        { text: '🚫 Cerrar inscripciones', callback_data: `cerrarInscripciones_${evento.id}` }
+                    ]);
+                }
+
+                bot.sendMessage(chatId, texto, {
+                    parse_mode: 'Markdown',
+                    reply_markup: { inline_keyboard: botones },
+                });
+            }, index * 1000);
         });
 
     } catch (error) {
@@ -641,7 +671,11 @@ bot.on('callback_query', async (query) => {
     const chatId = query.message.chat.id;
     const data = query.data;
 
-    // Ej: data = "inscribirme_12345"
+    if (!isUserLoggedIn(chatId)) {
+        bot.sendMessage(chatId, config.messages.notLoggedIn);
+        return;
+    }
+
     if (data.startsWith('inscribirme_')) {
         const eventoId = data.split('_')[1]; // obtenemos el ID del evento
         await handleInscripcion(bot, chatId, eventoId, query);
@@ -649,6 +683,20 @@ bot.on('callback_query', async (query) => {
     if (data.startsWith('cancelar_')) {
         const inscripcionId = data.split('_')[1];
         await handleCancelarInscripcion(bot, chatId, inscripcionId, query);
+    }
+    if (data.startsWith('verInscriptos_')) {
+        const eventoId = data.split('_')[1];
+        await handleVerInscriptos(bot, chatId, eventoId);
+    }
+
+    if (data.startsWith('verWaitlist_')) {
+        const eventoId = data.split('_')[1];
+        await handleVerWaitlist(bot, chatId, eventoId);
+    }
+
+    if (data.startsWith('cerrarInscripciones_')) {
+        const eventoId = data.split('_')[1];
+        await handleCerrarInscripciones(bot, chatId, eventoId);
     }
 });
 const handleInscripcion = async (bot, chatId, eventoId, query) => {
@@ -684,7 +732,7 @@ const handleInscripcion = async (bot, chatId, eventoId, query) => {
     } catch (error) {
         console.error('Error al inscribirse:', error.response?.data || error.message);
 
-        bot.answerCallbackQuery(query.id, { text: '❌ Error al inscribirte' });
+        bot.answerCallbackQuery(query.id, { text: '⚠️ No fue posible procesar tu inscripcion' });
         bot.sendMessage(
             chatId,
             '⚠️ Ocurrió un error al intentar inscribirte. Por favor, intenta nuevamente.'
@@ -713,13 +761,79 @@ const handleCancelarInscripcion = async (bot, chatId, inscripcionId, query) => {
         );
     } catch (error) {
         console.error('Error al cancelar inscripción:', error.response?.data || error.message);
-        bot.answerCallbackQuery(query.id, { text: '❌ Error al cancelar' });
+        bot.answerCallbackQuery(query.id, { text: '⚠️ No fue posible canclar la inscripción' });
         bot.sendMessage(
             chatId,
             '⚠️ Ocurrió un error al cancelar la inscripción. Intenta nuevamente.'
         );
     }
 };
+
+const handleVerInscriptos = async (bot, chatId, eventoId) => {
+    try {
+        bot.sendMessage(chatId, '👥 Buscando inscriptos confirmados...');
+        const endpoint = `${config.api.endpoints.eventos}/${eventoId}/participantes`;
+        const response = await apiClient.get(endpoint, { chatId });
+        const participantes = response.data;
+
+        if (!participantes || participantes.length === 0) {
+            bot.sendMessage(chatId, '📭 No hay participantes confirmados en este evento.');
+            return;
+        }
+
+        participantes.forEach((p, index) => {
+            setTimeout(() => {
+                bot.sendMessage(chatId, `👤 *${p.nombre} ${p.apellido}* (DNI: ${p.dni})`, {
+                    parse_mode: 'Markdown',
+                });
+            }, index * 700);
+        });
+    } catch (error) {
+        console.error(error);
+        bot.sendMessage(chatId, '⚠️ No se pudieron obtener los participantes en este momento');
+    }
+};
+
+const handleVerWaitlist = async (bot, chatId, eventoId) => {
+    try {
+        bot.sendMessage(chatId, '🕓 Buscando participantes en la lista de espera...');
+        const endpoint = `${config.api.endpoints.waitlist}/${eventoId}`;
+        const response = await apiClient.get(endpoint, { chatId });
+        const inscripciones = response.data.inscripcionesSinConfirmar;
+
+        if (!inscripciones || inscripciones.length === 0) {
+            bot.sendMessage(chatId, '📭 No hay participantes en la lista de espera.');
+            return;
+        }
+
+        inscripciones.forEach((insc, index) => {
+            setTimeout(() => {
+                const p = insc.participante;
+                bot.sendMessage(chatId, `🕓 *${p.nombre} ${p.apellido}* (DNI: ${p.dni})`, {
+                    parse_mode: 'Markdown',
+                });
+            }, index * 700);
+        });
+    } catch (error) {
+        console.error(error);
+        bot.sendMessage(chatId, '⚠️ No se pudo obtener la waitlist en este momento.');
+    }
+};
+
+const handleCerrarInscripciones = async (bot, chatId, eventoId) => {
+    try {
+        bot.sendMessage(chatId, '🚫 Cerrando inscripciones para el evento...');
+
+        const endpoint = `${config.api.endpoints.eventos}/${eventoId}?estado=NO_ACEPTA_INSCRIPCIONES`;
+        await apiClient.patch(endpoint, {}, { chatId });
+
+        bot.sendMessage(chatId, '✅ Inscripciones cerradas correctamente.');
+    } catch (error) {
+        console.error(error);
+        bot.sendMessage(chatId, '⚠️ No se pudo cerrar las inscripciones para el evento');
+    }
+};
+
 // Graceful shutdown
 process.on('SIGINT', () => {
   bot.stopPolling();
