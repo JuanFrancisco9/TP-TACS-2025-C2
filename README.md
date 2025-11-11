@@ -37,7 +37,7 @@ https://tp-tacs-2025-c2-frontend-production.up.railway.app/
 
 ## Stack Tecnológico
 - Backend: Java 21, SpringBoot 3.5.4, Maven
-- Frontend: React, TypeScript Vite
+- Frontend: React, TypeScript Vite, Node.js (para el Bot de Telegram)
 - Base de datos: MongoDB y Redis
 
 
