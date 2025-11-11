@@ -334,7 +334,7 @@ bot.onText(/\/logout/, async (msg) => {
 // Events command - Get all events
 bot.onText(/\/eventos/, async (msg) => {
     const chatId = msg.chat.id;
-
+    const user = activeSessions.get(chatId);
     try {
         bot.sendMessage(chatId, '🔍 Buscando eventos disponibles...');
 
@@ -353,7 +353,7 @@ bot.onText(/\/eventos/, async (msg) => {
                 const hoy = new Date();
 
                 // Mostrar botón solo si el evento es futuro
-                const puedeInscribirse = fechaEvento > hoy;
+                const puedeInscribirse = fechaEvento > hoy && evento.estado.tipoEstado !== 'NO_ACEPTA_INSCRIPCIONES' && user?.tipo === "ROLE_USER";
 
                 const botones = [];
 
@@ -562,7 +562,7 @@ bot.onText(/\/miseventos/, async (msg) => {
 
                 const fechaEvento = new Date(evento.fecha);
                 const hoy = new Date();
-                const puedeCerrar = fechaEvento > hoy;
+                const puedeCerrar = fechaEvento > hoy && evento.estado.tipoEstado !== 'NO_ACEPTA_INSCRIPCIONES';
 
                 const botones = [
                     [
@@ -756,7 +756,7 @@ const handleCancelarInscripcion = async (bot, chatId, inscripcionId, query) => {
         bot.answerCallbackQuery(query.id, { text: '✅ Inscripción cancelada' });
         bot.sendMessage(
             chatId,
-            `❌ Cancelaste tu inscripción correctamente.`,
+            `✅ Cancelaste tu inscripción correctamente.`,
             { parse_mode: 'Markdown' }
         );
     } catch (error) {
