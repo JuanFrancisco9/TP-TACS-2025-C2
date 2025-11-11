@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Box, Button, TextField, Tabs, Tab, Alert, FormControl, InputLabel, Select, MenuItem} from "@mui/material";
+import {Box, Button, TextField, Tabs, Tab, Alert, FormControl, InputLabel, Select, MenuItem, Typography} from "@mui/material";
 import { useNavigate } from 'react-router-dom';
 import authService from '../../services/authService';
 import type { LoginRequest } from '../../types/auth';
@@ -41,9 +41,15 @@ export default function FormularioLogin() {
     const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
     const [successMsg, setSuccessMsg] = React.useState<string | null>(null);
 
+    const PASSWORD_MIN_LENGTH = 8;
+
     const contraseniasCoinciden = contrasenia === comprobarContrasenia;
     const contraseniasNoCoinciden = comprobarContrasenia.length > 0 && !contraseniasCoinciden;
     const dniInvalido = dni.length > 0 && dni.length !== 8;
+    const passwordHasMinLength = contrasenia.length >= PASSWORD_MIN_LENGTH;
+    const passwordHasUppercase = /[A-Z]/.test(contrasenia);
+    const passwordHasSpecial = /[^a-zA-Z0-9]/.test(contrasenia);
+    const passwordRequirementsMet = passwordHasMinLength && passwordHasUppercase && passwordHasSpecial;
 
     const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
         setTabValue(newValue);
@@ -99,10 +105,17 @@ export default function FormularioLogin() {
             return;
         }
 
+        if (!passwordRequirementsMet) {
+            setErrorMsg(`La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres, una mayúscula y un carácter especial`);
+            return;
+        }
+
         if (!selectedRol) {
             setErrorMsg("Por favor selecciona un tipo de usuario");
             return;
         }
+
+
 
         if (dni.length !== 8) {
             setErrorMsg("El DNI debe tener 8 caracteres");
@@ -282,10 +295,40 @@ export default function FormularioLogin() {
                         required
                     />
 
+                    <Box
+                        component="ul"
+                        sx={{ mt: 1, mb: 0, pl: 3, listStyleType: "disc", display: "grid", gap: 0.5 }}
+                    >
+                        <Box
+                            component="li"
+                            sx={{ color: passwordHasMinLength ? "success.main" : "error.main" }}
+                        >
+                            <Typography variant="body2" sx={{ color: "inherit" }}>
+                                Al menos {PASSWORD_MIN_LENGTH} caracteres ({passwordHasMinLength ? "cumplido" : "pendiente"})
+                            </Typography>
+                        </Box>
+                        <Box
+                            component="li"
+                            sx={{ color: passwordHasUppercase ? "success.main" : "error.main" }}
+                        >
+                            <Typography variant="body2" sx={{ color: "inherit" }}>
+                                Al menos una letra mayúscula ({passwordHasUppercase ? "cumplido" : "pendiente"})
+                            </Typography>
+                        </Box>
+                        <Box
+                            component="li"
+                            sx={{ color: passwordHasSpecial ? "success.main" : "error.main" }}
+                        >
+                            <Typography variant="body2" sx={{ color: "inherit" }}>
+                                Al menos un carácter especial ({passwordHasSpecial ? "cumplido" : "pendiente"})
+                            </Typography>
+                        </Box>
+                    </Box>
+
                     <Button
                         type="submit"
                         variant="contained"
-                        disabled={submitting || contraseniasNoCoinciden || dniInvalido}
+                        disabled={submitting || contraseniasNoCoinciden || dniInvalido || !passwordRequirementsMet}
                         fullWidth
                     >
                         {submitting ? "Registrando..." : "Registrarse"}

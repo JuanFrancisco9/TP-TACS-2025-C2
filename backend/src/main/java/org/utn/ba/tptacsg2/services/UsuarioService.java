@@ -43,6 +43,11 @@ public class UsuarioService {
         if (usuarioRepository.findByUsername(usuario.getUsername()).isPresent()) {
             throw new RuntimeException("El usuario ya existe");
         }
+
+        if (!usuario.getPassword().matches(".*[A-Z].*") && !usuario.getPassword().matches(".*[!@#$%^&*()_+\\-={}\\[\\]:;\"'<>,.?/].*")){
+            throw new RuntimeException("Contraseña no cumple con requerimientos minimos");
+        }
+
         Rol rol;
         try {
             rol = Rol.valueOf(usuario.getRol().strip().toUpperCase());
