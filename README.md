@@ -4,9 +4,33 @@ El objetivo del TP es desarrollar una aplicación que permita a los usuarios pub
 
 [Enunciado](https://docs.google.com/document/d/e/2PACX-1vRKgz7eEA1fIByKMtXKxA6-Vs1rSst8cwUeTkMnZyYrDPkzkUECyK7WXqXWFSh5jwnxJMdanffdyWzB/pub)
 
-## Arquitectura
+## Arquitectura Cloud 
+La aplicación se encuentra desplegada en Railway, priorizando los siguientes pilares principales:
+- Conectividad segura: mediante HTTPS, control de CORS y uso de redes privadas internas.
+- Escalabilidad estática: los servicios son stateless, lo que permite replicarlos horizontalmente de forma sencilla. Además, también se permite escalar la CPU y RAM automáticamente basándose en el workload actual. 
+- Alta disponibilidad: se implementan mecanismos de auto-restart, monitoreo continuo y health checks automáticos.
 
-<img width="1064" height="574" alt="image" src="https://github.com/user-attachments/assets/b5709a62-aea6-432e-a342-6513ae6aac21" />
+Railway permite desplegar cada componente de la aplicación como una imagen Docker independiente, facilitando tanto el versionado como el redespliegue. Ante una actualización, simplemente se publica una nueva imagen del componente correspondiente (frontend, backend, bases de datos o bot de Telegram), y el entorno se actualiza en pocos minutos.
+
+Los componentes que integran esta arquitectura se encuentran descriptos en el diagrama de componentes:
+- Frontend: interfaz gráfica desarrollada en React, destinada a la gestión de eventos e inscripciones.
+- Backend: API REST implementada con Spring Boot, utilizada tanto por la interfaz web como por el bot de Telegram.
+- Bot de Telegram App: interfaz alternativa que permite consultar y registrarse a eventos directamente desde Telegram.
+- Base de datos MongoDB: responsable de la persistencia de la información de eventos, inscripciones y usuarios.
+- Base de datos Redis: utilizada como caché y para manejar concurrencia en las inscripciones, evitando conflictos por accesos simultáneos.
+
+Cada componente se despliega como un servicio independiente dentro del ecosistema de Railway, lo que —si bien no implica una arquitectura de microservicios estricta— nos permitió desacoplar la aplicación y desplegar únicamente los módulos que tuvieron cambios, reduciendo tiempos de inactividad y riesgos de errores cruzados.
+
+Durante el desarrollo y despliegue, se abordaron diversos desafíos relacionados con conectividad, escalabilidad y disponibilidad, aplicando las siguientes soluciones:
+
+🔐 Conectividad
+- Problema: errores de CORS y comunicación entre servicios al estar distribuidos en distintos puertos y dominios.
+- Solución: configuración explícita de CORS policies en el backend (Spring Boot) con dominios permitidos definidos por variable de entorno (disponibles desde el dashboard de Railway). Railway se encargó de la generación automática de certificados TLS (HTTPS).
+
+♻️ Disponibilidad
+- Problema: interrupciones por fallos o bloqueos temporales de servicio.
+- Solución: Railway gestiona auto-restarts y health checks automáticos. Además, se definieron endpoints de monitoreo (/actuator/health) en el backend para detectar estados no válidos.
+<img width="1211" height="667" alt="image" src="https://github.com/user-attachments/assets/6552b7ae-f511-4432-94e0-e8d69ccc52b7" />
 
 ## URL: 
 https://tp-tacs-2025-c2-frontend-production.up.railway.app/ 
