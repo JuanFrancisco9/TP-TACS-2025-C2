@@ -392,7 +392,13 @@ bot.onText(/\/inscripciones/, async (msg) => {
               const texto = formatInscription(inscripcion, inscripcion.evento, inscripcion.participante);
               const botones = [];
 
-              if (inscripcion.estado?.tipoEstado === 'ACEPTADA') {
+              const estado = inscripcion.estado?.tipoEstado;
+              const fechaEvento = new Date(inscripcion.evento.fecha);
+              const hoy = new Date();
+
+              const puedeCancelar = estado === 'ACEPTADA' && fechaEvento > hoy;
+
+              if (puedeCancelar) {
                   botones.push([
                       {
                           text: '❌ Cancelar inscripción',
@@ -403,7 +409,7 @@ bot.onText(/\/inscripciones/, async (msg) => {
 
               bot.sendMessage(chatId, texto, {
                   parse_mode: 'Markdown',
-                  reply_markup: { inline_keyboard: botones },
+                  reply_markup: botones.length ? { inline_keyboard: botones } : undefined,
               });
           }, index * 1000);
       });
@@ -445,19 +451,24 @@ bot.onText(/\/confirmadas/, async (msg) => {
         inscripcionesConfirmadas.forEach((inscripcion, index) => {
             setTimeout(() => {
                 const texto = formatInscription(inscripcion, inscripcion.evento, inscripcion.participante);
+                const botones = [];
+                const fechaEvento = new Date(inscripcion.evento.fecha);
+                const hoy = new Date();
 
-                const botones = [
-                    [
+                const puedeCancelar = fechaEvento > hoy;
+
+                if (puedeCancelar) {
+                    botones.push([
                         {
                             text: '❌ Cancelar inscripción',
                             callback_data: `cancelar_${inscripcion.id}`,
                         },
-                    ],
-                ];
+                    ]);
+                }
 
                 bot.sendMessage(chatId, texto, {
                     parse_mode: 'Markdown',
-                    reply_markup: { inline_keyboard: botones },
+                    reply_markup: botones.length ? { inline_keyboard: botones } : undefined,
                 });
             }, index * 1000);
         });
