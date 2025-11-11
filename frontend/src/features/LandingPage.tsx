@@ -10,7 +10,7 @@ import { ArrowBackIosNew, ArrowForwardIos } from '@mui/icons-material';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>('Todas');
   const [categories, setCategories] = useState<CategoriaDTO[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const viewportRef = useRef<HTMLDivElement | null>(null);
@@ -25,6 +25,11 @@ const LandingPage: React.FC = () => {
   }, []);
 
   const handleCategoryClick = (tipo: string) => {
+    if (tipo === 'Todas') {
+      setSelected('Todas');
+      navigate({ pathname: '/eventos', search: '' }, { replace: false });
+      return;
+    }
     const next = tipo === selected ? null : tipo;
     setSelected(next);
     const search = next ? `?categoria=${encodeURIComponent(next)}` : '';
@@ -100,7 +105,7 @@ const LandingPage: React.FC = () => {
                   <CircularProgress size={28} />
                 </div>
               ) : (
-                categories.map((categoria) => {
+                [{ tipo: 'Todas' } as CategoriaDTO, ...categories].map((categoria) => {
                   const tipo = categoria.tipo;
                   const IconComponent = getCategoryIconFor(undefined, categoria.icono, tipo);
                   return (
@@ -149,7 +154,7 @@ const LandingPage: React.FC = () => {
               <CircularProgress size={28} />
             </div>
           ) : (
-            categories.map((categoria) => {
+            ([{ tipo: 'Todas' } as CategoriaDTO, ...categories]).map((categoria) => {
               const tipo = categoria.tipo;
               const IconComponent = getCategoryIconFor(undefined, categoria.icono, tipo);
               return (
